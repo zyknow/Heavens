@@ -4,8 +4,6 @@ using Furion.DataEncryption;
 using Heavens.Core.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
 
 namespace Heavens.Core.Entities;
 

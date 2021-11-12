@@ -1,7 +1,4 @@
-﻿using Heavens.Core.Entities;
-using System.Threading.Tasks;
-
-namespace Heavens.Application.AuthorizeApp.Services;
+﻿namespace Heavens.Application.AuthorizeApp.Services;
 
 public interface IAuthorizeServices
 {

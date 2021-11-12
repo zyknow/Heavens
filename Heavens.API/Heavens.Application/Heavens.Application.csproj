@@ -18,4 +18,16 @@
     <Folder Include="UserApp\Services\" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Using Include="System" />
+		<Using Include="System.Collections.Generic" />
+		<Using Include="System.Linq" />
+		<Using Include="System.Text" />
+		<Using Include="System.Threading.Tasks" />
+		<Using Include="Bing.Extensions" />
+		<Using Include="Mapster" />
+		<Using Include="Heavens.Core.Entities" />
+		<Using Include="Heavens.Application._Base" />
+	</ItemGroup>
+
 </Project>

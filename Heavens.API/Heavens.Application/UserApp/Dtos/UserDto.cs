@@ -1,6 +1,4 @@
 ﻿using Heavens.Core.Entities.Base;
-using System;
-using System.Collections.Generic;
 
 namespace Heavens.Application.UserApp.Dtos;
 

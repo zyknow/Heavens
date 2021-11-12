@@ -1,5 +1,4 @@
 ﻿using Furion.DatabaseAccessor;
-using System;
 
 namespace Heavens.Core.Entities.Base;
 

@@ -1,6 +1,5 @@
 ﻿using Furion.DatabaseAccessor;
 using Furion.TaskScheduler;
-using Heavens.Core.Entities;
 
 namespace Heavens.Tasks;
 

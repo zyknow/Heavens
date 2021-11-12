@@ -13,7 +13,7 @@ tab_width = 4
 
 # 新行首选项
 end_of_line = crlf
-insert_final_newline = false
+insert_final_newline =true
 
 #### .NET 编码约定 ####
 
@@ -106,7 +106,7 @@ csharp_preferred_modifier_order = public,private,protected,internal,static,exter
 # 代码块首选项
 csharp_prefer_braces = true:suggestion
 csharp_prefer_simple_using_statement = true:warning
-csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_style_namespace_declarations =file_scoped:warning
 
 # 表达式级首选项
 csharp_prefer_simple_default_expression = true:warning

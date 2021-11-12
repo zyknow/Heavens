@@ -1,5 +1,4 @@
-﻿using Bing.Extensions;
-using Furion;
+﻿using Furion;
 using Meilisearch;
 using Microsoft.Extensions.Logging;
 

@@ -12,92 +12,91 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace Heavens.Web.Core
+namespace Heavens.Web.Core;
+
+public class Startup : AppStartup
 {
-    public class Startup : AppStartup
+    public void ConfigureServices(IServiceCollection services)
     {
-        public void ConfigureServices(IServiceCollection services)
+
+        //services.AddJwt();
+        services.AddJwt<JwtHandler>();
+        //services.AddJwt<JwtHandler>(enableGlobalAuthorize: true);
+        // 必须再AddJwt后面注册！
+        services.AddAuth();
+
+        // 添加跨域
+        services.AddCorsAccessor();
+
+        services.AddControllers()
+                .AddInjectWithUnifyResult()
+                .AddFriendlyException()
+                .AddNewtonsoftJson(option =>
+                {
+                    //忽略循环引用
+                    option.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    //设置时间格式
+                    option.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                })
+                // 注册多语言
+                .AddAppLocalization();
+
+        // 注册远程 http get,post 请求
+        services.AddRemoteRequest();
+
+        // 注册 选项 服务
+        services.AddOptionServices();
+
+        // 注册定时任务
+        services.AddTaskScheduler();
+
+        // 注册缓存
+        services.AddCache();
+
+        // 注册虚拟文件系统服务
+        //services.AddVirtualFileServer();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
         {
-
-            //services.AddJwt();
-            services.AddJwt<JwtHandler>();
-            //services.AddJwt<JwtHandler>(enableGlobalAuthorize: true);
-            // 必须再AddJwt后面注册！
-            services.AddAuth();
-
-            // 添加跨域
-            services.AddCorsAccessor();
-
-            services.AddControllers()
-                    .AddInjectWithUnifyResult()
-                    .AddFriendlyException()
-                    .AddNewtonsoftJson(option =>
-                    {
-                        //忽略循环引用
-                        option.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                        //设置时间格式
-                        option.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                    })
-                    // 注册多语言
-                    .AddAppLocalization();
-
-            // 注册远程 http get,post 请求
-            services.AddRemoteRequest();
-
-            // 注册 选项 服务
-            services.AddOptionServices();
-
-            // 注册定时任务
-            services.AddTaskScheduler();
-
-            // 注册缓存
-            services.AddCache();
-
-            // 注册虚拟文件系统服务
-            //services.AddVirtualFileServer();
+            app.UseDeveloperExceptionPage();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        // 配置多语言，必须在 路由注册之前
+        app.UseAppLocalization();
+
+        app.UseHttpsRedirection();
+
+        app.UseStaticFiles();
+        app.UseSerilogRequestLogging();    // 必须在 UseStaticFiles 和 UseRouting 之间
+        app.UseRouting();
+
+        app.UseCorsAccessor();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        if (env.IsDevelopment())
         {
-            if (env.IsDevelopment())
+            Scoped.Create((_, scope) =>
             {
-                app.UseDeveloperExceptionPage();
-            }
+                // 没创建Migration 就创建 Migration
+                DefaultDbContext context = scope.ServiceProvider.GetRequiredService<DefaultDbContext>();
+                context.Database.EnsureCreated();
 
-            // 配置多语言，必须在 路由注册之前
-            app.UseAppLocalization();
-
-            app.UseHttpsRedirection();
-
-            app.UseStaticFiles();
-            app.UseSerilogRequestLogging();    // 必须在 UseStaticFiles 和 UseRouting 之间
-            app.UseRouting();
-
-            app.UseCorsAccessor();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            if (env.IsDevelopment())
-            {
-                Scoped.Create((_, scope) =>
-                {
-                    // 没创建Migration 就创建 Migration
-                    var context = scope.ServiceProvider.GetRequiredService<DefaultDbContext>();
-                    context.Database.EnsureCreated();
-
-                    // 没迁移到数据库就迁移
-                    context.Database.Migrate();
-                });
-            }
-
-
-            app.UseInject(string.Empty);
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
+                // 没迁移到数据库就迁移
+                context.Database.Migrate();
             });
         }
+
+
+        app.UseInject(string.Empty);
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
     }
 }

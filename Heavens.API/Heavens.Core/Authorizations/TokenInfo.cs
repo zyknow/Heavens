@@ -1,5 +1,4 @@
-﻿using Bing.Extensions;
-using Furion;
+﻿using Furion;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Heavens.Core.Authorizations;

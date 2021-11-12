@@ -1,7 +1,5 @@
-﻿using Bing.Extensions;
-using Furion.DatabaseAccessor;
+﻿using Furion.DatabaseAccessor;
 using Heavens.Core.Authorizations;
-using System;
 
 namespace Heavens.Core.Entities.Base;
 

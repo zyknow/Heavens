@@ -21,9 +21,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.filenesting.json = .filenesting.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{D500F424-9D30-454F-A103-86D7547EB231}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D500F424-9D30-454F-A103-86D7547EB231}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heavens.Tasks", "Heavens.Tasks\Heavens.Tasks.csproj", "{F57DA4BA-D80A-4C08-BDF8-86421A83D27A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Tasks", "Heavens.Tasks\Heavens.Tasks.csproj", "{F57DA4BA-D80A-4C08-BDF8-86421A83D27A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Core.Extension", "Heavens.Core.Extension\Heavens.Core.Extension.csproj", "{F5D80671-A353-4135-89AB-2FE313B59419}"
 EndProject

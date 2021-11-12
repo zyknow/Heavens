@@ -1,21 +1,14 @@
-﻿using Bing.Extensions;
-using Furion;
+﻿using Furion;
 using Furion.DatabaseAccessor;
 using Furion.DataEncryption;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Heavens.Core;
 using Heavens.Core.Authorizations;
-using Heavens.Core.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Heavens.Application.AuthorizeApp.Services;
 

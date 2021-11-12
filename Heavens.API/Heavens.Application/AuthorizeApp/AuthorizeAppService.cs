@@ -7,13 +7,11 @@ using Furion.FriendlyException;
 using Heavens.Application.AuthorizeApp.Dtos;
 using Heavens.Application.AuthorizeApp.Services;
 using Heavens.Core;
-using Heavens.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.Threading.Tasks;
+
 
 namespace Heavens.Application.AuthorizeApp;
 
@@ -76,7 +74,7 @@ public class AuthorizeAppService : IDynamicApiController
         }
 
         //string accountToken = _userAuthorizeServicese.CreateToken(user, para.KeepAlive ? 60 * 24 * 15 : null);
-        string accountToken = _userAuthorizeServicese.CreateToken(user, para.KeepAlive? 10080:null);
+        string accountToken = _userAuthorizeServicese.CreateToken(user, para.KeepAlive ? 10080 : null);
         string refreshToken = JWTEncryption.GenerateRefreshToken(accountToken);
 
         _httpContextAccessor.HttpContext.Response.Headers["access-token"] = accountToken;

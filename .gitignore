@@ -348,3 +348,7 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/Heavens.API/Heavens.Web.Entry/heavens.db
+/Heavens.API/Heavens.Web.Entry/heavens.db-shm
+/Heavens.API/Heavens.Web.Entry/heavens.db-wal
+/Heavens.API/Heavens.Database.Migrations/Migrations

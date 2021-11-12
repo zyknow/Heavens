@@ -1,0 +1,242 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Heavens.Core</name>
+    </assembly>
+    <members>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ValidateIssuerSigningKey">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.IssuerSigningKey">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ValidateIssuer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ValidIssuer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ValidateAudience">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ValidAudience">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ValidateLifetime">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ExpiredTime">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.ClockSkew">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.JWTSettings.Algorithm">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Heavens.Core.Authorizations.TokenInfo">
+            <summary>
+            httpcontext 中 token 包含的信息
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.TokenInfo.Id">
+            <summary>
+            用户Id
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Authorizations.TokenInfo.Account">
+            <summary>
+            用户名
+            </summary>
+        </member>
+        <member name="M:Heavens.Core.Entities.Base.BaseEntity`1.SetUpdateByHttpToken">
+            <summary>
+            根据httpToken设置更新字段,如果没有token信息则只设置UpdatedTime
+            </summary>
+        </member>
+        <member name="M:Heavens.Core.Entities.Base.BaseEntity`1.SetCreateByHttpToken">
+            <summary>
+            根据httpToken设置创建字段,如果没有token信息则只设置CreatedTime
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.Id">
+            <summary>
+            id主键
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.IsDeleted">
+            <summary>
+            是否已被删除
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.CreatedId">
+            <summary>
+            创建者id
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.CreatedBy">
+            <summary>
+            创建者
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.CreatedTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.UpdatedId">
+            <summary>
+            更新者id
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.UpdatedBy">
+            <summary>
+            更新者
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.Base.BaseEntityProp`1.UpdatedTime">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="T:Heavens.Core.Entities.User">
+            <summary>
+            用户信息表
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Name">
+            <summary>
+            名字
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Account">
+            <summary>
+            登录账号
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Passwd">
+            <summary>
+            登录密码
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.PIN">
+            <summary>
+            PIN码
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Enabled">
+            <summary>
+            是否启用
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Roles">
+            <summary>
+            持有的角色 |号分割
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Email">
+            <summary>
+            邮箱
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Phone">
+            <summary>
+            手机号
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Sex">
+            <summary>
+            性别
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.Description">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="P:Heavens.Core.Entities.User.LastLoginTime">
+             <summary>
+            最后登录时间 
+             </summary>
+        </member>
+        <member name="T:Heavens.Core.Excode">
+            <summary>
+            异常状态码
+            </summary>
+        </member>
+        <member name="F:Heavens.Core.Excode.REFRESHTOKEN_NO_EXIST_OR_EXPIRE">
+            <summary>
+            刷新token不存在或已过期
+            </summary>
+        </member>
+        <member name="F:Heavens.Core.Excode.QUERY_BY_SOFT_FIELD_ERROR">
+            <summary>
+            soft 字段内容不对
+            </summary>
+        </member>
+        <member name="M:Heavens.Core.Extentions.Extention.SetPropValue(System.Object,System.Object,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String},System.Boolean)">
+            <summary>
+            给现有对象属性赋值
+            </summary>
+            <param name="obj"></param>
+            <param name="resource"></param>
+            <param name="includes"></param>
+            <param name="excludes"></param>
+            <param name="override"></param>
+        </member>
+        <member name="T:Heavens.Core.Extentions.RepositoryExtention">
+            <summary>
+            furion提供的数据库操作扩展
+            </summary>
+        </member>
+        <member name="M:Heavens.Core.Extentions.RepositoryExtention.FakeDeleteSetInfoNowAsync``1(Furion.DatabaseAccessor.IPrivateRepository{``0},``0)">
+            <summary>
+            根据实体假删除，并更新Update信息字段
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="repository"></param>
+            <param name="entity"></param>
+            <returns>Entity</returns>
+        </member>
+        <member name="M:Heavens.Core.Extentions.RepositoryExtention.FakeDeleteSetInfoNowAsync``2(Furion.DatabaseAccessor.IPrivateRepository{``0},``1)">
+            <summary>
+            根据Id假删除，并更新Update信息字段
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">实体主键类型</typeparam>
+            <param name="repository"></param>
+            <param name="id"></param>
+            <returns>Id</returns>
+        </member>
+        <member name="M:Heavens.Core.Extentions.RepositoryExtention.FakeDeleteSetInfoNowAsync``2(Furion.DatabaseAccessor.IPrivateRepository{``0},System.Collections.Generic.IEnumerable{``1})">
+            <summary>
+            根据Id批量假删除，并更新Update信息字段
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">实体主键类型</typeparam>
+            <param name="repository"></param>
+            <param name="ids"></param>
+            <returns>操作数量</returns>
+        </member>
+    </members>
+</doc>

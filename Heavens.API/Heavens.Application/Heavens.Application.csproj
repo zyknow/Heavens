@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DocumentationFile>Heavens.Application.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Heavens.Application.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Heavens.Core.Extension\Heavens.Core.Extension.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UserApp\Services\" />
+  </ItemGroup>
+
+</Project>

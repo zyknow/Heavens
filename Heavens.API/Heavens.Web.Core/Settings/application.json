@@ -1,0 +1,64 @@
+﻿{
+  "SpecificationDocumentSettings": {
+    "DocumentTitle": "Heavens | 规范化接口",
+    "GroupOpenApiInfos": [
+      {
+        "Group": "Default",
+        "Title": "Heavens | 规范化接口",
+        "Description": "Heavens | 让 .NET 开发更简单，更通用，更流行。",
+        "Version": "1.0.0",
+        "TermsOfService": "",
+        "Contact": {
+          "Name": "Heavens",
+          "Url": "",
+          "Email": ""
+        },
+        "License": {
+          "Name": "Apache-2.0",
+          "Url": ""
+        }
+      }
+    ]
+  },
+  "DynamicApiControllerSettings": {
+    // 路由参数采用 [FromQuery]
+    "UrlParameterization": true
+  },
+  // 缓存配置
+  "Cacheing": {
+    "CacheMode": 0, // 查看 CacheingOptions.cs 中的 CacheModeEnum 枚举，0默认为内存缓存
+    "RedisSettings": { // redis缓存配置(如果CacheMode选为redis，该配置必须设置，否者可能会报错)
+      "ConnectionStrings": [], // 连接字符串  示例：["127.0.0.1:6388,defaultDatabase=13,poolsize=10"]
+      "Sentinels": [], // 哨兵连接字符串 示例： ["192.169.1.10:26379", "192.169.1.11:26379", "192.169.1.12:26379"]
+      "SentinelReadOnly": false // 哨兵是否只能读
+    }
+  },
+  // jwt配置
+  "JWTSettings": {
+    "ValidateIssuerSigningKey": true, // 是否验证密钥，bool 类型，默认true
+    "IssuerSigningKey": "asdqwezxcgdfsertreqweqeqwasdsdasawq", // 密钥，string 类型，必须是复杂密钥，长度大于16
+    "ValidateIssuer": true, // 是否验证签发方，bool 类型，默认true
+    "ValidIssuer": "Heavens", // 签发方，string 类型
+    "ValidateAudience": true, // 是否验证签收方，bool 类型，默认true
+    "ValidAudience": "Heavens.client", // 签收方，string 类型
+    "ValidateLifetime": true, // 是否验证过期时间，bool 类型，默认true，建议true
+    "ExpiredTime": 20, // 过期时间，long 类型，单位分钟，默认20分钟
+    "ClockSkew": 5, // 过期时间容错值，long 类型，单位秒，默认 5秒
+    "Algorithm": "HS256" // 加密算法，string 类型，默认 SecurityAlgorithms.HmacSha256
+  },
+  "CorsAccessorSettings": {
+    // 允许跨域的请求头
+    "WithExposedHeaders": [ "access-token", "x-access-token" ]
+  },
+  // MeiliSearch 搜索引擎配置
+  "SearchEngineSettings": {
+    "Enabled": "true",
+    "ConnectStr": "http://mjrfid.cn:7700",
+    "MasterKey": "masterKey"
+  },
+  "LocalizationSettings": {
+    "SupportedCultures": [ "en-US", "zh-CN" ], // 配置支持的语言列表
+    "DefaultCulture": "en-US" // 配置默认语言，如果不配置，取 SupportedCultures 的第一项
+    //"LanguageFilePrefix": "Lang"
+  }
+}

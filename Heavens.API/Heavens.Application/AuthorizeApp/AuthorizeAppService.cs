@@ -1,14 +1,7 @@
 ﻿
 using Bing.Helpers;
-using Furion.DatabaseAccessor;
-using Furion.DataEncryption;
-using Furion.DynamicApiController;
-using Furion.FriendlyException;
 using Heavens.Application.AuthorizeApp.Dtos;
 using Heavens.Application.AuthorizeApp.Services;
-using Heavens.Core;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +15,7 @@ namespace Heavens.Application.AuthorizeApp;
 [ApiDescriptionSettings(Order = 100)]
 public class AuthorizeAppService : IDynamicApiController
 {
-    public AuthorizeAppService(IRepository<User> userRepository, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IAuthorizeServices userAuthorizeServices)
+    public AuthorizeAppService(IRepository<User> userRepository, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IAuthorizeService userAuthorizeServices)
     {
         _userRepository = userRepository;
         _httpContextAccessor = httpContextAccessor;
@@ -33,7 +26,7 @@ public class AuthorizeAppService : IDynamicApiController
     public IRepository<User> _userRepository { get; }
     public IHttpContextAccessor _httpContextAccessor { get; }
     public IWebHostEnvironment _env { get; }
-    public IAuthorizeServices _userAuthorizeServicese { get; }
+    public IAuthorizeService _userAuthorizeServicese { get; }
 
     /// <summary>
     /// 获取Token

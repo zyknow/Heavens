@@ -43,7 +43,7 @@ public class JwtHandler : AppAuthorizeHandler
                 return;
             }
 
-            IAuthorizeServices authorizeServices = currentContext.RequestServices.GetService<IAuthorizeServices>();
+            IAuthorizeService authorizeServices = currentContext.RequestServices.GetService<IAuthorizeService>();
             IRepository<User> userRepository = currentContext.RequestServices.GetService<IRepository<User>>();
 
             JsonWebToken tokenInfo = JWTEncryption.ReadJwtToken(token);

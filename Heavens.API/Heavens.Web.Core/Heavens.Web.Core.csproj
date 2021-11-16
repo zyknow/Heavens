@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Heavens.Application\Heavens.Application.csproj" />
     <ProjectReference Include="..\Heavens.Database.Migrations\Heavens.Database.Migrations.csproj" />
+    <ProjectReference Include="..\Heavens.Tasks\Heavens.Tasks.csproj" />
   </ItemGroup>
 
   <ItemGroup>

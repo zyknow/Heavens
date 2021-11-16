@@ -1,6 +1,6 @@
 ﻿namespace Heavens.Application.AuthorizeApp.Services;
 
-public interface IAuthorizeServices
+public interface IAuthorizeService
 {
     /// <summary>
     /// 为用户创建token

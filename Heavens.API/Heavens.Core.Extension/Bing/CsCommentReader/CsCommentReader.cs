@@ -54,7 +54,7 @@ public static class CsCommentReader
     /// 读取任类注释信息
     /// </summary>
     /// <param name="type">需要读取注释的类</param>
-    public static CsComments Create(Type type)
+    public static CsComments? Create(Type type)
     {
         if (type == null)
         {
@@ -68,7 +68,7 @@ public static class CsCommentReader
     /// 读取构造函数的注释信息
     /// </summary>
     /// <param name="ctor">需要读取注释的构造函数</param>
-    public static CsComments Create(ConstructorInfo ctor)
+    public static CsComments? Create(ConstructorInfo ctor)
     {
         if (ctor == null)
         {
@@ -83,7 +83,7 @@ public static class CsCommentReader
     /// 读取事件的注释信息
     /// </summary>
     /// <param name="event">需要读取注释的事件</param>
-    public static CsComments Create(EventInfo @event)
+    public static CsComments? Create(EventInfo @event)
     {
         if (@event == null)
         {
@@ -97,7 +97,7 @@ public static class CsCommentReader
     /// 读取方法的注释信息
     /// </summary>
     /// <param name="method">需要读取注释的方法</param>
-    public static CsComments Create(MethodInfo method)
+    public static CsComments? Create(MethodInfo method)
     {
         if (method == null)
         {
@@ -120,7 +120,7 @@ public static class CsCommentReader
     /// 读取属性的注释信息
     /// </summary>
     /// <param name="prop">需要读取注释的属性</param>
-    public static CsComments Create(PropertyInfo prop)
+    public static CsComments? Create(PropertyInfo prop)
     {
         if (prop == null)
         {
@@ -135,7 +135,7 @@ public static class CsCommentReader
     /// 读取字段的注释信息
     /// </summary>
     /// <param name="field">需要读取注释的字段</param>
-    public static CsComments Create(FieldInfo field)
+    public static CsComments? Create(FieldInfo field)
     {
         if (field == null)
         {
@@ -226,32 +226,42 @@ public static class CsCommentReader
     /// <param name="member">成员对象</param>
     /// <param name="path">路径</param>
     /// <returns></returns>
-    private static CsComments CreateComment(MemberInfo member, string path)
+    private static CsComments? CreateComment(MemberInfo member, string path)
     {
-        if (_member == null)
+        try
         {
-            _member = new List<MemberInfo>();
+
+
+            if (_member == null)
+            {
+                _member = new List<MemberInfo>();
+            }
+            else if (_member.Contains(member))
+            {
+                return null;
+            }
+            _member.Add(member);
+
+            System.Xml.XmlDocument? xml = CsCommentsXmlCache.Get(member);
+            if (xml == null)
+            {
+                return null;
+            }
+
+            System.Xml.XmlNodeList? node = xml.SelectNodes("/doc/members/member[@name='" + path.Replace('+', '.') + "']");
+            if (node.Count == 0)
+            {
+                return null;
+            }
+
+            _member.RemoveAt(_member.Count - 1);
+            return new CsComments(node[0]);
+
         }
-        else if (_member.Contains(member))
+        catch (Exception)
         {
             return null;
         }
-        _member.Add(member);
-
-        System.Xml.XmlDocument? xml = CsCommentsXmlCache.Get(member);
-        if (xml == null)
-        {
-            return null;
-        }
-
-        System.Xml.XmlNodeList? node = xml.SelectNodes("/doc/members/member[@name='" + path.Replace('+', '.') + "']");
-        if (node.Count == 0)
-        {
-            return null;
-        }
-
-        _member.RemoveAt(_member.Count - 1);
-        return new CsComments(node[0]);
     }
 
     /// <summary>

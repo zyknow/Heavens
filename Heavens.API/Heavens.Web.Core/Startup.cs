@@ -48,7 +48,7 @@ public class Startup : AppStartup
         services.AddOptionServices();
 
         // 注册定时任务
-        services.AddTaskScheduler();
+        //services.AddTaskScheduler();
 
         // 注册缓存
         services.AddCache();

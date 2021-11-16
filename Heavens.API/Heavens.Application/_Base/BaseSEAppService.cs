@@ -1,8 +1,6 @@
-﻿using Furion.DatabaseAccessor;
-using Heavens.Core.Entities.Base;
+﻿using Heavens.Core.Entities.Base;
 using Heavens.Core.Extension.SearchEngine;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 
 namespace Heavens.Application._Base;
 

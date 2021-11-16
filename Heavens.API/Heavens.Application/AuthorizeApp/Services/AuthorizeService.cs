@@ -1,10 +1,4 @@
 ﻿using Furion;
-using Furion.DatabaseAccessor;
-using Furion.DataEncryption;
-using Furion.DependencyInjection;
-using Furion.FriendlyException;
-using Heavens.Core;
-using Heavens.Core.Authorizations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,9 +6,9 @@ using System.Security.Claims;
 
 namespace Heavens.Application.AuthorizeApp.Services;
 
-public class AuthorizeServices : IAuthorizeServices, IScoped
+public class AuthorizeService : IAuthorizeService, IScoped
 {
-    public AuthorizeServices(IHttpContextAccessor httpContextAccessor, IRepository<User> userRepository)
+    public AuthorizeService(IHttpContextAccessor httpContextAccessor, IRepository<User> userRepository)
     {
         _httpContextAccessor = httpContextAccessor;
         _userRepository = userRepository;

@@ -14,12 +14,9 @@
     <ProjectReference Include="..\Heavens.Core.Extension\Heavens.Core.Extension.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UserApp\Services\" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<Using Include="System" />
+		<Using Include="System.IO" />
 		<Using Include="System.Collections.Generic" />
 		<Using Include="System.Linq" />
 		<Using Include="System.Text" />
@@ -28,6 +25,19 @@
 		<Using Include="Mapster" />
 		<Using Include="Heavens.Core.Entities" />
 		<Using Include="Heavens.Application._Base" />
+		<Using Include="Furion.DependencyInjection" />
+		<Using Include="Furion.FriendlyException" />
+		<Using Include="Microsoft.AspNetCore.Hosting" />
+		<Using Include="Microsoft.Extensions.Hosting" />
+		<Using Include="System.Reflection" />
+		<Using Include="Furion.DatabaseAccessor" />
+		<Using Include="Furion.DataEncryption" />
+		<Using Include="Microsoft.AspNetCore.Authorization" />
+		<Using Include="Microsoft.EntityFrameworkCore" />
+		<Using Include="System.ComponentModel.DataAnnotations" />
+		<Using Include="Heavens.Core" />
+		<Using Include="Heavens.Core.Authorizations" />
+		<Using Include="Furion.DynamicApiController" />
 	</ItemGroup>
 
 </Project>

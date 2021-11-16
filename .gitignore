@@ -352,3 +352,5 @@ MigrationBackup/
 /Heavens.API/Heavens.Web.Entry/heavens.db-shm
 /Heavens.API/Heavens.Web.Entry/heavens.db-wal
 /Heavens.API/Heavens.Database.Migrations/Migrations
+Heavens.API/Heavens.Application/Heavens.Application.xml
+Heavens.API/Heavens.Core/Heavens.Core.xml

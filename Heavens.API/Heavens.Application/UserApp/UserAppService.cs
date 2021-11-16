@@ -1,13 +1,4 @@
-﻿using Furion.DatabaseAccessor;
-using Furion.DataEncryption;
-using Furion.FriendlyException;
-using Heavens.Application.UserApp.Dtos;
-using Heavens.Core;
-using Heavens.Core.Authorizations;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-
+﻿using Heavens.Application.UserApp.Dtos;
 namespace Heavens.Application.UserApp;
 
 /// <summary>
@@ -20,11 +11,6 @@ public class UserAppService : BaseAppService<User, UserDto>
 
     public UserAppService(IRepository<User> userRepository) : base(userRepository)
     {
-    }
-    [Authorize(Roles = "admin")]
-    public override Task<List<UserDto>> GetAll()
-    {
-        return base.GetAll();
     }
 
     /// <summary>

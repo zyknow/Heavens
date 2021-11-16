@@ -93,7 +93,7 @@ export async function GetUserById(id: number): Promise<RequestResult<User>> {
 }
 
 /**
- * 获取所有 标签
+ * 获取所有用户
  */
 export async function GetAllUser(): Promise<RequestResult<User[]>> {
   return request.get<any, RequestResult<User[]>>('/api/User/all')

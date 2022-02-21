@@ -3,23 +3,23 @@
 /// <summary>
 /// 搜索排序
 /// </summary>
-public class ListSortDirection
+public class SortBy
 {
     /// <summary>
     /// 字段名
     /// </summary>
-    public string FieldName { get; set; }
+    public string Field { get; set; }
     /// <summary>
     /// 0 asc 
     /// 1 desc
     /// </summary>
-    public ListSortType SortType { get; set; } = ListSortType.Desc;
+    public SortType SortType { get; set; } = SortType.Desc;
 }
 
 /// <summary>
 /// 排序类型
 /// </summary>
-public enum ListSortType
+public enum SortType
 {
     /// <summary>
     /// 倒序

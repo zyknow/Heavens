@@ -1,7 +1,14 @@
-﻿using Furion.FriendlyException;
+﻿using EasyCaching.Core.Internal;
+using Furion.FriendlyException;
+using Heavens.Core;
 using Heavens.Core.Extension.PageQueayFilter.common;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text.Json;
 
 namespace Heavens.Core.Extension.PageQueayFilter.helper;
@@ -103,23 +110,24 @@ public static class FilterHelper
         };
 
     private static readonly Dictionary<Type, Func<JsonElement, object>> jsonElementConvertDic = new Dictionary<Type, Func<JsonElement, object>>()
-        {
-            {typeof(short),e=> e.GetInt16()},
-            {typeof(short?),e=> e.GetInt16()},
-            {typeof(int),e=> e.GetInt32()},
-            {typeof(int?),e=> e.GetInt32()},
-            {typeof(long),e=> e.GetInt64()},
-            {typeof(long?),e=> e.GetInt64()},
-            {typeof(decimal),e=> e.GetDecimal()},
-            {typeof(decimal?),e=> e.GetDecimal()},
-            {typeof(double?),e=> e.GetDouble()},
-            {typeof(double),e=> e.GetDouble()},
-            {typeof(string),e=> e.GetString()},
-            {typeof(DateTime),e=> e.GetDateTime()},
-            {typeof(DateTimeOffset),e=> e.GetDateTimeOffset()},
-            {typeof(bool),e=> e.GetBoolean()},
-            {typeof(Guid),e=> e.GetGuid()}
-        };
+    {
+        {typeof(short),e=> e.GetInt16()},
+        {typeof(short?),e=> e.GetInt16()},
+        {typeof(int),e=> e.GetInt32()},
+        {typeof(int?),e=> e.GetInt32()},
+        {typeof(long),e=> e.GetInt64()},
+        {typeof(long?),e=> e.GetInt64()},
+        {typeof(decimal),e=> e.GetDecimal()},
+        {typeof(decimal?),e=> e.GetDecimal()},
+        {typeof(double?),e=> e.GetDouble()},
+        {typeof(double),e=> e.GetDouble()},
+        {typeof(string),e=> e.GetString()},
+        {typeof(DateTime),e=> e.GetDateTime()},
+        {typeof(DateTimeOffset),e=> e.GetDateTimeOffset()},
+        {typeof(bool),e=> e.GetBoolean()},
+        {typeof(Guid),e=> e.GetGuid()}
+    };
+
     #endregion
 
     /// <summary>
@@ -128,11 +136,26 @@ public static class FilterHelper
     /// <typeparam name="T">表达式实体类型</typeparam>
     /// <param name="rules">查询条件组，如果为null，则直接返回 true 表达式</param>
     /// <returns>查询表达式</returns>
-    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules)
+    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules, List<IQueryAction<T>> queryActions)
     {
-        ParameterExpression param = Expression.Parameter(typeof(T), "m");
-        Expression body = GetExpressionBody(param, rules);
+
+        // 检查参数名
+        var actionParams = queryActions?.Where(q => q.FilterExp != null).Select(q => q.FilterExp.Parameters.FirstOrDefault()).Where(p => p?.Name != null);
+        if (actionParams != null && actionParams.GroupBy(p => p?.Name).Count() > 1)
+            throw Oops.Oh(Excode.QUERY_ACTION_PARAM_ERROR);
+
+        ParameterExpression param = actionParams?.FirstOrDefault() ?? Expression.Parameter(typeof(T), "m");
+        var visitor = new ParameterReplacementVisitor(param);
+        // 替换Param
+        queryActions?.ForEach(d =>
+        {
+            if (d.FilterExp != null)
+                d.FilterExp = (LambdaExpression)visitor.Visit(d.FilterExp);
+        });
+
+        Expression body = GetExpressionBody(param, rules, queryActions);
         Expression<Func<T, bool>> expression = Expression.Lambda<Func<T, bool>>(body, param);
+
         return expression;
     }
 
@@ -176,7 +199,7 @@ public static class FilterHelper
     /// <param name="param"></param>
     /// <param name="rules"></param>
     /// <returns></returns>
-    private static Expression GetExpressionBody(ParameterExpression param, ICollection<FilterRule> rules)
+    private static Expression GetExpressionBody<T>(ParameterExpression param, ICollection<FilterRule> rules, List<IQueryAction<T>>? queryActions = null)
     {
 
         //如果无条件或条件为空，直接返回 true表达式
@@ -186,26 +209,45 @@ public static class FilterHelper
         }
         List<Expression> bodies = new List<Expression>();
 
-        List<Expression> groupExs = new List<Expression>();
+        List<Expression> groupExps = new List<Expression>();
         List<FilterGroup> dGroups = Divide(rules.ToList());
 
         foreach (FilterGroup dgroup in dGroups)
         {
+            var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && dgroup.Rules.Any(r => r.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter()));
 
             if (dgroup.Rules.Count > 1)
             {
-                groupExs.Add(dgroup.Rules.Select(x => GetExpressionBody(param, x)).Aggregate(Expression.AndAlso));
+                groupExps.Add(dgroup.Rules.Select(x => GetActionExpression(x, queryActions) ?? GetExpressionBody(param, x)).Aggregate(Expression.AndAlso));
             }
             else
             {
-                groupExs.Add(GetExpressionBody(param, dgroup.Rules.First()));
+                groupExps.Add(GetActionExpression(dgroup.Rules.First(), queryActions) ?? GetExpressionBody(param, dgroup.Rules.First()));
             }
 
         }
-        bodies.Add(groupExs.Aggregate(Expression.OrElse));
+
+        bodies.Add(groupExps.Aggregate(Expression.OrElse));
 
         return bodies.Aggregate(Expression.AndAlso);
     }
+
+    private static Expression? GetActionExpression<T>(FilterRule rule, List<IQueryAction<T>>? queryActions = null)
+    {
+        var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && rule.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter());
+
+        if (action != null)
+        {
+            Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
+            Expression body = action.FilterExp;
+            var data = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
+            return data;
+        }
+        else
+            return null;
+
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -302,6 +344,15 @@ public static class FilterHelper
 
                 }
             }
+            else if (rule.Value.GetType() == typeof(JArray))
+            {
+                foreach (var item in (JArray)rule.Value)
+                {
+                    var dt = JsonConvert.DeserializeObject(item.ToString(), conversionType);
+                    expressionList.Add(Expression.Constant(dt, conversionType));
+                }
+            }
+            var init = Expression.NewArrayInit(conversionType, expressionList);
             return Expression.NewArrayInit(conversionType, expressionList);
         }
         else if (rule.Value is JsonElement)

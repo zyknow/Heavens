@@ -8,4 +8,8 @@
     <ProjectReference Include="..\Heavens.EntityFramework.Core\Heavens.EntityFramework.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
+  </ItemGroup>
+
 </Project>

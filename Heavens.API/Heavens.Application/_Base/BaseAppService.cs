@@ -3,6 +3,7 @@ using Heavens.Core.Extension.PageQueayFilter;
 using Heavens.Core.Extension.PageQueayFilter.common;
 using Heavens.Core.Extentions;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 
 namespace Heavens.Application._Base;
 
@@ -31,21 +32,39 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
         _repository = repository;
     }
 
+    ///// <summary>
+    ///// 获取分页
+    ///// </summary>
+    ///// <param name="request"></param>
+    ///// <returns></returns>
+    //[HttpPost]
+    //public Task<PagedList<TEntityDto>> Page(PageRequest request)
+    //{
+    //    System.Linq.Expressions.Expression<System.Func<TEntity, bool>> expression = request.GetRulesExpression<TEntity>();
+
+    //    return _repository
+    //        .Where(expression)
+    //        .OrderConditions(request.OrderConditions)
+    //        .Select(x => x.Adapt<TEntityDto>())
+    //        .ToPagedListAsync();
+    //}
+
     /// <summary>
     /// 获取分页
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost]
-    public Task<PagedList<TEntityDto>> Page(PageRequest request)
+    public async virtual Task<PagedList<TEntityDto>> Page(PageRequest request)
     {
-        System.Linq.Expressions.Expression<System.Func<TEntity, bool>> expression = request.GetRulesExpression<TEntity>();
+        Expression<Func<TEntity, bool>> exp = request.GetRulesExpression<TEntity>();
 
-        return _repository
-            .Where(expression)
-            .OrderConditions(request.OrderConditions)
+        var data = await _repository
+            .Where(exp)
+            .SortBy(request.Sort)
             .Select(x => x.Adapt<TEntityDto>())
-            .ToPagedListAsync();
+            .ToPagedListAsync(request.Page, request.PageSize);
+        return data;
     }
 
     /// <summary>

@@ -19,9 +19,7 @@ public class Startup : AppStartup
     public void ConfigureServices(IServiceCollection services)
     {
 
-        //services.AddJwt();
         services.AddJwt<JwtHandler>();
-        //services.AddJwt<JwtHandler>(enableGlobalAuthorize: true);
         // 必须再AddJwt后面注册！
         services.AddAuth();
 

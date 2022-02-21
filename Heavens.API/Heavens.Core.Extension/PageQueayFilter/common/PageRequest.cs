@@ -19,21 +19,20 @@ public class PageRequest
     /// <summary>
     /// 排序集合
     /// </summary>
-    public List<ListSortDirection> OrderConditions { get; set; } = new List<ListSortDirection>();
+    public SortBy Sort { get; set; } = new SortBy() { Field = "Id" };
 
     /// <summary>
     /// 查询条件组
     /// </summary>
-    public ICollection<FilterRule> FilterRules { get; set; } = new List<FilterRule>();
+    public ICollection<FilterRule> Filters { get; set; } = new List<FilterRule>();
 
     /// <summary>
     /// 获取查询条件表达式树
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public Expression<Func<T, bool>> GetRulesExpression<T>()
+    public Expression<Func<T, bool>> GetRulesExpression<T>(List<IQueryAction<T>>? queryActions = null)
     {
-        return FilterHelper.GetExpression<T>(FilterRules);
+        return FilterHelper.GetExpression(Filters, queryActions);
     }
-
 }

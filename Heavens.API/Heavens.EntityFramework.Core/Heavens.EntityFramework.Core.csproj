@@ -7,9 +7,15 @@
   <ItemGroup>
     <None Remove="sqlsettings.json" />
   </ItemGroup>
-
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.2" />
+	</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Heavens.Core.Extension\Heavens.Core.Extension.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
-﻿using Heavens.Application.CodeGenApp.Services;
+﻿using Heavens.Application._Framework.CodeGenApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Heavens.Application.CodeGenApp;
+namespace Heavens.Application._Framework.CodeGenApp;
 
 /// <summary>
 /// 根据后端实体生成代码

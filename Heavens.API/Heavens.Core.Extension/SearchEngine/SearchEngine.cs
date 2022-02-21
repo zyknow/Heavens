@@ -65,7 +65,7 @@ public class SearchEngine : ISearchEngine
             return Task.FromResult(false);
         }
 
-        return client?.IsHealthy();
+        return client?.IsHealthyAsync();
     }
 
     /// <summary>
@@ -82,8 +82,12 @@ public class SearchEngine : ISearchEngine
             return default;
         }
 
-        Meilisearch.Index index = await client.GetOrCreateIndex(indexStr);
-        return await index.Search<T>(search);
+        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        if (index == null)
+            await client.CreateIndexAsync(indexStr);
+        index = await client.GetIndexAsync(indexStr);
+
+        return await index.SearchAsync<T>(search);
     }
 
     /// <summary>
@@ -100,10 +104,14 @@ public class SearchEngine : ISearchEngine
             return;
         }
         //BeforeCheck();
-        Meilisearch.Index index = await client.GetOrCreateIndex(indexStr);
+        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        if (index == null)
+            await client.CreateIndexAsync(indexStr);
+        index = await client.GetIndexAsync(indexStr);
+
         if (!list.IsNullOrEmpty())
         {
-            await index.AddDocuments(list);
+            await index.AddDocumentsAsync(list);
         }
     }
 
@@ -121,10 +129,14 @@ public class SearchEngine : ISearchEngine
             return;
         }
         //BeforeCheck();
-        Meilisearch.Index index = await client.GetOrCreateIndex(indexStr);
+        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        if (index == null)
+            await client.CreateIndexAsync(indexStr);
+        index = await client.GetIndexAsync(indexStr);
+
         if (!entity.IsNull())
         {
-            await index.AddDocuments(new List<T>() { entity });
+            await index.AddDocumentsAsync(new List<T>() { entity });
         }
     }
 
@@ -141,8 +153,12 @@ public class SearchEngine : ISearchEngine
             return;
         }
         //BeforeCheck();
-        Meilisearch.Index index = await client.GetOrCreateIndex(indexStr);
-        await index.DeleteDocuments(ids);
+        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        if (index == null)
+            await client.CreateIndexAsync(indexStr);
+        index = await client.GetIndexAsync(indexStr);
+
+        await index.DeleteDocumentsAsync(ids);
     }
 
     /// <summary>
@@ -157,7 +173,7 @@ public class SearchEngine : ISearchEngine
             return;
         }
         //BeforeCheck();
-        await client.DeleteIndex(indexStr);
+        await client.DeleteIndexAsync(indexStr);
     }
 
     /// <summary>
@@ -172,10 +188,10 @@ public class SearchEngine : ISearchEngine
             return;
         }
         //BeforeCheck();
-        IEnumerable<Meilisearch.Index> indexs = await client.GetAllIndexes();
+        IEnumerable<Meilisearch.Index> indexs = await client.GetAllIndexesAsync();
         foreach (Meilisearch.Index index in indexs)
         {
-            await index.Delete();
+            await index.DeleteAsync();
         }
     }
 

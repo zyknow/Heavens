@@ -1,4 +1,5 @@
 ﻿using Heavens.Application.UserApp.Dtos;
+
 namespace Heavens.Application.UserApp;
 
 /// <summary>
@@ -12,6 +13,8 @@ public class UserAppService : BaseAppService<User, UserDto>
     public UserAppService(IRepository<User> userRepository) : base(userRepository)
     {
     }
+
+
 
     /// <summary>
     /// 获取用户信息，请求头中带token

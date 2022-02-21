@@ -1,9 +1,8 @@
-﻿
-using Heavens.Core.Entities.Base;
+﻿using Heavens.Core.Entities.Base;
 using Heavens.Core.Extension.Bing.CsCommentReader;
 using System.Text.RegularExpressions;
 
-namespace Heavens.Application.CodeGenApp.Services;
+namespace Heavens.Application._Framework.CodeGenApp.Services;
 
 public class CodeGenService : ICodeGenService, IScoped
 {

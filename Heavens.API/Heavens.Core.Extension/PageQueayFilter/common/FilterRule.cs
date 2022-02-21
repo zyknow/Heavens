@@ -1,5 +1,4 @@
-﻿using Heavens.Core.Extension.PageQueayFilter.attributes;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace Heavens.Core.Extension.PageQueayFilter.common;
 
@@ -8,11 +7,6 @@ namespace Heavens.Core.Extension.PageQueayFilter.common;
 /// </summary>
 public class FilterRule
 {
-    /// <summary>
-    /// 初始化一个<see cref="FilterRule"/>的新实例
-    /// </summary>
-    public FilterRule()
-    { }
     /// <summary>
     /// 使用指定数据名称，数据值及操作方式初始化一个<see cref="FilterRule"/>的新实例
     /// </summary>

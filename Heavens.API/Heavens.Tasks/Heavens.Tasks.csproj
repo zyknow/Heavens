@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Heavens.Application\Heavens.Application.csproj" />
-  </ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Heavens.Application\Heavens.Application.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Using Include="Heavens.Enums" />
 		<Using Include="System" />
 		<Using Include="System.Collections.Generic" />
 		<Using Include="System.Linq" />

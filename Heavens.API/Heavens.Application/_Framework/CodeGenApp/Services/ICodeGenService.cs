@@ -1,4 +1,4 @@
-﻿namespace Heavens.Application.CodeGenApp.Services;
+﻿namespace Heavens.Application._Framework.CodeGenApp.Services;
 
 public interface ICodeGenService
 {

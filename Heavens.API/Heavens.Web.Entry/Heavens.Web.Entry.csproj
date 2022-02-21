@@ -16,7 +16,7 @@
 		<None Remove="wwwroot\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -29,5 +29,8 @@
 			<UserProperties properties_4launchsettings_1json__JsonSchema="" />
 		</VisualStudio>
 	</ProjectExtensions>
+	<ItemGroup>
+	  <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
+	</ItemGroup>
 
 </Project>

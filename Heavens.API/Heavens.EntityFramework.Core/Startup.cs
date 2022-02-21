@@ -14,10 +14,12 @@ public class Startup : AppStartup
             //options.AddDbPool<DefaultDbContext>();
 
             options.AddDbPool<DefaultDbContext>(default, opt =>
-     {
-         //opt.UseBatchEF_MySQLPomelo();
-         opt.UseBatchEF_Sqlite();
-     });
+            {
+                //opt.UseMySql();
+                //opt.UseBatchEF_MySQLPomelo();
+                //opt.UseBatchEF_Sqlite();
+                //opt.UseLazyLoadingProxies();
+            });
         }, "Heavens.Database.Migrations");
     }
 }

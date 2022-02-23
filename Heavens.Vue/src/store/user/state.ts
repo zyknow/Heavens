@@ -19,10 +19,10 @@ export const initUserState: UserState = Object.assign({}, state)
 export const staticRoles = {
   admin: 'admin',
   user: 'user',
-  test: 'test',
+  test: 'test'
 }
 
 // 角色组
 export const staticRoleGroups = {
-  userGroup: [staticRoles.admin, staticRoles.user],
+  userGroup: [staticRoles.admin, staticRoles.user]
 }

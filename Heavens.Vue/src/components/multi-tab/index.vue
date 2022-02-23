@@ -1,11 +1,10 @@
 <template>
   <div class="h-full">
-    <div class="flex-row flex-j-bet h-8 mt-0.5 w-full pl-2 pr-2 multi-tab-bar">
+    <!-- 多标签div -->
+    <div class="multi-tab-bar h-8">
       <q-tabs
         align="left"
         active-color="primary"
-        class="col-12 h-8"
-        style="width: 97%"
         dense
         swipeable
         inline-label
@@ -16,50 +15,43 @@
         <div
           v-for="(tab, index) in multiTabStore.tagCaches"
           :key="index"
-          class="
-            page-tab
-            h-full
-            cursor-pointer
-            flex-row flex-all-center
-            ml-0.5
-            mr-0.5
-            pl-2
-            pr-2
-            space-x-1
-          "
+          class="flex page-tab h-full cursor-pointer flex-row items-center justify-center mr-0.5 pl-2 pr-2 space-x-1 bg-white rounded-sm"
           :class="tab.path == $router.currentRoute.value.path ? 'page-tab-active' : ''"
           @click="$router.push(tab.path)"
         >
-          <div class="flex-row flex-all-center">
-            <q-icon class="page-tab-title-icon" size="1.3rem" v-if="tab.icon" :name="tab.icon" />
+          <div class="flex flex-row items-center justify-center">
+            <q-icon v-if="tab.icon" class="page-tab-title-icon" size="1.3rem" :name="tab.icon" />
             <span class="page-tab-title text-gray-500">{{ t(tab.tabTitle || '') }}</span>
           </div>
 
-          <transition></transition>
+          <transition />
+          <!-- 刷新按钮 -->
           <q-icon
+            v-if="tab.path == multiTabStore.current"
             class="page-tab-icon"
             :class="state.refreshLoading && tab.path == multiTabStore.current ? 'animate-spin' : ''"
             name="autorenew"
             @click.stop="refresh(tab.path)"
           />
+          <!-- X按钮 -->
           <q-icon class="page-tab-icon" name="close" @click.stop="actions.close(tab.path)" />
-
+          <!-- 右键菜单 -->
           <q-menu touch-position context-menu>
             <q-list dense>
-              <q-item clickable v-close-popup>
+              <q-item v-close-popup clickable>
                 <q-item-section @click="refresh(tab.path)">{{ $t('刷新') }}</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup>
+              <q-item v-close-popup clickable>
                 <q-item-section @click="actions.closeOther(tab.path)">
                   {{ $t('关闭其他') }}
                 </q-item-section>
               </q-item>
-              <q-item clickable v-close-popup>
+              <q-item v-close-popup clickable>
                 <q-item-section @click="actions.closeLeft(tab.path)">
                   {{ $t('关闭左侧所有') }}
                 </q-item-section>
               </q-item>
-              <q-item clickable v-close-popup>
+              <q-item v-close-popup clickable>
                 <q-item-section @click="actions.closeRight(tab.path)">
                   {{ $t('关闭右侧所有') }}
                 </q-item-section>
@@ -68,7 +60,8 @@
           </q-menu>
         </div>
       </q-tabs>
-      <div class="flex-all-center">
+      <!-- 最右侧缓存按钮 -->
+      <div class="flex items-center justify-center">
         <q-icon
           class="cursor-pointer"
           :class="
@@ -91,18 +84,15 @@
         </q-icon>
       </div>
     </div>
-    <div style="height: calc(100% - 32px)">
+    <!-- 内容页 -->
+    <div style="height: calc(100% - 32px)" class="bg-white">
       <router-view v-slot="{ Component }">
-        <keep-alive :exclude="multiTabStore.exclude" v-if="state.cachingEnabled">
-          <component :is="!state.refreshLoading ? Component : ''"></component>
+        <keep-alive v-if="state.cachingEnabled" :exclude="multiTabStore.exclude">
+          <component :is="!state.refreshLoading ? Component : ''" />
         </keep-alive>
-        <component v-else :is="!state.refreshLoading ? Component : ''"></component>
-        <q-inner-loading :showing="state.refreshLoading"></q-inner-loading>
+        <component :is="!state.refreshLoading ? Component : ''" v-else />
+        <q-inner-loading :showing="state.refreshLoading" />
       </router-view>
-      <!-- <router-view v-slot="{ Component }" v-else>
-        <component :is="!refreshLoading ? Component : ''"></component>
-        <q-inner-loading :showing="refreshLoading"></q-inner-loading>
-      </router-view> -->
     </div>
   </div>
 </template>
@@ -120,10 +110,10 @@ const state = reactive({
   tab: 'multi-table',
   refreshLoading: false,
   cachingEnabled: ls.getItem(MULTI_TAB_CACHING_ENABLED),
-  cachingEnabledLoading: false,
+  cachingEnabledLoading: false
 })
 
-const setCachingEnabled = async enabled => {
+const setCachingEnabled = async (enabled: boolean) => {
   state.cachingEnabledLoading = true
   await sleepAsync(1000)
   state.cachingEnabledLoading = false
@@ -135,11 +125,11 @@ const multiTabStore = reactive({
   tagCaches: [] as CacheItem[],
   current: computed(() => router.currentRoute.value.path),
   exclude: [] as string[],
-  include: [] as string[],
+  include: [] as string[]
 }) as MultiTabStore
 const actions = MultiTabAction(multiTabStore)
 
-const refresh = async path => {
+const refresh = async (path: string) => {
   state.refreshLoading = true
   await actions.refreshAsync(path)
   state.refreshLoading = false
@@ -148,14 +138,11 @@ const refresh = async path => {
 
 <style lang="sass" scoped>
 .multi-tab-bar
-  box-sizing: border-box
-  border-bottom: 1px solid rgb(209, 209, 209)
+  // box-sizing: border-box
+  // border-bottom: 1px solid rgb(209, 209, 209)
+  @apply flex flex-row justify-between w-full justify-center
 
 .page-tab
-  border-style: solid
-  border-width: 1px
-  border-top-width: '0px'
-  border-top-color: white
   .page-tab-title,
   .page-tab-title-icon
     @apply text-gray-500

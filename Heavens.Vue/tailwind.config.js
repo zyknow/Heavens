@@ -1,7 +1,12 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const colors = require('tailwindcss/colors')
 module.exports = {
   purge: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
+    screens: {
+      sm: { max: '500px', min: '1px' },
+      md: { min: '501px' }
+    },
     extend: {},
     boxShadow: {
       sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -15,27 +20,27 @@ module.exports = {
       outline: '0 0 0 3px rgba(66, 153, 225, 0.5)',
       focus: '0 0 0 3px rgba(66, 153, 225, 0.5)',
       none: 'none',
-      max: '0 0 10px 8px rgba(8, 8, 8, 0.3)',
+      max: '0 0 10px 8px rgba(8, 8, 8, 0.3)'
     },
     colors: {
       ...colors,
       // 在这里添加完自定义颜色，最好在quasar.conf里也添加，否则可能会出现重名问题
-      primary: '#1890FF',
-      'light-primary': '#40A9FF',
+      primary: '#3B82F6',
+      'light-primary': '#F9A8D4',
       danger: '#FF4D4F',
       'light-danger': '#FF7875',
       'light-success': '#6EE7B7',
-      success: '#4CAF50',
-    },
+      success: '#4CAF50'
+    }
   },
   corePlugins: {
-    preflight: false,
+    preflight: false
   },
   variants: {
     extend: {
       backgroundColor: ['active'],
-      transitionDuration: ['hover', 'focus', 'active'],
-    },
+      transitionDuration: ['hover', 'focus', 'active']
+    }
   },
-  plugins: [],
+  plugins: []
 }

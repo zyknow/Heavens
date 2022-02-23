@@ -3,7 +3,7 @@ import { MeiliSearch } from 'meilisearch'
 
 export const supportIndexs = {
   book: 'book',
-  reader: 'reader',
+  reader: 'reader'
 }
 
 export interface MeiliResult {
@@ -12,7 +12,7 @@ export interface MeiliResult {
       id: string | number
       title: string
       genres: string[]
-    },
+    }
   ]
   offset: number
   limit: number

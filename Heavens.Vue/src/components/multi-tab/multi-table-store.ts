@@ -57,9 +57,9 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
       notify.warn('最后一个标签无法被关闭！')
       return
     }
-    state.exclude = state.tagCaches.filter(c => paths.includes(c.path)).map(p => p.name)
-    remove(state.tagCaches, list => paths.includes(list.path))
-    new Promise<void>(resolve => {
+    state.exclude = state.tagCaches.filter((c) => paths.includes(c.path)).map((p) => p.name)
+    remove(state.tagCaches, (list) => paths.includes(list.path))
+    new Promise<void>((resolve) => {
       setTimeout(() => {
         state.exclude = []
         resolve()
@@ -68,7 +68,7 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   }
 
   const addItem = (item: CacheItem) => {
-    if (state.tagCaches.findIndex(t => t.path == item.path) >= 0) {
+    if (state.tagCaches.findIndex((t) => t.path == item.path) >= 0) {
       // 已存在相同标签
       return
     }
@@ -92,22 +92,22 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   }
 
   const closeLeft = (path: CacheKey) => {
-    const removeCount = state.tagCaches.findIndex(t => t.path == path)
+    const removeCount = state.tagCaches.findIndex((t) => t.path == path)
     if (removeCount > 0) {
-      removeItemsAsync(take(state.tagCaches, removeCount).map(t => t.path))
+      removeItemsAsync(take(state.tagCaches, removeCount).map((t) => t.path))
     }
   }
 
   const closeRight = (path: CacheKey) => {
-    const removeIndex = state.tagCaches.findIndex(t => t.path == path)
+    const removeIndex = state.tagCaches.findIndex((t) => t.path == path)
     const removeCount = state.tagCaches.length - removeIndex - 1
     if (removeCount > 0) {
-      removeItemsAsync(takeRight(state.tagCaches, removeCount).map(t => t.path))
+      removeItemsAsync(takeRight(state.tagCaches, removeCount).map((t) => t.path))
     }
   }
 
   const closeOther = (path: CacheKey) => {
-    removeItemsAsync(state.tagCaches.filter(t => t.path != path).map(t => t.path))
+    removeItemsAsync(state.tagCaches.filter((t) => t.path != path).map((t) => t.path))
   }
 
   const getCaches = () => {
@@ -116,7 +116,7 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
 
   const refreshAsync = async (path?: CacheKey | undefined) => {
     router.push(path as string)
-    state.exclude = [state.tagCaches.find(c => c.path == path)?.name as string]
+    state.exclude = [state.tagCaches.find((c) => c.path == path)?.name as string]
     // 刷新延时，可去除
     await sleepAsync(100)
     nextTick(() => (state.exclude = []))
@@ -129,7 +129,7 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
       key: to.meta.id as number,
       tabTitle: to.meta.title as string,
       tabPath: to.fullPath,
-      icon: to.meta.icon as string,
+      icon: to.meta.icon as string
     })
   }
 

@@ -64,10 +64,7 @@ export async function GetUserPage(req: PageRequest): Promise<RequestResult<Paged
 /**
  * 用户修改密码
  */
-export async function ChangeUserPasswd(
-  oldPasswd: string,
-  newPasswd: string,
-): Promise<RequestResult<boolean>> {
+export async function ChangeUserPasswd(oldPasswd: string, newPasswd: string): Promise<RequestResult<boolean>> {
   return request.put<any, RequestResult<boolean>>('/api/user/passwd', { oldPasswd, newPasswd })
 }
 
@@ -113,6 +110,6 @@ export async function DeleteUserByIds(ids: number[]): Promise<RequestResult<numb
   return request.request<any, RequestResult<number>>({
     url: '/api/user/by-ids',
     method: 'delete',
-    data: ids,
+    data: ids
   })
 }

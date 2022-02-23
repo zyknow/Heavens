@@ -2,8 +2,8 @@
   <div v-for="(router, index) in routers" :key="index">
     <q-item
       v-if="!router.children"
-      clickable
       v-ripple
+      clickable
       :inset-level="childLevel == 0 ? undefined : childLevel"
       :to="router.path"
       class="text-gray-700"
@@ -35,23 +35,23 @@
       :duration="10"
       :icon="router.meta?.icon"
       :label="t(router.meta?.title || '')"
-      @mouseenter="showRightMenu()"
       class="text-gray-700"
+      @mouseenter="showRightMenu()"
     >
       <template #header>
         <q-item-section avatar>
           <q-icon :name="router.meta?.icon">
             <!-- 注释该 q-menu 以取消mini状态下的 右侧menu -->
             <q-menu
+              v-if="state.drawerMini && router.children && router.children.length > 0"
+              v-model="state.rightMenuVisible"
               transition-show="flip-right"
               transition-hide="flip-left"
               anchor="top right"
               self="top left"
-              v-model="state.rightMenuVisible"
-              v-if="state.drawerMini && router.children && router.children.length > 0"
               :offset="[17, 10]"
             >
-              <nav-right-menu-item :routers="router.children"></nav-right-menu-item>
+              <nav-right-menu-item :routers="router.children" />
             </q-menu>
           </q-icon>
         </q-item-section>
@@ -65,56 +65,42 @@
             v-if="router.children && router.children.length > 0"
             :routers="router.children"
             :childLevel="childLevel + 1"
-          ></nav-menu-item>
+          />
         </div>
       </template>
     </q-expansion-item>
   </div>
 </template>
 <script lang="ts" setup>
-import {
-  defineComponent,
-  PropType,
-  ref,
-  inject,
-  watch,
-  reactive,
-  toRefs,
-  computed,
-  defineProps,
-} from 'vue'
+import { defineComponent, PropType, ref, inject, watch, reactive, toRefs, computed, defineProps } from 'vue'
 import { MenuDataItem } from '@/router/_typing'
 import { useI18n } from 'vue-i18n'
-import navRightMenuItem from './nav-right-menu-item.vue'
-import { leftDrawerClosedKey } from '@/layouts'
+import { LEFT_DRAWER_CLOSED_KEY } from '@/layouts'
+import NavRightMenuItem from './nav-right-menu-item.vue'
 
 const props = defineProps({
   routers: {
     type: Object as PropType<MenuDataItem[]>,
-    default: () => [] as MenuDataItem[],
+    default: () => [] as MenuDataItem[]
   },
   isMenu: {
     type: Boolean,
-    default: false,
+    default: false
   },
   childLevel: {
     type: Number,
-    default: 0,
-  },
+    default: 0
+  }
 })
 const t = useI18n().t
 const libDialog = ref()
 const state = reactive({
-  drawerMini: inject(leftDrawerClosedKey, ref(true)),
+  drawerMini: inject(LEFT_DRAWER_CLOSED_KEY, ref(true)),
   rightMenuVisible: false,
-  addLibDialogVisible: false,
+  addLibDialogVisible: false
 })
 const showRightMenu = () => {
   if (state.drawerMini) state.rightMenuVisible = !state.rightMenuVisible
-}
-
-const show = () => {
-  libDialog.value.show()
 }
 </script>
 <style lang="sass"></style>

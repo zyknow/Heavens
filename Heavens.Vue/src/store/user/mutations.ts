@@ -24,7 +24,7 @@ export const mutations: MutationTree<UserState> = {
   [SET_ROUTERS]: (state, routers) => {
     state.routers = routers
   },
-  [RESET_USER]: state => {
+  [RESET_USER]: (state) => {
     Object.assign(state, initUserState)
-  },
+  }
 }

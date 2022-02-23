@@ -16,7 +16,7 @@ export const GET_USER_INFO = 'GET_USER_INFO'
 export const GENERATE_ROUTES_DYNAMIC = 'GENERATE_ROUTES_DYNAMIC'
 
 export const actions: ActionTree<UserState, RootState> = {
-  async [LOGIN]({ commit }, info: LoginParams) {
+  async [LOGIN]({}, info: LoginParams) {
     const res = await GetAuthorizeJwtToken(info)
     return res
   },
@@ -41,5 +41,5 @@ export const actions: ActionTree<UserState, RootState> = {
     commit(RESET_USER)
     commit(SET_TOKEN_INFO, undefined)
     router.push(loginRoutePath)
-  },
+  }
 }

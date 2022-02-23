@@ -1,21 +1,8 @@
 <template>
-  <q-btn
-    :loading="state.loading"
-    size="1.0rem"
-    dense
-    flat
-    icon="r_public"
-    class="text-gray-700"
-    :label="title"
-  >
+  <q-btn :loading="state.loading" size="1.0rem" dense flat icon="r_public" class="text-gray-700" :label="title">
+    <q-tooltip>{{ t('语言') }}</q-tooltip>
     <q-menu>
-      <q-item
-        clickable
-        v-close-popup
-        v-for="(langTitle, lang, i) in supportLangs"
-        :key="i"
-        @click="setLang(lang)"
-      >
+      <q-item v-for="(langTitle, lang, i) in supportLangs" :key="i" v-close-popup clickable @click="setLang(lang)">
         <q-item-section>{{ langTitle }}</q-item-section>
       </q-item>
     </q-menu>
@@ -23,17 +10,18 @@
 </template>
 <script lang="ts" setup>
 import { supportLangs } from 'src/i18n/_index'
-import { ref, defineComponent, toRefs, reactive, defineProps } from 'vue'
+import { reactive } from 'vue'
 import { SET_LANG } from 'src/store/user/mutations'
 import store from '@/store'
 import { sleepAsync } from '@/utils'
-
-const props = defineProps({
-  title: String,
+import { useI18n } from 'vue-i18n'
+const t = useI18n().t
+defineProps({
+  title: String
 })
 
 const state = reactive({
-  loading: false,
+  loading: false
 })
 
 const setLang = async (lang: string) => {
@@ -44,4 +32,4 @@ const setLang = async (lang: string) => {
   state.loading = false
 }
 </script>
-<style lang="sass"></style>
+<style lang="sass" scoped></style>

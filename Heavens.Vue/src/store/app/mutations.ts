@@ -9,5 +9,5 @@ export const mutations: MutationTree<AppState> = {
   },
   [SET_MULTI_TAB_ENABLED](state: AppState, enabled: boolean) {
     state.multiTabEnabled = enabled
-  },
+  }
 }

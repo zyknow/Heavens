@@ -2,8 +2,8 @@
   <div v-for="(router, index) in routers" :key="index">
     <q-item
       v-if="!router.children"
-      clickable
       v-ripple
+      clickable
       :to="router.path"
       class="text-gray-700"
       exact-active-class="bg-blue-100"
@@ -23,7 +23,7 @@
       :label="t(router.meta?.title || '')"
       class="text-gray-700"
     >
-      <nav-right-menu-item :routers="router.children"></nav-right-menu-item>
+      <nav-right-menu-item :routers="router.children" />
     </q-expansion-item>
   </div>
 </template>
@@ -32,7 +32,7 @@ import { MenuDataItem } from '@/router/_typing'
 import { ref, defineComponent, toRefs, reactive, PropType, defineProps } from 'vue'
 import { useI18n } from 'vue-i18n'
 const props = defineProps({
-  routers: Object as PropType<MenuDataItem[]>,
+  routers: Object as PropType<MenuDataItem[]>
 })
 
 const t = useI18n().t

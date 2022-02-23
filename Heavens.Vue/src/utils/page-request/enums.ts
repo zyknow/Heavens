@@ -5,7 +5,7 @@ export type FilterCondition = 1 | 2
 
 export const FilterCondition = {
   and: 1 as FilterCondition,
-  or: 2 as FilterCondition,
+  or: 2 as FilterCondition
 }
 
 /**
@@ -24,15 +24,15 @@ export const FilterOperate = {
   endsWith: 10 as FilterOperate,
   contains: 11 as FilterOperate,
   notContains: 12 as FilterOperate,
-  in: 13 as FilterOperate,
+  in: 13 as FilterOperate
 }
 
 /**
  * 排序类型<br />&nbsp; Desc = 0<br />&nbsp; Asc = 1<br />
  */
-export type ListSortType = 0 | 1
+export type SortType = 0 | 1
 
-export const ListSortType = {
-  desc: 0 as ListSortType,
-  asc: 1 as ListSortType,
+export const SortType = {
+  desc: 0 as SortType,
+  asc: 1 as SortType
 }

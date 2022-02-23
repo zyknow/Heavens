@@ -1,4 +1,5 @@
 import { ls } from 'src/utils'
+import { copyByKeys } from './../../utils/index'
 import { watch, computed } from 'vue'
 export interface AppState {
   lang: string
@@ -7,13 +8,13 @@ export interface AppState {
 
 export const state: AppState = {
   lang: 'zh-CN',
-  multiTabEnabled: true,
+  multiTabEnabled: true
 }
 
 // 根据缓存获取配置
-const app = ls.getItem('app')
+const app = ls.getItem('app') as AppState
 if (app) {
-  Object.keys(app).forEach(key => (state[key] = app[key]))
+  copyByKeys(state, app)
 }
 
 /**
@@ -26,6 +27,6 @@ export const watchAppStateToSave = (appState: AppState) => {
     (v, ov) => {
       ls.set('app', v)
     },
-    { deep: true },
+    { deep: true }
   )
 }

@@ -13,12 +13,13 @@ export const REQUEST_REFRESH_TOKEN_KEY = 'X-Authorization'
 const settings = getAppSettingsByLocalStorage()?.axios
 const request = axios.create({
   baseURL: settings?.baseURL,
-  timeout: settings?.timeout,
+  timeout: settings?.timeout
 })
 
 // 异常拦截处理器
 const errorHandler = async (error: AxiosError): Promise<any> => {
   if (error.response) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data = {}, status, statusText } = error.response
 
     // 403 无权限
@@ -35,14 +36,12 @@ const errorHandler = async (error: AxiosError): Promise<any> => {
   return new RequestResult({
     succeeded: false,
     errors: error.message,
-    excption: error,
+    excption: error
   } as RequestResult)
 }
 
 // 请求拦截器
-const requestHandler = (
-  config: AxiosRequestConfig,
-): AxiosRequestConfig | Promise<AxiosRequestConfig> => {
+const requestHandler = (config: AxiosRequestConfig): AxiosRequestConfig | Promise<AxiosRequestConfig> => {
   const tokenInfo = store.getters['user/tokenInfo'] as TokenInfo
 
   if (tokenInfo?.token) {
@@ -59,9 +58,7 @@ const requestHandler = (
 request.interceptors.request.use(requestHandler, errorHandler)
 
 // 响应拦截器
-const responseHandler = (
-  response: AxiosResponse,
-): ResponseBody<any> | AxiosResponse<any> | Promise<any> | any => {
+const responseHandler = (response: AxiosResponse): ResponseBody<any> | AxiosResponse<any> | Promise<any> | any => {
   const tokenInfo = store.getters['user/tokenInfo'] as TokenInfo
 
   const newToken = response.headers['access-token']
@@ -70,15 +67,13 @@ const responseHandler = (
   if (newToken && newToken != tokenInfo?.token) {
     // 新token中的过期时间戳
     const expirationTime = JSON.parse(
-      decodeURIComponent(
-        escape(window.atob(newToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))),
-      ),
+      decodeURIComponent(escape(window.atob(newToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))))
     ).exp
 
     const newTokenInfo = {
       token: newToken,
       refreshToken: newRefreshToken,
-      expirationTime,
+      expirationTime
     } as TokenInfo
 
     store.commit(`user/${SET_TOKEN_INFO}`, newTokenInfo)

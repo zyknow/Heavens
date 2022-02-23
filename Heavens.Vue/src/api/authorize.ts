@@ -26,6 +26,6 @@ export async function GetAuthorizeJwtToken(loginInfo: LoginParams): Promise<Requ
   return request.request<any, RequestResult<void>>({
     url: '/api/authorize/token',
     data: loginInfo,
-    method: 'post',
+    method: 'post'
   })
 }

@@ -1,12 +1,9 @@
 {
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "octref.vetur"
-  ],
-  "unwantedRecommendations": [
-    "hookyqr.beautify",
-    "dbaeumer.jshint",
-    "ms-vscode.vscode-typescript-tslint-plugin"
-  ]
+  // "recommendations": [
+  //   "dbaeumer.vscode-eslint",
+  //   "esbenp.prettier-vscode",
+  //   "octref.vetur"
+  // ],
+  "recommendations": ["johnsoncodehk.volar", "stylelint.vscode-stylelint", "dbaeumer.vscode-eslint"],
+  "unwantedRecommendations": ["hookyqr.beautify", "dbaeumer.jshint", "ms-vscode.vscode-typescript-tslint-plugin"]
 }

@@ -3,9 +3,9 @@
 </template>
 <script lang="ts">
 export default {
-  name: 'home',
+  name: 'Home'
 }
 </script>
 
-<script lang="ts" ,setup></script>
+<script lang="ts" setup></script>
 <style lang="sass"></style>

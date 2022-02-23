@@ -10,5 +10,5 @@ export const app: Module<AppState, RootState> = {
   state,
   mutations,
   actions,
-  getters,
+  getters
 }

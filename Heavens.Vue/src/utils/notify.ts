@@ -1,5 +1,5 @@
 import { RequestResult } from 'src/api/_typing'
-import { LooseDictionary, Notify } from 'quasar'
+import { Notify } from 'quasar'
 import { Component } from 'vue'
 
 /**
@@ -46,16 +46,7 @@ export type NotifyOption = {
    * Window side/corner to stick to
    * Default value: bottom
    */
-  position?:
-    | 'top-left'
-    | 'top-right'
-    | 'bottom-left'
-    | 'bottom-right'
-    | 'top'
-    | 'bottom'
-    | 'left'
-    | 'right'
-    | 'center'
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top' | 'bottom' | 'left' | 'right' | 'center'
   /**
    * Override the auto generated group with custom one; Grouped notifications cannot be updated; String or number value inform this is part of a specific group, regardless of its options; When a new notification is triggered with same group name, it replaces the old one and shows a badge with how many times the notification was triggered
    * Default value: (message + caption + multiline + actions labels + position)
@@ -77,11 +68,13 @@ export type NotifyOption = {
   /**
    * Style definitions to be attributed to the badge
    */
-  badgeStyle?: any[] | string | LooseDictionary
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  badgeStyle?: any[] | string
   /**
    * Class definitions to be attributed to the badge
    */
-  badgeClass?: any[] | string | LooseDictionary
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  badgeClass?: any[] | string
   /**
    * Show progress bar to detail when notification will disappear automatically (unless timeout is 0)
    */
@@ -89,7 +82,8 @@ export type NotifyOption = {
   /**
    * Class definitions to be attributed to the progress bar
    */
-  progressClass?: any[] | string | LooseDictionary
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  progressClass?: any[] | string
   /**
    * Add CSS class(es) to the notification for easier customization
    */
@@ -97,7 +91,7 @@ export type NotifyOption = {
   /**
    * Key-value for attributes to be set on the notification
    */
-  attrs?: LooseDictionary
+  attrs?: object
   /**
    * Amount of time to display (in milliseconds)
    * Default value: 5000
@@ -106,6 +100,7 @@ export type NotifyOption = {
   /**
    * Notification actions (buttons); If a 'handler' is specified or not, clicking/tapping on the button will also close the notification; Also check 'closeBtn' convenience prop
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actions?: any[]
   /**
    * Function to call when notification gets dismissed
@@ -130,8 +125,8 @@ export type NotifyOption = {
  */
 export const notifyI18n = {
   t(msg: string): string {
-    return ''
-  },
+    return msg
+  }
 }
 
 /**
@@ -147,13 +142,13 @@ export type INotify = {
    * @param res
    * @param opt ?: NotifyOption
    */
-  response(res: RequestResult, opt?: NotifyOption)
+  response(res: RequestResult, opt?: NotifyOption): void
   /**
    * axios执行消息提示，仅当执行失败时
    * @param res
    * @param opt ?: NotifyOption
    */
-  responseOnErr(res: RequestResult, opt?: NotifyOption)
+  responseOnErr(res: RequestResult, opt?: NotifyOption): void
 }
 
 /**
@@ -168,7 +163,7 @@ const baseNotify = (msg: string): NotifyOption => {
     group: false,
     timeout: 2500,
     color: 'white',
-    classes: 'notify-caption-text', // 用于自定义样式
+    classes: 'notify-caption-text' // 用于自定义样式
   }
 }
 
@@ -182,45 +177,40 @@ export const notify: INotify = {
   info(msg: string, opt?: NotifyOption): void {
     const options: NotifyOption = {
       icon: 'info',
-      textColor: 'blue-10',
+      textColor: 'blue-10'
     }
     Notify.create({ ...baseNotify(msg), ...options, ...opt })
   },
   error(msg: string, opt?: NotifyOption): void {
     const options: NotifyOption = {
       icon: 'cancel',
-      textColor: 'red-9',
+      textColor: 'red-9'
     }
     Notify.create({ ...baseNotify(msg), ...options, ...opt })
   },
   warn(msg: string, opt?: NotifyOption): void {
     const options: NotifyOption = {
       icon: 'warning',
-      textColor: 'orange-9',
+      textColor: 'orange-9'
     }
     Notify.create({ ...baseNotify(msg), ...options, ...opt })
   },
   success(msg: string, opt?: NotifyOption): void {
     const options: NotifyOption = {
       icon: 'check_circle',
-      textColor: 'positive',
+      textColor: 'positive'
     }
     Notify.create({ ...baseNotify(msg), ...options, ...opt })
   },
   response(res: RequestResult, opt?: NotifyOption): void {
     if (!res || !res.succeeded) {
       // notify.error(res.errors?.toString() || responseActionFalid, opt)
-      notify.error(
-        typeof res.errors == 'string'
-          ? res.errors
-          : JSON.stringify(res.errors) || responseActionFalid,
-        opt,
-      )
+      notify.error(typeof res.errors == 'string' ? res.errors : JSON.stringify(res.errors) || responseActionFalid, opt)
     } else {
       notify.success(responseActionSuccess, opt)
     }
   },
   responseOnErr(res: RequestResult, opt?: NotifyOption): void {
     if (!res || !res.succeeded) notify.response(res, opt)
-  },
+  }
 }

@@ -29,7 +29,7 @@ export const loadAppsetings = () => {
         location.reload()
       }
     })
-    .catch(e => {
+    .catch(() => {
       console.error('加载 appsettings.json 失败')
     })
 }

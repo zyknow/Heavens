@@ -7,7 +7,7 @@ import { AppState } from 'src/store/app/state'
 
 const i18n = createI18n({
   locale: (ls.getItem('app') as AppState)?.lang || 'zh-CN',
-  messages,
+  messages
 })
 
 export default boot(({ app }) => {

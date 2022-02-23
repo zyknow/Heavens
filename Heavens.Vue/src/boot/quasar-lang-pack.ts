@@ -15,7 +15,7 @@ export default boot(async (/* { app, router, ... } */) => {
     await import(
       /* webpackInclude: /(de|en-US)\.js$/ */
       'quasar/lang/' + langIso
-    ).then(lang => {
+    ).then((lang) => {
       Quasar.lang.set(lang.default)
     })
   } catch (err) {

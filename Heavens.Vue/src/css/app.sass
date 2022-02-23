@@ -4,127 +4,17 @@
 @import 'tailwindcss/components'
 @import 'tailwindcss/utilities'
 
-//flex 布局
+body
+  font-family: "Helvetica Neue", Helvetica, STHeiTi, sans-serif
+
+  // @apply font-bold
+
+  // notify样式
+.notify-caption-text
+  @apply text-lg
+
 @layer utilities
-  body
-    font-family: "Helvetica Neue", Helvetica, STHeiTi, sans-serif
-
-  .flex-col
-    display: flex
-    flex-direction: column!important
-
-  .flex-row
-    display: flex
-    flex-direction: row!important
-
-  .flex-col-rev
-    display: flex
-    flex-direction: column-reverse!important
-
-  .flex-row-rev
-    display: flex
-    flex-direction: row-reverse!important
-
-  .flex-1
-    flex: 1!important
-
-  .flex-item
-    flex: 1!important
-
-  /* 对其方式 */
-  /* 主轴 */
-  /* 开始 */
-  .flex-j-start
-    justify-content: flex-start!important
-
-  /* 结束 */
-  .flex-j-end
-    justify-content: flex-end!important
-
-  /* 主轴居中 */
-  .flex-j-center
-    justify-content: center!important
-
-  /* 主轴中间等距 */
-  .flex-j-bet
-    justify-content: space-between!important
-
-  /* 主轴两边中间间隔 */
-  .flex-j-around
-    justify-content: space-around!important
-
-  /* 交叉轴 */
-  /* align-items: flex-start | flex-end | center | baseline | stretch; */
-  .flex-a-start
-    align-items: flex-start!important
-
-  .flex-a-end
-    align-items: flex-end!important
-
-  .flex-a-center
-    display: flex
-    align-items: center!important
-
-  /* 主轴交叉轴 同时居中 */
-  .flex-all-center
-    display: flex
-    justify-content: center!important
-    align-items: center!important
-
-  /* flex 换行 */
-  .flex-wrap
-    display: flex
-    flex-wrap: wrap
-
   .upper
     transition: 0.5s
     transform: translate(0, -2px)
     box-shadow: 0px 0px 20px 3px #999
-
-
-// 固定table 标题栏
-.sticky-header-column-table
-  tr th
-    font-size: 1.1rem
-    position: sticky
-    z-index: 2
-  thead tr:first-child th
-    top: 0
-    z-index: 1
-
-// 固定 table 最右侧栏
-.sticky-right-column-table
-
-  td:last-child
-    /* bg color is important for td; just specify one */
-    @apply bg-gray-100
-
-  tr th
-    position: sticky
-    /* higher than z-index for td below */
-    z-index: 2
-    /* bg color is important; just specify one */
-
-  /* this will be the loading indicator */
-  thead tr:last-child th
-    /* height of all previous header rows */
-    top: 48px
-    /* highest z-index */
-    z-index: 3
-  thead tr:last-child th
-    top: 0
-    z-index: 1
-  tr:last-child th:last-child
-    /* highest z-index */
-    z-index: 3
-
-  td:last-child
-    z-index: 1
-
-  td:last-child, th:last-child
-    position: sticky
-    right: 0
-
-// notify样式
-.notify-caption-text
-  @apply text-lg

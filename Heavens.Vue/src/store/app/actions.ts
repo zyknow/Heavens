@@ -12,7 +12,7 @@ export const actions: ActionTree<AppState, RootState> = {
       await import(
         /* webpackInclude: /(zh-CN|en-US)\.js$/ */
         'quasar/lang/' + lang
-      ).then(langObj => {
+      ).then((langObj) => {
         Quasar.lang.set(langObj.default)
         commit(SET_LANG, lang)
         location.reload()
@@ -22,5 +22,5 @@ export const actions: ActionTree<AppState, RootState> = {
       // Requested Quasar Language Pack does not exist,
       // let's not break the app, so catching error
     }
-  },
+  }
 }

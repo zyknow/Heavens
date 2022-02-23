@@ -34,12 +34,12 @@ export const storeKey: InjectionKey<VuexStore<StateInterface>> = Symbol('vuex-ke
 const store = createStore<StateInterface>({
   modules: {
     app,
-    user,
+    user
   },
 
   // enable strict mode (adds overhead!)
   // for dev mode and --debug builds only
-  strict: !!process.env.DEBUGGING,
+  strict: !!process.env.DEBUGGING
 })
 
 export default store

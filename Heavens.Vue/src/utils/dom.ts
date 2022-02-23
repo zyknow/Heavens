@@ -6,7 +6,7 @@ export type TargetElement = ComponentPublicInstance | HTMLElement | Element | Do
 
 export function getTargetElement(
   target?: BasicTarget<TargetElement>,
-  defaultElement?: TargetElement,
+  defaultElement?: TargetElement
 ): TargetElement | undefined | null {
   if (!target) {
     return defaultElement

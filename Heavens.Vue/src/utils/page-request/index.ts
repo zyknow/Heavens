@@ -1,10 +1,9 @@
-import { identity } from 'lodash'
-import { FilterCondition, FilterOperate, ListSortType } from './enums'
+import { FilterCondition, FilterOperate, SortType } from './enums'
 
 /**
  * 筛选规则
  */
-export interface FilterRule {
+export interface Filter {
   /**
    * 获取或设置 属性名称
    */
@@ -12,43 +11,61 @@ export interface FilterRule {
   /**
    * 获取或设置 属性值
    */
-  value?: any
+  value?: number | string | number[] | string[]
   operate?: FilterOperate
   condition?: FilterCondition
 }
 
-export interface ListSortDirection {
+export interface SortBy {
   /**
    * 字段名
    */
-  fieldName?: string
-  sortType?: ListSortType
+  field?: string
+  sortType?: SortType
 }
 
 export interface PageRequest {
   /**
    * 页码
    */
-  page?: number
+  page: number
   /**
    * 每页大小
    */
-  pageSize?: number
+  pageSize: number
   /**
    * 排序集合
    */
-  orderConditions?: Array<ListSortDirection>
+  sort: SortBy
   /**
    * 查询条件组
    */
-  filterRules?: Array<FilterRule>
+  filters: Array<Filter>
 
   /**
    * 统一设置查询条件value值，用于单搜索框简单搜索
    * @param value
    */
-  setAllRulesValue(value: string | number): void
+  setAllRulesValue(value: string | number | []): void
 
+  /**
+   * 设置指定field的 Rule value,没有则创建该field
+   * @param field
+   * @param value
+   */
+  setRule(rule: Filter): void
+
+  /**
+   * 清除基于field的规则
+   * @param field
+   * @param value
+   */
+  removeRules(field: string): void
+
+  /**
+   * 清空所有规则
+   */
+  clearRules(): void
   /**
    * 设置分页参数
    * @param pagination 分页数据
@@ -63,23 +80,51 @@ export interface PageRequest {
 }
 
 export class PageRequest implements PageRequest {
-  constructor(page: number, pageSize: number, filterGroups: Array<FilterRule> = []) {
+  constructor(page: number, pageSize: number, filters: Filter[], sortBy: SortBy = {}) {
     this.page = page
     this.pageSize = pageSize
-    this.filterRules = filterGroups
-    this.orderConditions = [{ fieldName: 'id', sortType: ListSortType.desc }]
+    this.filters = filters
+
+    if (sortBy?.field) this.sort = sortBy
+    else this.sort = { field: 'id', sortType: SortType.desc }
   }
 
-  page?: number = 1
+  page = 1
 
-  pageSize?: number = 50
+  pageSize = 50
 
-  orderConditions?: Array<ListSortDirection>
+  sort: SortBy
 
-  filterRules?: Array<FilterRule>
+  filters: Array<Filter>
 
-  setAllRulesValue = (value: string | number) => {
-    this.filterRules?.forEach(r => (r.value = value))
+  clearRules = (): void => {
+    this.filters = []
+  }
+
+  setAllRulesValue = (value: string | number | []): void => {
+    this.filters?.forEach((r) => (r.value = value))
+  }
+
+  setRule = (rule: Filter): void => {
+    if (!this.filters?.length) {
+      this.filters = []
+    }
+    const index = this.filters?.findIndex((r) => r.field == rule.field)
+    if (index < 0) {
+      this.filters.push(rule)
+    } else {
+      this.filters[index] = rule
+    }
+  }
+
+  removeRules = (field: string): void => {
+    if (!this.filters?.length) {
+      return
+    }
+    const index = this.filters?.findIndex((r) => r.field == field)
+    if (index >= 0) {
+      this.filters.splice(index, 1)
+    }
   }
 
   setOrder = (pagination: {
@@ -88,14 +133,12 @@ export class PageRequest implements PageRequest {
     page: number
     rowsPerPage: number
     rowsNumber: number
-  }) => {
+  }): void => {
     this.page = pagination.page
     this.pageSize = pagination.rowsPerPage
-    if (this.orderConditions && this.orderConditions.length > 0) {
-      this.orderConditions[0].fieldName = pagination.sortBy || 'id'
-      this.orderConditions[0].sortType = pagination.descending
-        ? ListSortType.desc
-        : ListSortType.asc
+    if (this.sort?.field) {
+      this.sort.field = pagination.sortBy || 'id'
+      this.sort.sortType = pagination.descending ? SortType.desc : SortType.asc
     }
   }
 }

@@ -22,7 +22,7 @@ router.beforeEach(async (to, from) => {
       // 未登录，进入到登录页
       return {
         path: loginRoutePath,
-        replace: true,
+        replace: true
       }
     }
 
@@ -33,7 +33,7 @@ router.beforeEach(async (to, from) => {
     // 获取失败，去到登录页面
     return {
       path: loginRoutePath,
-      replace: true,
+      replace: true
     }
   }
 
@@ -63,7 +63,7 @@ router.beforeEach(async (to, from) => {
 
 // 配置
 LoadingBar.setDefaults({
-  color: 'blue',
+  color: 'blue'
 })
 
 router.beforeEach((to, from, next) => {

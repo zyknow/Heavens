@@ -2,14 +2,26 @@
   <q-layout view="hhh lpR lFr" class="basic-layout">
     <basic-header class="basic-header" />
 
-    <q-drawer v-model="state.drawerOpen" :width="250" :mini="state.drawerMini" side="left" class="rounded-lg">
-      <q-list class="rounded-borders text-primary">
-        <nav-menu-item :routers="router.children" />
-      </q-list>
+    <q-drawer
+      v-model="state.drawerOpen"
+      :width="250"
+      :mini="state.drawerMini"
+      side="left"
+      class="layout-rounded"
+      style="-webkit-scroll"
+      :class="state.drawerMini ? 'overflow-hidden' : ''"
+    >
+      <q-scroll-area class="h-full">
+        <q-list class="rounded-borders text-primary">
+          <nav-menu-item :routers="router.children" />
+        </q-list>
+      </q-scroll-area>
     </q-drawer>
     <q-page-container class="basic-page-container">
       <multi-tabs v-if="$store.getters['app/multiTabEnabled'] && !$q.platform.is.mobile" />
-      <router-view v-else />
+      <div v-else class="w-full h-full bg-white flex layout-rounded">
+        <router-view class="w-full h-full layout-rounded" />
+      </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -45,14 +57,19 @@ const router = store.getters['user/routers']
 </script>
 <style lang="sass">
 
+// 所有窗口类型统一圆角样式
+.layout-rounded
+  @apply rounded-md
+
 .basic-layout
   @apply bg-gray-300 fixed h-screen w-screen
   .basic-header
-    @apply  bg-white rounded-lg m-2
+    @apply  bg-white m-2 layout-rounded
 
   .basic-page-container
-    padding-bottom: 29px
-    @apply m-4 mr-2 max-h-full h-full
+    padding-bottom: 28px
+    padding-right: 24px
+    @apply m-4 mr-2 max-h-full h-full w-full
 
   @media screen and (min-width: 500px)
     .q-drawer-container
@@ -60,5 +77,5 @@ const router = store.getters['user/routers']
         top: 66px !important
         left: 8px !important
         bottom: 12px !important
-        @apply rounded-lg
+        @apply layout-rounded
 </style>

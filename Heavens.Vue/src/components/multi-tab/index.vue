@@ -1,36 +1,38 @@
 <template>
-  <div class="h-full">
-    <!-- 多标签div -->
-    <div class="multi-tab-bar h-8">
+  <div class="h-full flex flex-row flex-wrap w-full">
+    <!-- 多标签父div -->
+    <div class="flex flex-row bg-white mb-1.5 pr-2 whitespace-nowrap w-full layout-rounded">
       <q-tabs
         align="left"
         active-color="primary"
         dense
-        swipeable
         inline-label
         indicator-color="transparent"
         :breakpoint="0"
         outside-arrows
+        style="width: calc(100% - 30px)"
+        class="flex flex-row flex-nowrap items-center h-8 layout-rounded"
       >
+        <!-- 多标签 -->
         <div
           v-for="(tab, index) in multiTabStore.tagCaches"
           :key="index"
-          class="flex page-tab h-full cursor-pointer flex-row items-center justify-center mr-0.5 pl-2 pr-2 space-x-1 bg-white rounded-sm"
+          class="flex page-tab h-full cursor-pointer flex-row flex-nowrap items-center justify-center mr-0.5 pl-2 pr-2 space-x-0.5 bg-white border-b-8 border-white border-opacity-100"
           :class="tab.path == $router.currentRoute.value.path ? 'page-tab-active' : ''"
           @click="$router.push(tab.path)"
         >
-          <div class="flex flex-row items-center justify-center">
+          <q-tab class="hidden" />
+          <div class="flex flex-row flex-nowrap items-center justify-center">
             <q-icon v-if="tab.icon" class="page-tab-title-icon" size="1.3rem" :name="tab.icon" />
             <span class="page-tab-title text-gray-500">{{ t(tab.tabTitle || '') }}</span>
           </div>
 
-          <transition />
           <!-- 刷新按钮 -->
           <q-icon
             v-if="tab.path == multiTabStore.current"
             class="page-tab-icon"
             :class="state.refreshLoading && tab.path == multiTabStore.current ? 'animate-spin' : ''"
-            name="autorenew"
+            name="r_autorenew"
             @click.stop="refresh(tab.path)"
           />
           <!-- X按钮 -->
@@ -43,24 +45,25 @@
               </q-item>
               <q-item v-close-popup clickable>
                 <q-item-section @click="actions.closeOther(tab.path)">
-                  {{ $t('关闭其他') }}
+                  {{ t('关闭其他') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
                 <q-item-section @click="actions.closeLeft(tab.path)">
-                  {{ $t('关闭左侧所有') }}
+                  {{ t('关闭左侧所有') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
                 <q-item-section @click="actions.closeRight(tab.path)">
-                  {{ $t('关闭右侧所有') }}
+                  {{ t('关闭右侧所有') }}
                 </q-item-section>
               </q-item>
             </q-list>
           </q-menu>
         </div>
       </q-tabs>
-      <!-- 最右侧缓存按钮 -->
+
+      <!-- 侧缓存按钮 -->
       <div class="flex items-center justify-center">
         <q-icon
           class="cursor-pointer"
@@ -85,7 +88,7 @@
       </div>
     </div>
     <!-- 内容页 -->
-    <div style="height: calc(100% - 32px)" class="bg-white">
+    <div style="height: calc(100% - 35px)" class="bg-white layout-rounded w-full">
       <router-view v-slot="{ Component }">
         <keep-alive v-if="state.cachingEnabled" :exclude="multiTabStore.exclude">
           <component :is="!state.refreshLoading ? Component : ''" />
@@ -137,11 +140,6 @@ const refresh = async (path: string) => {
 </script>
 
 <style lang="sass" scoped>
-.multi-tab-bar
-  // box-sizing: border-box
-  // border-bottom: 1px solid rgb(209, 209, 209)
-  @apply flex flex-row justify-between w-full justify-center
-
 .page-tab
   .page-tab-title,
   .page-tab-title-icon
@@ -165,12 +163,12 @@ const refresh = async (path: string) => {
 
 
 .page-tab-icon
-  font-size: 1rem
+  font-size: 1.2rem
   border-radius: 0.2rem
   opacity: 0.58
   transition: all 0.3s
 
 
 .page-tab-icon:hover
-  @apply text-light-primary opacity-100 cursor-pointer
+  @apply text-light-primary opacity-100 cursor-pointer font-bold
 </style>

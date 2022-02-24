@@ -4,7 +4,7 @@
       <div class="mt-40 flex flex-row items-center">
         <!-- 这里替换成自己的icon -->
         <q-spinner-box color="orange" size="5.5em" />
-        <span class="text-4xl font-extrabold">HeavensFeel</span>
+        <span class="text-4xl font-extrabold">Heavens</span>
       </div>
       <span class="text-gray-400">Heavens 是基于 Quasar 设计的快速开发框架</span>
       <router-view />

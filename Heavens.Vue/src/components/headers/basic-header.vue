@@ -5,11 +5,11 @@
       <div class="flex flex-row items-center space-x-4">
         <q-btn dense flat round icon="menu" @click="changeLeftDrawer()" />
         <!-- 这才是标题栏 -->
-        <div v-if="!$q.platform.is.mobile" class="flex flex-row items-center">
+        <div class="flex flex-row items-center sm:hidden">
           <q-spinner-box color="orange" size="2.5em" />
           <span
             class="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500 header-title-text text-xl font-semibold"
-            >HeavensFeel</span
+            >Heavens</span
           >
         </div>
         <!-- 完成搜索功能 -->

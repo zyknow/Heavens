@@ -9,6 +9,49 @@ body
 
   // @apply font-bold
 
+  // 固定table 标题栏
+.sticky-header-column-table
+  tr th
+    font-size: 1.1rem
+    position: sticky
+    z-index: 2
+  thead tr:first-child th
+    top: 0
+    z-index: 1
+
+// 固定 table 最右侧栏
+.sticky-right-column-table
+
+  td:last-child
+    /* bg color is important for td; just specify one */
+    @apply bg-gray-100
+
+  tr th
+    position: sticky
+    /* higher than z-index for td below */
+    z-index: 2
+    /* bg color is important; just specify one */
+
+  /* this will be the loading indicator */
+  thead tr:last-child th
+    /* height of all previous header rows */
+    top: 48px
+    /* highest z-index */
+    z-index: 3
+  thead tr:last-child th
+    top: 0
+    z-index: 1
+  tr:last-child th:last-child
+    /* highest z-index */
+    z-index: 3
+
+  td:last-child
+    z-index: 1
+
+  td:last-child, th:last-child
+    position: sticky
+    right: 0
+
   // notify样式
 .notify-caption-text
   @apply text-lg

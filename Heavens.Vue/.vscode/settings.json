@@ -113,6 +113,7 @@
   },
   "cSpell.words": [
     "antv",
+    "autorenew",
     "browserslist",
     "endregion",
     "esnext",
@@ -138,5 +139,8 @@
   "volar.codeLens.pugTools": true,
   "volar.codeLens.scriptSetupTools": true,
   "volar.icon.preview": true,
-  "volar.formatting.printWidth": 120
+  "volar.formatting.printWidth": 120,
+  "[sass]": {
+    "editor.defaultFormatter": "syler.sass-indented"
+  }
 }

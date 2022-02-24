@@ -1,8 +1,8 @@
 {
-  "name": "heavensfeel",
+  "name": "heavens",
   "version": "0.0.1",
   "description": "A Quasar Framework app",
-  "productName": "Heavens Feel",
+  "productName": "Heavens",
   "author": "Is",
   "private": true,
   "scripts": {

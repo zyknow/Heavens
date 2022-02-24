@@ -19,18 +19,6 @@ export const dynamicRouter: MenuDataItem[] = [
   }
 ]
 
-for (let index = 1; index <= 14; index++) {
-  const element = cloneDeep(dynamicRouter[0])
-  element.path = '/home' + index
-  element.name = 'home' + index
-  element.component = import(`pages/homeTest/index${index}.vue`)
-  {
-    ;(element.meta as any).title =
-      (element.meta as any).title + (element.meta as any).title + (element.meta as any).title + index
-  }
-  dynamicRouter.push(element)
-}
-
 // 静态路由
 export const staticRoutes: MenuDataItem[] = [
   {

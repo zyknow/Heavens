@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex flex-row flex-wrap w-full">
     <!-- 多标签父div -->
-    <div class="flex flex-row bg-white mb-1.5 pr-2 whitespace-nowrap w-full layout-rounded">
+    <div class="flex flex-row pr-2 whitespace-nowrap w-full">
       <q-tabs
         align="left"
         active-color="primary"
@@ -11,13 +11,13 @@
         :breakpoint="0"
         outside-arrows
         style="width: calc(100% - 30px)"
-        class="flex flex-row flex-nowrap items-center h-8 layout-rounded"
+        class="flex flex-row flex-nowrap items-center h-8"
       >
         <!-- 多标签 -->
         <div
           v-for="(tab, index) in multiTabStore.tagCaches"
           :key="index"
-          class="flex page-tab h-full cursor-pointer flex-row flex-nowrap items-center justify-center mr-0.5 pl-2 pr-2 space-x-0.5 bg-white border-b-8 border-white border-opacity-100"
+          class="flex page-tab h-full cursor-pointer flex-row flex-nowrap items-center justify-center mr-0.5 pl-2 pr-2 space-x-0.5"
           :class="tab.path == $router.currentRoute.value.path ? 'page-tab-active' : ''"
           @click="$router.push(tab.path)"
         >
@@ -88,7 +88,7 @@
       </div>
     </div>
     <!-- 内容页 -->
-    <div style="height: calc(100% - 35px)" class="bg-white layout-rounded w-full">
+    <div style="height: calc(100% - 35px)" class="w-full h-full">
       <router-view v-slot="{ Component }">
         <keep-alive v-if="state.cachingEnabled" :exclude="multiTabStore.exclude">
           <component :is="!state.refreshLoading ? Component : ''" />

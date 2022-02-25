@@ -18,9 +18,12 @@
       </q-scroll-area>
     </q-drawer>
     <q-page-container class="basic-page-container">
-      <multi-tabs v-if="$store.getters['app/multiTabEnabled'] && !$q.platform.is.mobile" />
-      <div v-else class="w-full h-full bg-white flex layout-rounded">
-        <router-view class="w-full h-full layout-rounded" />
+      <multi-tabs
+        v-if="$store.getters['app/multiTabEnabled'] && !$q.platform.is.mobile"
+        class="bg-white layout-rounded"
+      />
+      <div v-else class="w-full h-full flex bg-white layout-rounded">
+        <router-view class="w-full h-full" />
       </div>
     </q-page-container>
   </q-layout>
@@ -59,7 +62,7 @@ const router = store.getters['user/routers']
 
 // 所有窗口类型统一圆角样式
 .layout-rounded
-  @apply rounded-md
+  @apply rounded-md overflow-hidden
 
 .basic-layout
   @apply bg-gray-300 fixed h-screen w-screen

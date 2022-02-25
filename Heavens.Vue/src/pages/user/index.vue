@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-full">
     <q-table
       v-model:selected.sync="state.selected"
       v-model:pagination="state.pagination"
@@ -10,9 +10,10 @@
       :row-key="(v) => v.id"
       :visible-columns="state.visibleColumns"
       flat
+      square
       :rows-per-page-options="[10, 15, 50, 500, 1000, 10000]"
       table-header-class="bg-gray-100"
-      class="h-full relative sticky-header-column-table sticky-right-column-table layout-rounded"
+      class="h-full relative sticky-header-column-table sticky-right-column-table"
       :virtual-scroll="state.users.length >= 200"
       @request="tableHandler"
     >

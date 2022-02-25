@@ -50,13 +50,4 @@ const state = reactive({
   searchDarkStyle: false
 })
 </script>
-<style lang="sass" scoped>
-// .sticky-header-column-table
-//   tr th
-//     font-size: 1.1rem
-//     position: sticky
-//     z-index: 2
-//   thead tr:first-child th
-//     top: 0
-//     z-index: 1
-</style>
+<style lang="sass" scoped></style>

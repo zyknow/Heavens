@@ -162,12 +162,12 @@ export default {
 import { AddUser, DeleteUserByIds, GetUserById, GetUserPage, UpdateUser, User } from '@/api/user'
 import { reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { staticRoles } from '@/store/user/state'
 import { dateFormat } from '@/utils/date-util'
 import { useQuasar } from 'quasar'
 import { ls } from '@/utils'
 import { PageRequest } from '@/utils/page-request'
 import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
+import { staticRoles } from '@/store/user-state'
 
 const USER_VISIBLE_COLUMNS = `user_visibleColumns`
 const defaultVisibleColumns = ['name', 'account', 'roles', 'enabled', 'sex', 'birth', 'createdTime']

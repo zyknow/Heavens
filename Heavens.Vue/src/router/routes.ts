@@ -1,7 +1,14 @@
+import { staticRoles } from '@/store/user-state'
 import { cloneDeep } from 'lodash-es'
 import userLayout from 'src/layouts/user-layout.vue'
-import { staticRoles } from 'src/store/user/state'
 import { MenuDataItem } from './_typing'
+
+// 白名单页名
+export const allowList = ['login']
+// 登录路由
+export const loginRoutePath = '/login'
+// 默认访问路由
+export const defaultRoutePath = '/home'
 
 // 动态路由，根据用户信息中的角色
 export const dynamicRouter: MenuDataItem[] = [

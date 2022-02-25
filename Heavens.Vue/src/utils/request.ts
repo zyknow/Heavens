@@ -1,12 +1,11 @@
 import { RequestResult, ResponseBody } from 'src/api/_typing'
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { notify } from './notify'
-import store from 'src/store'
 import router from '@/router'
-import { loginRoutePath } from '@/router/router-guards'
 import { getAppSettingsByLocalStorage } from './app-settings'
-import { SET_TOKEN_INFO } from '@/store/user/mutations'
-import { TokenInfo } from '@/store/user/_typing'
+import { TokenInfo } from '@/store/_typing'
+import { userState } from '@/store/user-state'
+import { loginRoutePath } from '@/router/routes'
 export const REQUEST_TOKEN_KEY = 'Authorization'
 export const REQUEST_REFRESH_TOKEN_KEY = 'X-Authorization'
 
@@ -42,7 +41,7 @@ const errorHandler = async (error: AxiosError): Promise<any> => {
 
 // 请求拦截器
 const requestHandler = (config: AxiosRequestConfig): AxiosRequestConfig | Promise<AxiosRequestConfig> => {
-  const tokenInfo = store.getters['user/tokenInfo'] as TokenInfo
+  const tokenInfo = userState.tokenInfo
 
   if (tokenInfo?.token) {
     config.headers[REQUEST_TOKEN_KEY] = `Bearer ${tokenInfo.token}`
@@ -59,7 +58,7 @@ request.interceptors.request.use(requestHandler, errorHandler)
 
 // 响应拦截器
 const responseHandler = (response: AxiosResponse): ResponseBody<any> | AxiosResponse<any> | Promise<any> | any => {
-  const tokenInfo = store.getters['user/tokenInfo'] as TokenInfo
+  const tokenInfo = userState.tokenInfo
 
   const newToken = response.headers['access-token']
   const newRefreshToken = response.headers['x-access-token']
@@ -76,8 +75,7 @@ const responseHandler = (response: AxiosResponse): ResponseBody<any> | AxiosResp
       expirationTime
     } as TokenInfo
 
-    store.commit(`user/${SET_TOKEN_INFO}`, newTokenInfo)
-
+    userState.tokenInfo = newTokenInfo
     // 拿到新token重新获取用户信息
   }
   return new RequestResult(response.data)

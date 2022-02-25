@@ -18,10 +18,7 @@
       </q-scroll-area>
     </q-drawer>
     <q-page-container class="basic-page-container">
-      <multi-tabs
-        v-if="$store.getters['app/multiTabEnabled'] && !$q.platform.is.mobile"
-        class="bg-white layout-rounded"
-      />
+      <multi-tabs v-if="appState.multiTabEnabled && !$q.platform.is.mobile" class="bg-white layout-rounded" />
       <div v-else class="w-full h-full flex bg-white layout-rounded">
         <router-view class="w-full h-full" />
       </div>
@@ -35,9 +32,10 @@ import BasicHeader from 'src/components/headers/basic-header.vue'
 import MultiTabs from 'src/components/multi-tab/index.vue'
 import { ref, defineComponent, provide, InjectionKey, readonly, reactive, toRefs, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
-import store from '@/store'
 import { CHANGE_LEFT_DRAWER_FUN, LEFT_DRAWER_CLOSED_KEY } from '.'
-
+import { appState } from '@/store/app-state'
+import { userState } from '@/store/user-state'
+import { MenuDataItem } from '@/router/_typing'
 // import { useMultiTabStateProvider } from 'src/components/multi-tab-bar/multi-table-store'
 
 const $q = useQuasar()
@@ -56,7 +54,7 @@ provide(
   LEFT_DRAWER_CLOSED_KEY,
   computed(() => state.drawerMini)
 )
-const router = store.getters['user/routers']
+const router = userState.routers as MenuDataItem
 </script>
 <style lang="sass">
 

@@ -9,14 +9,7 @@
     <q-btn class="text-gray-700" size="1.0rem" dense flat icon="r_settings" @click="toSettings">
       <q-tooltip>{{ t('设置') }}</q-tooltip>
     </q-btn>
-    <q-btn
-      class="text-gray-700"
-      size="1.0rem"
-      dense
-      flat
-      icon="r_account_circle"
-      :label="$store.getters['user/info']?.name"
-    >
+    <q-btn class="text-gray-700" size="1.0rem" dense flat icon="r_account_circle" :label="userState.info?.name">
       <q-tooltip>{{ t('账户') }}</q-tooltip>
       <q-menu>
         <q-item v-close-popup clickable>
@@ -27,7 +20,7 @@
         </q-item>
         <q-separator />
         <q-item v-close-popup clickable>
-          <q-item-section @click="$store.dispatch(`user/${LOGOUT}`)">退出登录</q-item-section>
+          <q-item-section @click="userState.logout()">退出登录</q-item-section>
         </q-item>
       </q-menu>
     </q-btn>
@@ -41,12 +34,11 @@ export default {
 </script>
 <script lang="ts" setup>
 import { TO_SETTINGS_FUN } from '@/layouts'
-import { LOGOUT } from '@/store/user/actions'
+import { userState } from '@/store/user-state'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LanguageSelect from '../I18n/language-select.vue'
 const t = useI18n().t
-
 const toSettings = inject(TO_SETTINGS_FUN) as () => void
 </script>
 <style lang="sass" scoped></style>

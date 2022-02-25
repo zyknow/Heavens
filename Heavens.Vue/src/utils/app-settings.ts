@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ls } from '.'
 
-export const APP_SETTINGS = 'appsettings'
+export const APP_SETTINGS = 'APP_SETTINGS'
 
 export interface AppSettings {
   axios: {
@@ -18,7 +18,7 @@ export const getAppSettingsByLocalStorage = (): AppSettings => {
   return ls.getItem(APP_SETTINGS) as AppSettings
 }
 
-export const loadAppsetings = () => {
+export const loadAppSettings = () => {
   // 获取appsettings
   axios
     .get('appsettings.json')

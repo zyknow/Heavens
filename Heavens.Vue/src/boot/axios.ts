@@ -1,7 +1,9 @@
+import { userState } from './../store/user-state'
+import { appState } from './../store/app-state'
 import { boot } from 'quasar/wrappers'
 import axios, { AxiosInstance } from 'axios'
 import request from 'src/utils/request'
-import { loadAppsetings } from '@/utils/app-settings'
+import { loadAppSettings } from '@/utils/app-settings'
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -21,5 +23,5 @@ export default boot(({ app }) => {
   //       so you can easily perform requests against your app's API
 
   // 加载appsettings
-  loadAppsetings()
+  loadAppSettings()
 })

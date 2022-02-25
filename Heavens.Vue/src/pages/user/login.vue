@@ -43,13 +43,12 @@ import { isDev } from 'src/utils'
 import { LoginParams } from '@/api/authorize'
 import { reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
-import store from 'src/store'
-import { LOGIN } from 'src/store/user/actions'
 import { RequestResult } from 'src/api/_typing'
 import { notify } from 'src/utils/notify'
 import router from 'src/router'
-import { defaultRoutePath } from 'src/router/router-guards'
 import LanguageSelect from '@/components/I18n/language-select.vue'
+import { userState } from '@/store/user-state'
+import { defaultRoutePath } from '@/router/routes'
 
 const t = useI18n().t
 const state = reactive({
@@ -64,7 +63,7 @@ const loginForm = reactive<LoginParams>({
 
 const submit = async () => {
   state.loading = true
-  const res = (await store.dispatch(`user/${LOGIN}`, loginForm)) as RequestResult
+  const res = await userState.login(loginForm)
   state.loading = false
   notify.responseOnErr(res)
   if (res?.succeeded) {

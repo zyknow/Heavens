@@ -119,7 +119,7 @@ module.exports = configure(function (ctx) {
         brand: {
           // 调色板
           primary: '#3B82F6',
-          'light-primary': '#F9A8D4',
+          'light-primary': '#93C5FD',
           danger: '#FF4D4F',
           'light-danger': '#FF7875',
           'light-success': '#6EE7B7',

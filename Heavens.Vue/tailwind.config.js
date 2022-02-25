@@ -26,7 +26,7 @@ module.exports = {
       ...colors,
       // 在这里添加完自定义颜色，最好在quasar.conf里也添加，否则可能会出现重名问题
       primary: '#3B82F6',
-      'light-primary': '#F9A8D4',
+      'light-primary': '#93C5FD',
       danger: '#FF4D4F',
       'light-danger': '#FF7875',
       'light-success': '#6EE7B7',

@@ -36,7 +36,7 @@
             @click.stop="refresh(tab.path)"
           />
           <!-- X按钮 -->
-          <q-icon class="page-tab-icon" name="close" @click.stop="actions.close(tab.path)" />
+          <q-icon class="page-tab-icon" name="close" @click.stop="multiTabAction.close(tab.path)" />
           <!-- 右键菜单 -->
           <q-menu touch-position context-menu>
             <q-list dense>
@@ -44,17 +44,17 @@
                 <q-item-section @click="refresh(tab.path)">{{ $t('刷新') }}</q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="actions.closeOther(tab.path)">
+                <q-item-section @click="multiTabAction.closeOther(tab.path)">
                   {{ t('关闭其他') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="actions.closeLeft(tab.path)">
+                <q-item-section @click="multiTabAction.closeLeft(tab.path)">
                   {{ t('关闭左侧所有') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="actions.closeRight(tab.path)">
+                <q-item-section @click="multiTabAction.closeRight(tab.path)">
                   {{ t('关闭右侧所有') }}
                 </q-item-section>
               </q-item>
@@ -73,16 +73,16 @@
               : 'transition transform ease-in-out duration-500 hover:scale-125'
           "
           size="1.5rem"
-          :color="state.cachingEnabled ? 'green' : 'gray'"
+          :color="appState.multiTabCacheEnabled ? 'green' : 'gray'"
           name="data_usage"
-          @click="setCachingEnabled(!state.cachingEnabled)"
+          @click="setCachingEnabled(!appState.multiTabCacheEnabled)"
         >
           <q-tooltip
             class="text-white flex-col"
-            :class="state.cachingEnabled ? 'bg-green-400 ' : ' bg-gray-400'"
+            :class="appState.multiTabCacheEnabled ? 'bg-green-400 ' : ' bg-gray-400'"
             :offset="[10, 10]"
           >
-            <span>{{ state.cachingEnabled ? t('已开启标签页缓存') : t('未开启标签页缓存') }}</span>
+            <span>{{ appState.multiTabCacheEnabled ? t('已开启标签页缓存') : t('未开启标签页缓存') }}</span>
           </q-tooltip>
         </q-icon>
       </div>
@@ -90,10 +90,10 @@
     <!-- 内容页 -->
     <div style="height: calc(100% - 35px)" class="w-full h-full">
       <router-view v-slot="{ Component }">
-        <keep-alive v-if="state.cachingEnabled" :exclude="multiTabStore.exclude">
-          <component :is="!state.refreshLoading ? Component : ''" />
+        <keep-alive v-if="appState.multiTabCacheEnabled" :exclude="multiTabStore.exclude">
+          <component :is="state.refreshLoading ? '' : Component" />
         </keep-alive>
-        <component :is="!state.refreshLoading ? Component : ''" v-else />
+        <component :is="state.refreshLoading ? '' : Component" v-else />
         <q-inner-loading :showing="state.refreshLoading" />
       </router-view>
     </div>
@@ -101,40 +101,29 @@
 </template>
 <script lang="ts" setup>
 import { defineComponent, reactive, toRefs, computed } from 'vue'
-import { CacheItem, MultiTabAction, MultiTabStore } from './multi-table-store'
+import { multiTabAction, multiTabStore } from './multi-table-store'
 import router from 'src/router'
 import { isDev, ls, sleepAsync } from 'src/utils'
 import { useI18n } from 'vue-i18n'
-
-const MULTI_TAB_CACHING_ENABLED = 'multi-tab-caching-enabled'
+import { appState } from '@/store/app-state'
 
 const t = useI18n().t
 const state = reactive({
-  tab: 'multi-table',
   refreshLoading: false,
-  cachingEnabled: ls.getItem(MULTI_TAB_CACHING_ENABLED),
   cachingEnabledLoading: false
 })
 
 const setCachingEnabled = async (enabled: boolean) => {
   state.cachingEnabledLoading = true
-  await sleepAsync(1000)
+  // 延迟动画 可以移除
+  await sleepAsync(500)
   state.cachingEnabledLoading = false
-  state.cachingEnabled = enabled
-  ls.set(MULTI_TAB_CACHING_ENABLED, enabled)
+  appState.multiTabCacheEnabled = enabled
 }
-
-const multiTabStore = reactive({
-  tagCaches: [] as CacheItem[],
-  current: computed(() => router.currentRoute.value.path),
-  exclude: [] as string[],
-  include: [] as string[]
-}) as MultiTabStore
-const actions = MultiTabAction(multiTabStore)
 
 const refresh = async (path: string) => {
   state.refreshLoading = true
-  await actions.refreshAsync(path)
+  await multiTabAction.refreshAsync(path)
   state.refreshLoading = false
 }
 </script>

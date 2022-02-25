@@ -14,13 +14,13 @@ export const defaultRoutePath = '/home'
 export const dynamicRouter: MenuDataItem[] = [
   {
     path: '/home',
-    name: 'home',
+    name: 'Home',
     meta: { title: '主页', icon: 'r_home', authority: [staticRoles.admin, staticRoles.user] },
     component: import('pages/home/index.vue')
   },
   {
     path: '/user',
-    name: 'user',
+    name: 'User',
     meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
     component: import('pages/user/index.vue')
   }

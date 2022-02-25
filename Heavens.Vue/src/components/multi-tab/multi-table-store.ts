@@ -1,10 +1,11 @@
-import { watch, nextTick } from 'vue'
+import { watch, nextTick, reactive, computed } from 'vue'
 import router from 'src/router'
 import { cloneDeep, last, take, takeRight, remove } from 'lodash-es'
 import { IndexSign } from '@/typing'
 import { RouteLocationNormalized } from 'vue-router'
 import { sleepAsync } from 'src/utils'
 import { notify } from 'src/utils/notify'
+
 export type CacheKey = string
 export interface CacheItem {
   name: string
@@ -14,10 +15,10 @@ export interface CacheItem {
   tabPath?: string
   icon?: string
 }
+
 export interface MultiTabStore extends IndexSign {
   tagCaches: CacheItem[]
   current: CacheKey
-  include: string[]
   exclude: string[]
 }
 export interface IMultiTabAction {
@@ -73,7 +74,6 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
       return
     }
     state.tagCaches.push(cloneDeep(item))
-    state.include.push(item.path)
     router.push(item.path)
   }
 
@@ -118,7 +118,9 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
     router.push(path as string)
     state.exclude = [state.tagCaches.find((c) => c.path == path)?.name as string]
     // 刷新延时，可去除
-    await sleepAsync(100)
+    // await sleepAsync(500)
+
+    // 下次页面更新时再刷新 exclude
     nextTick(() => (state.exclude = []))
   }
 
@@ -138,7 +140,17 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
     addToRouter(v)
   })
   // 首次加载无法监听到，需要手动添加标签
-  addToRouter(router.currentRoute.value)
+  // addToRouter(router.currentRoute.value)
 
   return { add, close, closeLeft, closeRight, closeOther, getCaches, refreshAsync }
 }
+
+export const multiTabStore = reactive({
+  tagCaches: [],
+  current: computed(() => router.currentRoute.value.path),
+  exclude: []
+}) as MultiTabStore
+
+export const multiTabAction = MultiTabAction(multiTabStore)
+
+console.log(multiTabStore.tagCaches)

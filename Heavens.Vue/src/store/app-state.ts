@@ -1,6 +1,5 @@
 import { computed, provide, watch, reactive } from 'vue'
 import { copyByKeys, ls } from 'src/utils'
-import { ActionTree } from 'vuex'
 import { Quasar } from 'quasar'
 import { notify } from 'src/utils/notify'
 import { i18n } from '@/boot/i18n'
@@ -15,11 +14,16 @@ export interface AppState {
    * 多标签栏
    */
   multiTabEnabled: boolean
+  /**
+   * 多标签栏缓存启用
+   */
+  multiTabCacheEnabled: boolean
 }
 
 export const appState: AppState = reactive({
   lang: 'zh-CN',
-  multiTabEnabled: true
+  multiTabEnabled: true,
+  multiTabCacheEnabled: false
 })
 
 //#region 初始化(必须放在 watch 前面)

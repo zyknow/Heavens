@@ -1,4 +1,7 @@
-﻿using Heavens.Core.Entities.Base;
+﻿using Furion;
+using Furion.UnifyResult;
+using Heavens.Core.Entities.Base;
+using Heavens.Core.Extension.Extensions;
 using Heavens.Core.Extension.PageQueayFilter;
 using Heavens.Core.Extension.PageQueayFilter.common;
 using Heavens.Core.Extentions;
@@ -31,24 +34,6 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     {
         _repository = repository;
     }
-
-    ///// <summary>
-    ///// 获取分页
-    ///// </summary>
-    ///// <param name="request"></param>
-    ///// <returns></returns>
-    //[HttpPost]
-    //public Task<PagedList<TEntityDto>> Page(PageRequest request)
-    //{
-    //    System.Linq.Expressions.Expression<System.Func<TEntity, bool>> expression = request.GetRulesExpression<TEntity>();
-
-    //    return _repository
-    //        .Where(expression)
-    //        .OrderConditions(request.OrderConditions)
-    //        .Select(x => x.Adapt<TEntityDto>())
-    //        .ToPagedListAsync();
-    //}
-
     /// <summary>
     /// 获取分页
     /// </summary>
@@ -58,6 +43,10 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     public async virtual Task<PagedList<TEntityDto>> Page(PageRequest request)
     {
         Expression<Func<TEntity, bool>> exp = request.GetRulesExpression<TEntity>();
+
+        // 开发环境下填入过滤条件
+        if (App.HostEnvironment.IsDevelopment())
+            UnifyContext.Fill(exp.ToLambdaString());
 
         var data = await _repository
             .Where(exp)

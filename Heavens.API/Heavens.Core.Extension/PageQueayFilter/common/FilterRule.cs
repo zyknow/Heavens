@@ -37,7 +37,7 @@ public class FilterRule
     /// <summary>
     /// 获取或设置 条件间操作方式，仅限And, Or
     /// </summary>
-    public FilterCondition Condition { get; set; } = FilterCondition.And;
+    public FilterCondition Condition { get; set; } = FilterCondition.Or;
     /// <summary>
     /// 
     /// </summary>
@@ -51,20 +51,20 @@ public class FilterRule
 
 public enum FilterCondition
 {
-
-    /// <summary>
-    /// 并且
-    /// </summary>
-    [Code("and")]
-    [Description("并且")]
-    And = 1,
-
     /// <summary>
     /// 或者
     /// </summary>
     [Code("or")]
     [Description("或者")]
-    Or = 2
+    Or = 1,
+    /// <summary>
+    /// 并且
+    /// </summary>
+    [Code("and")]
+    [Description("并且")]
+    And = 2
+
+
 }
 
 /// <summary>

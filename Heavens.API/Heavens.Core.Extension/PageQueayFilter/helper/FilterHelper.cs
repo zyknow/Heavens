@@ -224,7 +224,6 @@ public static class FilterHelper
             {
                 groupExps.Add(GetActionExpression(dgroup.Rules.First(), queryActions) ?? GetExpressionBody(param, dgroup.Rules.First()));
             }
-
         }
 
         bodies.Add(groupExps.Aggregate(Expression.OrElse));
@@ -257,7 +256,7 @@ public static class FilterHelper
     private static Expression GetExpressionBody(ParameterExpression param, FilterRule rule)
     {
         // if (rule == null || rule.Value == null || string.IsNullOrEmpty(rule.Value.ToString()))
-        if (rule == null)
+        if (rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value.ToString()))
         {
             return Expression.Constant(true);
         }

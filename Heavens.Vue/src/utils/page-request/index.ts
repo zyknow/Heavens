@@ -11,7 +11,7 @@ export interface Filter {
   /**
    * 获取或设置 属性值
    */
-  value?: number | string | number[] | string[]
+  value?: number | string | number[] | string[] | Date
   operate?: FilterOperate
   condition?: FilterCondition
 }
@@ -43,10 +43,11 @@ export interface PageRequest {
   filters: Array<Filter>
 
   /**
-   * 统一设置查询条件value值，用于单搜索框简单搜索
+   * 统一设置查询条件value值
    * @param value
+   * @param exclude 排除的字段
    */
-  setAllRulesValue(value: string | number | []): void
+  setAllRulesValue(value: string | number | [], exclude?: string[]): void
 
   /**
    * 设置指定field的 Rule value,没有则创建该field
@@ -101,8 +102,8 @@ export class PageRequest implements PageRequest {
     this.filters = []
   }
 
-  setAllRulesValue = (value: string | number | []): void => {
-    this.filters?.forEach((r) => (r.value = value))
+  setAllRulesValue = (value: string | number | [], exclude?: string[]): void => {
+    this.filters?.filter((f) => !exclude?.includes(f.field as never)).forEach((r) => (r.value = value))
   }
 
   setRule = (rule: Filter): void => {

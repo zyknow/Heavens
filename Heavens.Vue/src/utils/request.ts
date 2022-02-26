@@ -1,3 +1,4 @@
+import { isDev } from './index'
 import { RequestResult, ResponseBody } from 'src/api/_typing'
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { notify } from './notify'
@@ -76,8 +77,16 @@ const responseHandler = (response: AxiosResponse): ResponseBody<any> | AxiosResp
     } as TokenInfo
 
     userState.tokenInfo = newTokenInfo
-    // 拿到新token重新获取用户信息
+    // TODO: 拿到新token重新获取用户信息
   }
+
+  if (isDev) {
+    // 开发环境下包含扩展信息
+    if (response?.data?.extras) {
+      console.log(response.data.extras)
+    }
+  }
+
   return new RequestResult(response.data)
 }
 

@@ -14,7 +14,7 @@
       :rows-per-page-options="[10, 15, 50, 500, 1000, 10000]"
       table-header-class="bg-gray-100"
       class="h-full relative sticky-header-column-table sticky-right-column-table"
-      :virtual-scroll="state.users.length >= 200"
+      :virtual-scroll="state.users.length >= 100"
       @request="tableHandler"
     >
       <template #loading>
@@ -169,24 +169,29 @@ import { PageRequest } from '@/utils/page-request'
 import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
 import { staticRoles } from '@/store/user-state'
 
-const USER_VISIBLE_COLUMNS = `user_visibleColumns`
+const USER_VISIBLE_COLUMNS = `USER_VISIBLE_COLUMNS`
 const defaultVisibleColumns = ['name', 'account', 'roles', 'enabled', 'sex', 'birth', 'createdTime']
-const defaultForm = {
+const defaultForm: User = {
   name: '',
   account: '',
   passwd: '',
-  sex: false,
-  enabled: true,
+  enabled: false,
+  roles: [],
   email: '',
   phone: '',
+  sex: false,
   description: '',
-  birth: '1990-1-1',
-  roles: [] as string[]
-} as unknown as User
+  lastLoginTime: undefined,
+  id: 0,
+  createdId: 0,
+  createdTime: '',
+  updatedId: 0,
+  updatedTime: ''
+}
 
 const $q = useQuasar()
 const t = useI18n().t
-const columns = [
+const columns: any[] = [
   {
     label: t('用户名'),
     name: 'name',
@@ -280,10 +285,9 @@ const columns = [
     align: 'center',
     required: true
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-] as any[]
+]
+
 const state = reactive({
-  columns,
   visibleColumns: (ls.getItem(USER_VISIBLE_COLUMNS) || defaultVisibleColumns) as string[],
   selected: [] as User[],
   users: [] as User[],
@@ -292,15 +296,26 @@ const state = reactive({
   pageRequest: new PageRequest(1, 10, [
     {
       field: 'name',
-      value: '',
-      operate: FilterOperate.contains,
-      condition: FilterCondition.or
+      value: '123',
+      operate: FilterOperate.contains
     },
     {
       field: 'account',
       value: '',
-      operate: FilterOperate.contains,
-      condition: FilterCondition.or
+      operate: FilterOperate.contains
+    },
+    {},
+    {
+      field: 'createdTime',
+      value: '2023-02-12',
+      operate: FilterOperate.greater,
+      condition: FilterCondition.and
+    },
+    {
+      field: 'createdTime',
+      value: '2023-02-12',
+      operate: FilterOperate.greater,
+      condition: FilterCondition.and
     }
   ]),
   pagination: {
@@ -332,7 +347,7 @@ const tableHandler = async ({ pagination }: any) => {
 const getUsers = async () => {
   const { pageRequest } = state
 
-  pageRequest.setAllRulesValue(state.searchKey)
+  // pageRequest.setAllRulesValue(state.searchKey, ['createdTime'])
   pageRequest.setOrder(state.pagination)
 
   state.loading = true

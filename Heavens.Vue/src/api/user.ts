@@ -49,7 +49,7 @@ export interface User extends IndexSign, BaseEntity {
   /**
    * 最后登录时间
    */
-  lastLoginTime: Date
+  lastLoginTime?: Date
 }
 
 // *---------------------------------------------------------------method---------------------------------------------------------------------

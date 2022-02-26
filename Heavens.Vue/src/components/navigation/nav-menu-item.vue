@@ -4,7 +4,7 @@
       v-if="!router.children"
       v-ripple
       clickable
-      :inset-level="childLevel == 0 ? undefined : childLevel"
+      :inset-level="childLevel ? childLevel : undefined"
       :to="router.path"
       class="text-gray-700"
       exact-active-class="bg-blue-100"
@@ -64,7 +64,7 @@
           <nav-menu-item
             v-if="router.children && router.children.length > 0"
             :routers="router.children"
-            :childLevel="childLevel + 1"
+            :childLevel="childLevel + 0.5"
           />
         </div>
       </template>

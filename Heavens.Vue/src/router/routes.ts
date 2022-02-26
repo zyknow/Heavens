@@ -1,6 +1,4 @@
 import { staticRoles } from '@/store/user-state'
-import { cloneDeep } from 'lodash-es'
-import userLayout from 'src/layouts/user-layout.vue'
 import { MenuDataItem } from './_typing'
 
 // 白名单页名
@@ -23,6 +21,21 @@ export const dynamicRouter: MenuDataItem[] = [
     name: 'User',
     meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
     component: import('pages/user/index.vue')
+  },
+  // 演示多级标签
+  {
+    path: '/user1',
+    name: 'User1',
+    meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
+    component: import('src/layouts/empty-layout.vue'),
+    children: [
+      {
+        path: '/user2',
+        name: 'User2',
+        meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
+        component: import('pages/user/index.vue')
+      }
+    ]
   }
 ]
 
@@ -32,7 +45,7 @@ export const staticRoutes: MenuDataItem[] = [
     path: '/login',
     name: 'Login',
     redirect: '/login',
-    component: userLayout,
+    component: import('src/layouts/user-layout.vue'),
     children: [
       {
         path: '/login',

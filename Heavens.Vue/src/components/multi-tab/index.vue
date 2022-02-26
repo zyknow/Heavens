@@ -15,11 +15,11 @@
       >
         <!-- 多标签 -->
         <div
-          v-for="(tab, index) in multiTabStore.tagCaches"
+          v-for="(tab, index) in multiTabState.tagCaches"
           :key="index"
           class="flex page-tab h-full cursor-pointer flex-row flex-nowrap items-center justify-center mr-0.5 pl-2 pr-2 space-x-0.5"
-          :class="tab.path == $router.currentRoute.value.path ? 'page-tab-active' : ''"
-          @click="$router.push(tab.path)"
+          :class="tab.name == $router.currentRoute.value.name ? 'page-tab-active' : ''"
+          @click="$router.push(tab.name)"
         >
           <q-tab class="hidden" />
           <div class="flex flex-row flex-nowrap items-center justify-center">
@@ -29,32 +29,32 @@
 
           <!-- 刷新按钮 -->
           <q-icon
-            v-if="tab.path == multiTabStore.current"
+            v-if="tab.name == multiTabState.current"
             class="page-tab-icon"
-            :class="state.refreshLoading && tab.path == multiTabStore.current ? 'animate-spin' : ''"
+            :class="state.refreshLoading && tab.name == multiTabState.current ? 'animate-spin' : ''"
             name="r_autorenew"
-            @click.stop="refresh(tab.path)"
+            @click.stop="refresh(tab.name)"
           />
           <!-- X按钮 -->
-          <q-icon class="page-tab-icon" name="close" @click.stop="multiTabAction.close(tab.path)" />
+          <q-icon class="page-tab-icon" name="close" @click.stop="multiTabAction.close(tab.name)" />
           <!-- 右键菜单 -->
           <q-menu touch-position context-menu>
             <q-list dense>
               <q-item v-close-popup clickable>
-                <q-item-section @click="refresh(tab.path)">{{ $t('刷新') }}</q-item-section>
+                <q-item-section @click="refresh(tab.name)">{{ $t('刷新') }}</q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="multiTabAction.closeOther(tab.path)">
+                <q-item-section @click="multiTabAction.closeOther(tab.name)">
                   {{ t('关闭其他') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="multiTabAction.closeLeft(tab.path)">
+                <q-item-section @click="multiTabAction.closeLeft(tab.name)">
                   {{ t('关闭左侧所有') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="multiTabAction.closeRight(tab.path)">
+                <q-item-section @click="multiTabAction.closeRight(tab.name)">
                   {{ t('关闭右侧所有') }}
                 </q-item-section>
               </q-item>
@@ -90,7 +90,7 @@
     <!-- 内容页 -->
     <div style="height: calc(100% - 35px)" class="w-full h-full">
       <router-view v-slot="{ Component }">
-        <keep-alive v-if="appState.multiTabCacheEnabled" :exclude="multiTabStore.exclude">
+        <keep-alive v-if="appState.multiTabCacheEnabled" :exclude="multiTabState.exclude">
           <component :is="state.refreshLoading ? '' : Component" />
         </keep-alive>
         <component :is="state.refreshLoading ? '' : Component" v-else />
@@ -101,7 +101,7 @@
 </template>
 <script lang="ts" setup>
 import { defineComponent, reactive, toRefs, computed } from 'vue'
-import { multiTabAction, multiTabStore } from './multi-table-store'
+import { multiTabAction, multiTabState } from './multi-table-store'
 import router from 'src/router'
 import { isDev, ls, sleepAsync } from 'src/utils'
 import { useI18n } from 'vue-i18n'

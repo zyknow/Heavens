@@ -34,7 +34,7 @@ export default {
   未开启标签页缓存: 'Disabled Tag Cache',
 
   // ? user
-  用户名: 'Account',
+  用户名: 'Name',
   // 账号: 'Account',
   持有角色: 'Hold Role',
   状态: 'Status',
@@ -46,12 +46,13 @@ export default {
   备注: 'Description',
   生日: 'Birth',
   年龄: 'Age',
+  创建时间: 'Created Date',
   确定要删除这些数据吗: 'Are you sure you want to delete this data?',
   确定要删除这个数据吗: 'Are you sure you want to delete this data?',
 
   //#endregion //!  --------------------------------------------------------------------------------------end
   //#region //! -----------------------------------------路由
   主页: 'Home',
-  用户管理: 'User Manager',
+  用户管理: 'User Manager'
   //#endregion //!  --------------------------------------------------------------------------------------end
 }

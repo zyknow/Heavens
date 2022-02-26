@@ -3,7 +3,7 @@ export const enumToOption = (enumType: any) => {
   for (const [key, val] of Object.entries(enumType)) {
     option.push({
       label: key,
-      value: val,
+      value: val
     } as any)
   }
   return option

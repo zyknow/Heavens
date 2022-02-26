@@ -3,7 +3,7 @@ import { Quasar } from 'quasar'
 import enUS from 'quasar/lang/en-US'
 import zhCN from 'quasar/lang/zh-CN'
 import { ls } from 'src/utils'
-import { AppState } from 'src/store/app/state'
+import { AppState } from '@/store/app-state'
 
 // "async" is optional;
 // more info on params: https://v2.quasar.dev/quasar-cli/boot-files
@@ -15,7 +15,7 @@ export default boot(async (/* { app, router, ... } */) => {
     await import(
       /* webpackInclude: /(de|en-US)\.js$/ */
       'quasar/lang/' + langIso
-    ).then(lang => {
+    ).then((lang) => {
       Quasar.lang.set(lang.default)
     })
   } catch (err) {

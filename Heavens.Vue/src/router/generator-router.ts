@@ -7,21 +7,19 @@ const rootRouter: MenuDataItem = {
   path: '/',
   redirect: '/home',
   meta: {
-    title: '首页',
+    title: '首页'
   },
   component: () => import('@/layouts/basic-layout.vue'),
-  children: [] as MenuDataItem[],
+  children: [] as MenuDataItem[]
 }
 
 const generator = (router: MenuDataItem[], roles: string[]): MenuDataItem[] => {
   return router
     .filter(
-      r =>
-        !r.meta ||
-        !r.meta.authority ||
-        (r.meta?.authority && intersectionWith(r.meta?.authority, roles).length > 0),
+      (r) =>
+        !r.meta || !r.meta.authority || (r.meta?.authority && intersectionWith(r.meta?.authority, roles).length > 0)
     )
-    .map(r => {
+    .map((r) => {
       if (r.children?.length) {
         r.children = generator(r.children, roles)
       } else {
@@ -31,7 +29,7 @@ const generator = (router: MenuDataItem[], roles: string[]): MenuDataItem[] => {
     })
 }
 
-export const generatorDynamicRouter = (router: MenuDataItem[], roles: string[]) => {
+export const generatorDynamicRouter = (router: MenuDataItem[], roles: string[]): MenuDataItem => {
   rootRouter.children = generator(router, roles)
   return rootRouter
 }

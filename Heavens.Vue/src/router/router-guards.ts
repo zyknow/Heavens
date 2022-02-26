@@ -1,14 +1,8 @@
+import { userState } from './../store/user-state'
 import router from './index'
 import { LoadingBar } from 'quasar'
 import { intersectionWith } from 'lodash-es'
-import { GENERATE_ROUTES_DYNAMIC, GET_USER_INFO } from 'src/store/user/actions'
-import store from '@/store'
-// 白名单页名
-export const allowList = ['login']
-// 登录路由
-export const loginRoutePath = '/login'
-// 默认访问路由
-export const defaultRoutePath = '/home'
+import { allowList, loginRoutePath } from './routes'
 
 router.beforeEach(async (to, from) => {
   // 白名单路由直接不检查
@@ -16,37 +10,37 @@ router.beforeEach(async (to, from) => {
     return true
   }
 
-  const userTokenInfo = store.getters['user/tokenInfo']
+  const userTokenInfo = userState.tokenInfo
   if (!userTokenInfo) {
     if (to.fullPath !== loginRoutePath) {
       // 未登录，进入到登录页
       return {
         path: loginRoutePath,
-        replace: true,
+        replace: true
       }
     }
 
     return to
   }
   // 无用户信息则获取用户信息
-  if (!store.getters['user/info'] && !(await store.dispatch(`user/${GET_USER_INFO}`))) {
+  if (!userState.info && !(await userState.getUserInfo())) {
     // 获取失败，去到登录页面
     return {
       path: loginRoutePath,
-      replace: true,
+      replace: true
     }
   }
 
-  let allowRouter = store.getters['user/routers']
+  let allowRouter = userState.routers
   if (!allowRouter) {
     //生成路由
-    allowRouter = store.dispatch(`user/${GENERATE_ROUTES_DYNAMIC}`)
+    allowRouter = userState.generateRoutesDynamic()
     if (allowRouter) return { ...to, replace: true }
     return false
   }
   const authority = to.meta.authority as string[]
 
-  const userRoles = store.getters['user/roles']
+  const userRoles = userState.info?.roles
   // 未设置页面权限，直接访问
   if (!authority || authority.length == 0) {
     return true
@@ -63,7 +57,7 @@ router.beforeEach(async (to, from) => {
 
 // 配置
 LoadingBar.setDefaults({
-  color: 'blue',
+  color: 'blue'
 })
 
 router.beforeEach((to, from, next) => {

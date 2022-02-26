@@ -1,42 +1,39 @@
 <template>
-  <div class="p-2 h-full">
+  <div class="h-full">
     <q-table
+      v-model:selected.sync="state.selected"
+      v-model:pagination="state.pagination"
       :rows="state.users"
       :columns="columns"
       selection="multiple"
       :loading="state.loading"
-      :row-key="v => v.id"
+      :row-key="(v) => v.id"
       :visible-columns="state.visibleColumns"
-      v-model:selected.sync="state.selected"
       flat
-      @request="tableHandler"
-      v-model:pagination="state.pagination"
+      square
       :rows-per-page-options="[10, 15, 50, 500, 1000, 10000]"
       table-header-class="bg-gray-100"
       class="h-full relative sticky-header-column-table sticky-right-column-table"
-      :virtual-scroll="state.users.length >= 200"
+      :virtual-scroll="state.users.length >= 100"
+      @request="tableHandler"
     >
       <template #loading>
         <q-inner-loading showing color="primary" />
       </template>
 
       <template #top>
-        <div class="w-full flex-row flex-j-bet">
-          <div class="flex-row space-x-1">
+        <div class="w-full flex flex-row justify-between">
+          <div class="flex flex-row space-x-1">
             <q-input
+              v-model="state.searchKey"
               outlined
               :label="`${t('用户名')}/${t('账号')}`"
               dense
-              v-model="state.searchKey"
               @keyup.enter="getUsers"
-            ></q-input>
+            />
             <q-btn icon="search" color="primary" @click="getUsers" />
             <q-btn color="primary" :label="t('添加')" @click="showDialog(t('添加'))" />
-            <q-btn
-              color="danger"
-              :label="t('删除')"
-              @click="deleteByIds(state.selected.map(s => s.id))"
-            />
+            <q-btn color="danger" :label="t('删除')" @click="deleteByIds(state.selected.map((s) => s.id))" />
           </div>
           <div>
             <q-select
@@ -77,32 +74,26 @@
             size="2rem"
             :color="props.row.enabled ? 'success' : 'danger'"
             :name="props.row.enabled ? 'r_face_retouching_natural' : 'r_face_retouching_off'"
-          ></q-icon>
+          />
         </q-td>
         <!-- 状态显示为文字 -->
         <!-- <q-td :props="props" class="w-1">
           <q-chip dense outline square :color="props.row.enabled ? 'success' : 'danger'">
             {{ props.row.enabled ? '启用' : '禁用' }}
           </q-chip>
-        </q-td> -->
+        </q-td>-->
       </template>
 
       <template #body-cell-sex="props">
         <!-- 状态显示为Icon -->
         <q-td :props="props" class="w-1">
-          <q-icon
-            size="2rem"
-            :color="props.row.sex ? 'primary' : 'pink-3'"
-            :name="props.row.sex ? 'male' : 'female'"
-          ></q-icon>
+          <q-icon size="2rem" :color="props.row.sex ? 'primary' : 'pink-3'" :name="props.row.sex ? 'male' : 'female'" />
         </q-td>
       </template>
 
       <template #body-cell-roles="props">
         <q-td :props="props">
-          <q-chip dense outline square color="primary" v-for="role in props.row.roles" :key="role">
-            {{ role }}
-          </q-chip>
+          <q-chip v-for="role in props.row.roles" :key="role" dense outline square color="primary">{{ role }}</q-chip>
         </q-td>
       </template>
 
@@ -119,67 +110,43 @@
         <q-card-section>
           <div class="text-h6">{{ t(state.dialogTitle) }}</div>
         </q-card-section>
-        <q-separator></q-separator>
+        <q-separator />
 
         <q-card-section class="q-pt-none mt-8">
           <q-form class="space-y-2" @submit="dialogFormSubmit">
-            <q-input dense outlined v-model="state.form.name" :label="t('用户名')"></q-input>
+            <q-input v-model="state.form.name" dense outlined :label="t('用户名')" />
             <q-input
+              v-model="state.form.account"
               dense
               outlined
-              v-model="state.form.account"
               :label="t('账号')"
-              :rules="[v => v.length > 0 || t('必填')]"
-            ></q-input>
-            <q-input dense outlined v-model="state.form.passwd" :label="t('密码')"></q-input>
+              :rules="[(v: string) => v.length > 0 || t('必填')]"
+            />
+            <q-input v-model="state.form.passwd" dense outlined :label="t('密码')" />
             <q-select
-              outlined
               v-model="state.form.roles"
+              outlined
               multiple
               :options="roles"
               :label="t('持有角色')"
               use-chips
               color="primary"
-            ></q-select>
+            />
             <q-toggle
+              v-model="state.form.enabled"
               size="4rem"
               :color="state.form.enabled ? 'success' : 'danger'"
               :label="t('状态')"
               left-label
-              v-model="state.form.enabled"
               :icon="state.form.enabled ? 'r_face_retouching_natural' : 'r_face_retouching_off'"
             />
 
             <!-- <q-input dense outlined v-model="name" :label="t('状态')" ></q-input> -->
-            <q-input dense outlined v-model="state.form.email" :label="t('邮箱')"></q-input>
-            <q-input dense outlined v-model="state.form.phone" :label="t('手机')"></q-input>
-            <q-input filled v-model="state.form.birth" mask="date" :rules="['date']">
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                    <q-date v-model="state.form.birth">
-                      <div class="row items-center justify-end">
-                        <q-btn v-close-popup :label="t('关闭')" color="primary" flat />
-                      </div>
-                    </q-date>
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-            <q-input
-              dense
-              outlined
-              type="textarea"
-              v-model="state.form.description"
-              :label="t('备注')"
-            ></q-input>
-            <q-btn
-              class="float-right"
-              :label="t(state.dialogTitle)"
-              color="primary"
-              type="submit"
-            />
-            <q-card-actions class="w-full"></q-card-actions>
+            <q-input v-model="state.form.email" dense outlined :label="t('邮箱')" />
+            <q-input v-model="state.form.phone" dense outlined :label="t('手机')" />
+            <q-input v-model="state.form.description" dense outlined type="textarea" :label="t('备注')" />
+            <q-btn class="float-right" :label="t(state.dialogTitle)" color="primary" type="submit" />
+            <q-card-actions class="w-full" />
           </q-form>
         </q-card-section>
       </q-card>
@@ -188,134 +155,139 @@
 </template>
 <script lang="ts">
 export default {
-  name: 'user',
+  name: 'User'
 }
 </script>
 <script lang="ts" setup>
 import { AddUser, DeleteUserByIds, GetUserById, GetUserPage, UpdateUser, User } from '@/api/user'
-import { ref, defineComponent, toRefs, reactive, computed, watch } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { staticRoles } from '@/store/user/state'
 import { dateFormat } from '@/utils/date-util'
 import { useQuasar } from 'quasar'
 import { ls } from '@/utils'
 import { PageRequest } from '@/utils/page-request'
-import { FilterCondition, FilterOperate, ListSortType } from '@/utils/page-request/enums'
+import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
+import { staticRoles } from '@/store/user-state'
 
-const USER_VISIBLE_COLUMNS = `user_visibleColumns`
+const USER_VISIBLE_COLUMNS = `USER_VISIBLE_COLUMNS`
 const defaultVisibleColumns = ['name', 'account', 'roles', 'enabled', 'sex', 'birth', 'createdTime']
-const defaultForm = {
+const defaultForm: User = {
   name: '',
   account: '',
   passwd: '',
-  sex: false,
-  enabled: true,
+  enabled: false,
+  roles: [],
   email: '',
   phone: '',
+  sex: false,
   description: '',
-  birth: '1990-1-1',
-  roles: [] as string[],
-} as any as User
+  lastLoginTime: undefined,
+  id: 0,
+  createdId: 0,
+  createdTime: '',
+  updatedId: 0,
+  updatedTime: ''
+}
 
 const $q = useQuasar()
 const t = useI18n().t
-const columns = [
+const columns: any[] = [
   {
     label: t('用户名'),
     name: 'name',
     field: 'name',
     sortable: true,
     align: 'center',
-    textClasses: '',
+    textClasses: ''
   },
   {
     label: t('账号'),
     name: 'account',
     field: 'account',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('持有角色'),
     name: 'roles',
     field: 'roles',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('状态'),
     name: 'enabled',
     field: 'enabled',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('邮箱'),
     name: 'email',
     field: 'email',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('手机号'),
     name: 'phone',
     field: 'phone',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('备注'),
     name: 'description',
     field: 'description',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('性别'),
     name: 'sex',
     field: 'sex',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('年龄'),
     name: 'age',
     field: 'age',
     sortable: true,
-    format: v => `${v > 0 ? v : ''}`,
-    align: 'center',
+    format: (v: number) => `${v > 0 ? v : ''}`,
+    align: 'center'
   },
   {
     label: t('生日'),
     name: 'birth',
     field: 'birth',
-    format: v => `${v ? dateFormat(v) : ''}`,
+    format: (v: string) => `${v ? dateFormat(v) : ''}`,
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('创建时间'),
     name: 'createdTime',
     field: 'createdTime',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('修改时间'),
     name: 'updatedTime',
     field: 'updatedTime',
     sortable: true,
-    align: 'center',
+    align: 'center'
   },
   {
     label: t('操作'),
     name: 'actions',
     align: 'center',
-    required: true,
-  },
-] as any[]
+    required: true
+  }
+]
+
 const state = reactive({
-  columns,
   visibleColumns: (ls.getItem(USER_VISIBLE_COLUMNS) || defaultVisibleColumns) as string[],
   selected: [] as User[],
   users: [] as User[],
@@ -324,16 +296,27 @@ const state = reactive({
   pageRequest: new PageRequest(1, 10, [
     {
       field: 'name',
-      value: '',
-      operate: FilterOperate.contains,
-      condition: FilterCondition.or,
+      value: '123',
+      operate: FilterOperate.contains
     },
     {
       field: 'account',
       value: '',
-      operate: FilterOperate.contains,
-      condition: FilterCondition.or,
+      operate: FilterOperate.contains
     },
+    {},
+    {
+      field: 'createdTime',
+      value: '2023-02-12',
+      operate: FilterOperate.greater,
+      condition: FilterCondition.and
+    },
+    {
+      field: 'createdTime',
+      value: '2023-02-12',
+      operate: FilterOperate.greater,
+      condition: FilterCondition.and
+    }
   ]),
   pagination: {
     sortBy: 'id',
@@ -341,21 +324,22 @@ const state = reactive({
     page: 1,
     rowsPerPage: 10,
     rowsNumber: 1,
-    totalPages: 1,
+    totalPages: 1
   },
   dialogVisible: false,
   dialogTitle: '添加',
-  form: { ...defaultForm },
+  form: { ...defaultForm }
 })
 
 watch(
   () => state.visibleColumns,
   (v, ov) => {
     ls.set(USER_VISIBLE_COLUMNS, v)
-  },
+  }
 )
 
-const tableHandler = async ({ pagination, filter }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tableHandler = async ({ pagination }: any) => {
   state.pagination = pagination
   await getUsers()
 }
@@ -363,7 +347,7 @@ const tableHandler = async ({ pagination, filter }) => {
 const getUsers = async () => {
   const { pageRequest } = state
 
-  pageRequest.setAllRulesValue(state.searchKey)
+  // pageRequest.setAllRulesValue(state.searchKey, ['createdTime'])
   pageRequest.setOrder(state.pagination)
 
   state.loading = true
@@ -405,10 +389,7 @@ const dialogFormSubmit = async () => {
 
 const deleteByIds = (ids: number[]) => {
   $q.dialog({
-    message:
-      ids.length > 1
-        ? `${t('已选中')}${ids.length}，${t('确定要删除这些数据吗')}`
-        : t('确定要删除这个数据吗'),
+    message: ids.length > 1 ? `${t('已选中')}${ids.length}，${t('确定要删除这些数据吗')}` : t('确定要删除这个数据吗')
   }).onOk(async () => {
     state.loading = true
     const res = await DeleteUserByIds(ids)
@@ -422,4 +403,4 @@ getUsers()
 
 const roles = computed(() => Object.values<string>(staticRoles))
 </script>
-<style lang="sass"></style>
+<style lang="sass" scoped></style>

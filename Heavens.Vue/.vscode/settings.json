@@ -122,6 +122,7 @@
     "nprogress",
     "pinia",
     "qrcode",
+    "rotue",
     "sider",
     "tailwindcss",
     "tinymce",
@@ -142,5 +143,8 @@
   "volar.formatting.printWidth": 120,
   "[sass]": {
     "editor.defaultFormatter": "syler.sass-indented"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

@@ -1,12 +1,28 @@
 import { staticRoles } from '@/store/user-state'
 import { MenuDataItem } from './_typing'
 
+const rotueView = import('@/layouts/route-view.vue')
+const userLayout = import('@/layouts/user-layout.vue')
+const mainLayout = import('@/layouts/main-layout.vue')
+
 // 白名单页名
 export const allowList = ['login']
 // 登录路由
 export const loginRoutePath = '/login'
 // 默认访问路由
-export const defaultRoutePath = '/home'
+export const defaultRoutePath = '/'
+
+// 动态路由根级菜单
+export const dynamicRootRouter: MenuDataItem = {
+  name: '/home',
+  path: '/',
+  redirect: '/home',
+  meta: {
+    title: '首页'
+  },
+  component: mainLayout,
+  children: [] as MenuDataItem[]
+}
 
 // 动态路由，根据用户信息中的角色
 export const dynamicRouter: MenuDataItem[] = [
@@ -25,27 +41,26 @@ export const dynamicRouter: MenuDataItem[] = [
   // 演示多级标签
   {
     path: '/user1',
-    name: 'User1',
-    meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
-    component: import('src/layouts/empty-layout.vue'),
+    meta: { title: '用户管理下拉', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
+    component: rotueView,
+    redirect: 'User2',
     children: [
       {
         path: '/user2',
         name: 'User2',
-        meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
+        meta: { title: '用户管理2', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
         component: import('pages/user/index.vue')
       }
     ]
   }
 ]
-
 // 静态路由
 export const staticRoutes: MenuDataItem[] = [
   {
     path: '/login',
     name: 'Login',
     redirect: '/login',
-    component: import('src/layouts/user-layout.vue'),
+    component: userLayout,
     children: [
       {
         path: '/login',

@@ -89,13 +89,7 @@
     </div>
     <!-- 内容页 -->
     <div style="height: calc(100% - 35px)" class="w-full h-full">
-      <router-view v-slot="{ Component }">
-        <keep-alive v-if="appState.multiTabCacheEnabled" :exclude="multiTabState.exclude">
-          <component :is="state.refreshLoading ? '' : Component" />
-        </keep-alive>
-        <component :is="state.refreshLoading ? '' : Component" v-else />
-        <q-inner-loading :showing="state.refreshLoading" />
-      </router-view>
+      <route-view />
     </div>
   </div>
 </template>
@@ -106,7 +100,7 @@ import router from 'src/router'
 import { isDev, ls, sleepAsync } from 'src/utils'
 import { useI18n } from 'vue-i18n'
 import { appState } from '@/store/app-state'
-
+import RouteView from '@/layouts/route-view.vue'
 const t = useI18n().t
 const state = reactive({
   refreshLoading: false,

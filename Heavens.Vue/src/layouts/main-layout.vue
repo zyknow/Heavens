@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hhh lpR lFr" class="basic-layout">
+  <q-layout view="hhh lpR lFr" class="main-layout">
     <basic-header class="basic-header" />
 
     <q-drawer
@@ -62,7 +62,7 @@ const router = userState.routers as MenuDataItem
 .layout-rounded
   @apply rounded-md overflow-hidden
 
-.basic-layout
+.main-layout
   @apply bg-gray-300 fixed h-screen w-screen
   .basic-header
     @apply  bg-white m-2 layout-rounded

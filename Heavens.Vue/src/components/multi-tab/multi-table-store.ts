@@ -41,16 +41,12 @@ export interface IMultiTabAction {
    */
   closeOther: (name: CacheKey) => void
   /**
-   * 获取缓存列表
-   */
-  getCaches: () => CacheItem[]
-  /**
    * 刷新指定路径
    */
-  refreshAsync: (name?: CacheKey | undefined) => void
+  refreshAsync: (name: CacheKey) => void
 }
 
-export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
+const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   const removeItemsAsync = async (tabNames: string[]) => {
     if (state.tagCaches.length <= 1) {
       notify.warn('最后一个标签无法被关闭！')
@@ -108,14 +104,12 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
     removeItemsAsync(state.tagCaches.filter((t) => t.name != name).map((t) => t.name))
   }
 
-  const getCaches = () => {
-    return state.tagCaches
-  }
-
-  const refreshAsync = async (name?: CacheKey | undefined) => {
-    router.push(name as string)
+  const refreshAsync = async (name: CacheKey) => {
+    // debugger
+    // router.push(name as string)
     state.exclude = [state.tagCaches.find((c) => c.name == name)?.name as string]
     // 刷新延时，可去除
+    // await sleepAsync(500)
     // 下次页面更新时再刷新 exclude
     nextTick(() => (state.exclude = []))
   }
@@ -135,7 +129,7 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   // 首次加载无法监听到，需要手动添加标签
   // addToRouter(router.currentRoute.value)
 
-  return { add, close, closeLeft, closeRight, closeOther, getCaches, refreshAsync }
+  return { add, close, closeLeft, closeRight, closeOther, refreshAsync }
 }
 
 export const multiTabState = reactive({

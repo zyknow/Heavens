@@ -114,9 +114,9 @@ const setCachingEnabled = async (enabled: boolean) => {
   appState.multiTabCacheEnabled = enabled
 }
 
-const refresh = async (path: string) => {
+const refresh = async (name: string) => {
   multiTabState.refreshLoading = true
-  await multiTabAction.refreshAsync(path)
+  await multiTabAction.refreshAsync(name)
   multiTabState.refreshLoading = false
 }
 </script>

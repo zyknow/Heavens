@@ -31,7 +31,7 @@
           <q-icon
             v-if="tab.name == multiTabState.current"
             class="page-tab-icon"
-            :class="state.refreshLoading && tab.name == multiTabState.current ? 'animate-spin' : ''"
+            :class="multiTabState.refreshLoading && tab.name == multiTabState.current ? 'animate-spin' : ''"
             name="r_autorenew"
             @click.stop="refresh(tab.name)"
           />
@@ -103,7 +103,6 @@ import { appState } from '@/store/app-state'
 import RouteView from '@/layouts/route-view.vue'
 const t = useI18n().t
 const state = reactive({
-  refreshLoading: false,
   cachingEnabledLoading: false
 })
 
@@ -116,9 +115,9 @@ const setCachingEnabled = async (enabled: boolean) => {
 }
 
 const refresh = async (path: string) => {
-  state.refreshLoading = true
+  multiTabState.refreshLoading = true
   await multiTabAction.refreshAsync(path)
-  state.refreshLoading = false
+  multiTabState.refreshLoading = false
 }
 </script>
 

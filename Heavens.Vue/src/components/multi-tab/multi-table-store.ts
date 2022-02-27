@@ -4,6 +4,7 @@ import { cloneDeep, last, take, takeRight, remove } from 'lodash-es'
 import { IndexSign } from '@/typing'
 import { RouteLocationNormalized } from 'vue-router'
 import { notify } from 'src/utils/notify'
+import { sleepAsync } from '@/utils'
 
 export type CacheKey = string
 export interface CacheItem {
@@ -12,10 +13,11 @@ export interface CacheItem {
   icon?: string
 }
 
-export interface MultiTabStore extends IndexSign {
+export interface MultiTabStore {
   tagCaches: CacheItem[]
   current: CacheKey
   exclude: string[]
+  refreshLoading: boolean
 }
 export interface IMultiTabAction {
   /**
@@ -114,8 +116,6 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
     router.push(name as string)
     state.exclude = [state.tagCaches.find((c) => c.name == name)?.name as string]
     // 刷新延时，可去除
-    // await sleepAsync(500)
-
     // 下次页面更新时再刷新 exclude
     nextTick(() => (state.exclude = []))
   }
@@ -141,7 +141,8 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
 export const multiTabState = reactive({
   tagCaches: [],
   current: computed(() => router.currentRoute.value.name),
-  exclude: []
+  exclude: [],
+  refreshLoading: false
 }) as MultiTabStore
 
 export const multiTabAction = MultiTabAction(multiTabState)

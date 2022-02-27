@@ -1,10 +1,10 @@
 <template>
   <router-view v-slot="{ Component }">
     <keep-alive v-if="appState.multiTabCacheEnabled" :exclude="multiTabState.exclude">
-      <component :is="state.refreshLoading ? '' : Component" />
+      <component :is="multiTabState.refreshLoading ? '' : Component" />
     </keep-alive>
-    <component :is="state.refreshLoading ? '' : Component" v-else />
-    <q-inner-loading :showing="state.refreshLoading" />
+    <component :is="multiTabState.refreshLoading ? '' : Component" v-else />
+    <q-inner-loading :showing="multiTabState.refreshLoading" />
   </router-view>
 </template>
 
@@ -14,8 +14,4 @@ import { useQuasar } from 'quasar'
 import { appState } from '@/store/app-state'
 import { multiTabState } from '@/components/multi-tab/multi-table-store'
 const $q = useQuasar()
-const state = reactive({
-  refreshLoading: false,
-  cachingEnabledLoading: false
-})
 </script>

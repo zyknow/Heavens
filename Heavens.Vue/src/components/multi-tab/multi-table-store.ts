@@ -17,7 +17,7 @@ export interface MultiTabStore {
   tagCaches: CacheItem[]
   current: CacheKey
   exclude: string[]
-  refreshLoading: boolean
+  loading: boolean
 }
 export interface IMultiTabAction {
   /**
@@ -44,6 +44,10 @@ export interface IMultiTabAction {
    * 刷新指定路径
    */
   refreshAsync: (name: CacheKey) => void
+  /**
+   * 清空所有缓存
+   */
+  clear: () => void
 }
 
 const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
@@ -115,13 +119,22 @@ const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   }
 
   const addToRouter = (to: RouteLocationNormalized) => {
-    add({
-      name: to.name as string,
-      tabTitle: to.meta.title as string,
-      icon: to.meta.icon as string
-    })
+    if (to.meta?.keepAlive)
+      add({
+        name: to.name as string,
+        tabTitle: to.meta.title as string,
+        icon: to.meta.icon as string
+      })
   }
 
+  const clear = () => {
+    state.loading = true
+    state.exclude = cloneDeep(state.tagCaches.map((t) => t.name))
+    state.tagCaches = []
+    // 下次页面更新时再刷新 exclude
+    nextTick(() => (state.exclude = []))
+    state.loading = false
+  }
   // 监听路由改变时，添加标签
   watch(router.currentRoute, (v, ov) => {
     addToRouter(v)
@@ -129,14 +142,14 @@ const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   // 首次加载无法监听到，需要手动添加标签
   // addToRouter(router.currentRoute.value)
 
-  return { add, close, closeLeft, closeRight, closeOther, refreshAsync }
+  return { add, close, closeLeft, closeRight, closeOther, refreshAsync, clear }
 }
 
 export const multiTabState = reactive({
   tagCaches: [],
   current: computed(() => router.currentRoute.value.name),
   exclude: [],
-  refreshLoading: false
+  loading: false
 }) as MultiTabStore
 
 export const multiTabAction = MultiTabAction(multiTabState)

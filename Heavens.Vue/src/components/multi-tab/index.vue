@@ -31,7 +31,7 @@
           <q-icon
             v-if="tab.name == multiTabState.current"
             class="page-tab-icon"
-            :class="multiTabState.refreshLoading && tab.name == multiTabState.current ? 'animate-spin' : ''"
+            :class="multiTabState.loading && tab.name == multiTabState.current ? 'animate-spin' : ''"
             name="r_autorenew"
             @click.stop="refresh(tab.name)"
           />
@@ -73,16 +73,16 @@
               : 'transition transform ease-in-out duration-500 hover:scale-125'
           "
           size="1.5rem"
-          :color="appState.multiTabCacheEnabled ? 'green' : 'gray'"
+          :color="appStore.multiTabCacheEnabled ? 'green' : 'gray'"
           name="data_usage"
-          @click="setCachingEnabled(!appState.multiTabCacheEnabled)"
+          @click="setCachingEnabled(!appStore.multiTabCacheEnabled)"
         >
           <q-tooltip
             class="text-white flex-col"
-            :class="appState.multiTabCacheEnabled ? 'bg-green-400 ' : ' bg-gray-400'"
+            :class="appStore.multiTabCacheEnabled ? 'bg-green-400 ' : ' bg-gray-400'"
             :offset="[10, 10]"
           >
-            <span>{{ appState.multiTabCacheEnabled ? t('已开启标签页缓存') : t('未开启标签页缓存') }}</span>
+            <span>{{ appStore.multiTabCacheEnabled ? t('已开启标签页缓存') : t('未开启标签页缓存') }}</span>
           </q-tooltip>
         </q-icon>
       </div>
@@ -99,8 +99,8 @@ import { multiTabAction, multiTabState } from './multi-table-store'
 import router from 'src/router'
 import { isDev, ls, sleepAsync } from 'src/utils'
 import { useI18n } from 'vue-i18n'
-import { appState } from '@/store/app-state'
 import RouteView from '@/layouts/route-view.vue'
+import { appStore } from '@/store/app-store'
 const t = useI18n().t
 const state = reactive({
   cachingEnabledLoading: false
@@ -111,13 +111,13 @@ const setCachingEnabled = async (enabled: boolean) => {
   // 延迟动画 可以移除
   await sleepAsync(500)
   state.cachingEnabledLoading = false
-  appState.multiTabCacheEnabled = enabled
+  appStore.multiTabCacheEnabled = enabled
 }
 
 const refresh = async (name: string) => {
-  multiTabState.refreshLoading = true
+  multiTabState.loading = true
   await multiTabAction.refreshAsync(name)
-  multiTabState.refreshLoading = false
+  multiTabState.loading = false
 }
 </script>
 

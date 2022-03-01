@@ -29,7 +29,7 @@
 </template>
 <script lang="ts" setup>
 import { MenuDataItem } from '@/router/_typing'
-import { ref, defineComponent, toRefs, reactive, PropType, defineProps } from 'vue'
+import { ref, defineComponent, toRefs, reactive, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 const props = defineProps({
   routers: Object as PropType<MenuDataItem[]>

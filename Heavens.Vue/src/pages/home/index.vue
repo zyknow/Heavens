@@ -1,6 +1,11 @@
 <template>
   <div>
     <h1>Home</h1>
+    <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
+      <!-- Wrapping only one DOM element, defined by QBtn -->
+      <q-btn color="secondary" icon="mail" label="Email" />
+    </transition>
+    <q-btn color="secondary" icon="mail" label="Email" />
     <q-tabs
       align="left"
       active-color="primary"

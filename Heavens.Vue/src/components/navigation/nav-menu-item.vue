@@ -72,7 +72,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { defineComponent, PropType, ref, inject, watch, reactive, toRefs, computed, defineProps } from 'vue'
+import { defineComponent, PropType, ref, inject, watch, reactive, toRefs, computed } from 'vue'
 import { MenuDataItem } from '@/router/_typing'
 import { useI18n } from 'vue-i18n'
 import { LEFT_DRAWER_CLOSED_KEY } from '@/layouts'

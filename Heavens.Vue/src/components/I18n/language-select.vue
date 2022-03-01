@@ -6,7 +6,7 @@
         :key="i"
         v-close-popup
         clickable
-        @click="appState.lang = lang"
+        @click="appStore.lang = lang"
       >
         <q-item-section>{{ langTitle }}</q-item-section>
       </q-item>
@@ -14,9 +14,9 @@
   </q-btn>
 </template>
 <script lang="ts" setup>
+import { appStore } from '@/store/app-store'
 import { supportLangs } from 'src/i18n/_index'
 import { useI18n } from 'vue-i18n'
-import { appState } from '@/store/app-state'
 const t = useI18n().t
 defineProps({
   title: String

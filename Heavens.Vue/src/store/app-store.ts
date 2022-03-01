@@ -5,42 +5,35 @@ import { notify } from 'src/utils/notify'
 import { i18n } from '@/boot/i18n'
 export const APP = 'APP'
 
-export interface AppState {
+const actions = {}
+
+export const appStore = reactive({
+  ...actions,
   /**
    * 语言
    */
-  lang: string
+  lang: 'zh-CN',
   /**
    * 多标签栏
    */
-  multiTabEnabled: boolean
+  multiTabEnabled: true,
   /**
    * 多标签栏缓存启用
    */
-  multiTabCacheEnabled: boolean
-}
-
-export const appState: AppState = reactive({
-  lang: 'zh-CN',
-  multiTabEnabled: true,
   multiTabCacheEnabled: false
 })
 
-//#region 初始化(必须放在 watch 前面)
-
-// 根据缓存获取配置
-const app = ls.getItem(APP) as AppState
+// 初始化 根据缓存获取配置
+const app = ls.getItem(APP)
 if (app) {
-  copyByKeys(appState, app)
+  copyByKeys(appStore, app)
 }
-
-//#endregion
 
 //#region 监听对象
 
 // 监听 lang 变化
 watch(
-  () => appState.lang,
+  () => appStore.lang,
   async (lang) => {
     i18n.global.locale = lang as any
     try {
@@ -61,7 +54,7 @@ watch(
 
 // 监听app state 变化进行缓存
 watch(
-  appState,
+  appStore,
   (app) => {
     ls.set(APP, app)
   },

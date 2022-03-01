@@ -9,6 +9,7 @@ export type MenuRouteMeta = {
   // icon?: string | VNodeChild | JSX.Element
   icon?: string
   authority?: string[]
+  keepAlive?: boolean
 }
 
 export type MenuDataItem = {

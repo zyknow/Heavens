@@ -1,9 +1,19 @@
-import { staticRoles } from '@/store/user-state'
 import { MenuDataItem } from './_typing'
 
 const rotueView = import('@/layouts/route-view.vue')
 const userLayout = import('@/layouts/user-layout.vue')
 const mainLayout = import('@/layouts/main-layout.vue')
+
+// 角色
+export const staticRoles = {
+  admin: 'Admin',
+  user: 'User',
+  test: 'Test'
+}
+// 角色组
+export const staticRoleGroups = {
+  userGroup: [staticRoles.admin, staticRoles.user]
+}
 
 // 白名单页名
 export const allowList = ['login']
@@ -29,13 +39,13 @@ export const dynamicRouter: MenuDataItem[] = [
   {
     path: '/home',
     name: 'Home',
-    meta: { title: '主页', icon: 'r_home', authority: [staticRoles.admin, staticRoles.user] },
+    meta: { title: '主页', icon: 'r_home', authority: [staticRoles.admin, staticRoles.user], keepAlive: true },
     component: import('pages/home/index.vue')
   },
   {
     path: '/user',
     name: 'User',
-    meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
+    meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin], keepAlive: true },
     component: import('pages/user/index.vue')
   },
   // 演示多级标签
@@ -48,7 +58,7 @@ export const dynamicRouter: MenuDataItem[] = [
       {
         path: '/user2',
         name: 'User2',
-        meta: { title: '用户管理2', icon: 'r_manage_accounts', authority: [staticRoles.admin] },
+        meta: { title: '用户管理2', icon: 'r_manage_accounts', authority: [staticRoles.admin], keepAlive: true },
         component: import('pages/user/index.vue')
       }
     ]

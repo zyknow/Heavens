@@ -14,13 +14,11 @@
       icon="r_tab"
       @click="appStore.multiTabVisible = !appStore.multiTabVisible"
     >
-      <q-tooltip>
-        <div class="flex flex-col">
-          {{ t('多标签栏') }}
-          <q-badge :color="appStore.multiTabVisible ? 'green' : 'gray'">{{
-            appStore.multiTabVisible ? t('已启用') : t('已禁用')
-          }}</q-badge>
-        </div>
+      <q-tooltip class="flex flex-row justify-center">
+        {{ t('多标签栏') }}：
+        <q-badge :color="appStore.multiTabVisible ? 'green' : 'grey'" outline>{{
+          appStore.multiTabVisible ? t('已启用') : t('已禁用')
+        }}</q-badge>
       </q-tooltip>
     </q-btn>
     <q-btn class="text-gray-700" size="1.0rem" dense flat icon="r_settings" @click="toSettings">

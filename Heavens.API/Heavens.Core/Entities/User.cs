@@ -85,7 +85,7 @@ public class User : BaseEntity, IEntityTypeBuilder<User>, IEntitySeedData<User>
                     Enabled = true,
                     Account = "admin",
                     Passwd = MD5Encryption.Encrypt("123456"),
-                    Roles = "admin",
+                    Roles = "Admin",
                 },
                 new User()
                 {

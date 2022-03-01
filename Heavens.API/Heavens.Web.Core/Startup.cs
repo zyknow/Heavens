@@ -20,8 +20,8 @@ public class Startup : AppStartup
     {
 
         services.AddJwt<JwtHandler>();
-        // 必须再AddJwt后面注册！
-        services.AddAuth();
+        // 注册授权，必须在AddJwt后面注册！
+        services.AddAuthorization(o => o.AddProjectPolicy());
 
         // 添加跨域
         services.AddCorsAccessor();

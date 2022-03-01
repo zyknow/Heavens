@@ -5,7 +5,6 @@ namespace Heavens.Application.UserApp;
 /// <summary>
 /// 用户接口
 /// </summary>
-//[Authorize(Roles = "admin")]
 [Authorize]
 public class UserAppService : BaseAppService<User, UserDto>
 {
@@ -20,7 +19,6 @@ public class UserAppService : BaseAppService<User, UserDto>
     /// 获取用户信息，请求头中带token
     /// </summary>
     /// <returns></returns>
-    [Authorize]
     public async Task<UserDto> GetByToken()
     {
         int userId = TokenInfo.Id;
@@ -41,7 +39,6 @@ public class UserAppService : BaseAppService<User, UserDto>
     /// <param name="oldPasswd">旧密码</param>
     /// <param name="newPasswd">新密码</param>
     /// <returns></returns>
-    [Authorize]
     public async Task<bool> UpdatePasswd([Required] string oldPasswd, [Required] string newPasswd)
     {
         User user = await _repository.FirstAsync(u => u.Id == TokenInfo.Id, true);

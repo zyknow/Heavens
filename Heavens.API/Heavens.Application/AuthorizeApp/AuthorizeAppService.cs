@@ -40,14 +40,10 @@ public class AuthorizeAppService : IDynamicApiController
 
         if (para.LoginType == LoginType.AccountPassword)
         {
-            if (Valid.IsEmail(para.Account)) // 邮箱
-            {
-                user = await _userRepository.FirstOrDefaultAsync(u => u.Email == para.Account && u.Enabled) ?? throw Oops.Oh(Excode.USER_NAME_OR_PASSWD_ERROR);
-            }
-            else
-            {
-                user = await _userRepository.FirstOrDefaultAsync(u => u.Account == para.Account && u.Enabled) ?? throw Oops.Oh(Excode.USER_NAME_OR_PASSWD_ERROR);
-            }
+            var isEmail = Valid.IsEmail(para.Account);
+
+            user = await _userRepository.FirstOrDefaultAsync(u => (isEmail ? u.Email == para.Account : u.Account == para.Account) && u.Enabled) ?? throw Oops.Oh(Excode.USER_NAME_OR_PASSWD_ERROR);
+
         }
         else if (para.LoginType == LoginType.PhonePasswd)
         {

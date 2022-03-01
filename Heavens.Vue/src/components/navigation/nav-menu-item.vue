@@ -4,7 +4,7 @@
       v-if="!router.children"
       v-ripple
       clickable
-      :inset-level="childLevel == 0 ? undefined : childLevel"
+      :inset-level="childLevel ? childLevel : undefined"
       :to="router.path"
       class="text-gray-700"
       exact-active-class="bg-blue-100"
@@ -64,7 +64,7 @@
           <nav-menu-item
             v-if="router.children && router.children.length > 0"
             :routers="router.children"
-            :childLevel="childLevel + 1"
+            :childLevel="childLevel + 0.5"
           />
         </div>
       </template>
@@ -72,7 +72,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { defineComponent, PropType, ref, inject, watch, reactive, toRefs, computed, defineProps } from 'vue'
+import { defineComponent, PropType, ref, inject, watch, reactive, toRefs, computed } from 'vue'
 import { MenuDataItem } from '@/router/_typing'
 import { useI18n } from 'vue-i18n'
 import { LEFT_DRAWER_CLOSED_KEY } from '@/layouts'

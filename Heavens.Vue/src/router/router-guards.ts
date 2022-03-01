@@ -1,4 +1,4 @@
-import { userState } from './../store/user-state'
+import { userStore } from '../store/user-store'
 import router from './index'
 import { LoadingBar } from 'quasar'
 import { intersectionWith } from 'lodash-es'
@@ -10,7 +10,7 @@ router.beforeEach(async (to, from) => {
     return true
   }
 
-  const userTokenInfo = userState.tokenInfo
+  const userTokenInfo = userStore.tokenInfo
   if (!userTokenInfo) {
     if (to.fullPath !== loginRoutePath) {
       // 未登录，进入到登录页
@@ -23,7 +23,7 @@ router.beforeEach(async (to, from) => {
     return to
   }
   // 无用户信息则获取用户信息
-  if (!userState.info && !(await userState.getUserInfo())) {
+  if (!userStore.info && !(await userStore.getUserInfo())) {
     // 获取失败，去到登录页面
     return {
       path: loginRoutePath,
@@ -31,16 +31,16 @@ router.beforeEach(async (to, from) => {
     }
   }
 
-  let allowRouter = userState.routers
+  let allowRouter = userStore.routers
   if (!allowRouter) {
     //生成路由
-    allowRouter = userState.generateRoutesDynamic()
+    allowRouter = userStore.generateRoutesDynamic()
     if (allowRouter) return { ...to, replace: true }
     return false
   }
   const authority = to.meta.authority as string[]
 
-  const userRoles = userState.info?.roles
+  const userRoles = userStore.info?.roles
   // 未设置页面权限，直接访问
   if (!authority || authority.length == 0) {
     return true

@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hhh lpR lFr" class="basic-layout">
+  <q-layout view="hhh lpR lFr" class="main-layout">
     <basic-header class="basic-header" />
 
     <q-drawer
@@ -18,7 +18,7 @@
       </q-scroll-area>
     </q-drawer>
     <q-page-container class="basic-page-container">
-      <multi-tabs v-if="appState.multiTabEnabled && !$q.platform.is.mobile" class="bg-white layout-rounded" />
+      <multi-tabs v-if="appStore.multiTabVisible && !$q.platform.is.mobile" class="bg-white layout-rounded" />
       <div v-else class="w-full h-full flex bg-white layout-rounded">
         <router-view class="w-full h-full" />
       </div>
@@ -33,11 +33,9 @@ import MultiTabs from 'src/components/multi-tab/index.vue'
 import { ref, defineComponent, provide, InjectionKey, readonly, reactive, toRefs, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { CHANGE_LEFT_DRAWER_FUN, LEFT_DRAWER_CLOSED_KEY } from '.'
-import { appState } from '@/store/app-state'
-import { userState } from '@/store/user-state'
 import { MenuDataItem } from '@/router/_typing'
-// import { useMultiTabStateProvider } from 'src/components/multi-tab-bar/multi-table-store'
-
+import { userStore } from '@/store/user-store'
+import { appStore } from '@/store/app-store'
 const $q = useQuasar()
 const state = reactive({
   drawerMini: false,
@@ -54,7 +52,7 @@ provide(
   LEFT_DRAWER_CLOSED_KEY,
   computed(() => state.drawerMini)
 )
-const router = userState.routers as MenuDataItem
+const router = userStore.routers as MenuDataItem
 </script>
 <style lang="sass">
 
@@ -62,7 +60,7 @@ const router = userState.routers as MenuDataItem
 .layout-rounded
   @apply rounded-md overflow-hidden
 
-.basic-layout
+.main-layout
   @apply bg-gray-300 fixed h-screen w-screen
   .basic-header
     @apply  bg-white m-2 layout-rounded

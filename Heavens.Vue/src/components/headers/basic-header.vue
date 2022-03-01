@@ -4,7 +4,7 @@
       <!-- left header -->
       <div class="flex flex-row items-center space-x-4">
         <q-btn dense flat round icon="menu" @click="changeLeftDrawer()" />
-        <!-- 这才是标题栏 -->
+        <!-- 标题栏 -->
         <div class="flex flex-row items-center sm:hidden">
           <q-spinner-box color="orange" size="2.5em" />
           <span

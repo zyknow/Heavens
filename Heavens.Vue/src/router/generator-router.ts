@@ -1,17 +1,6 @@
 import { intersectionWith } from 'lodash-es'
+import { dynamicRootRouter } from './routes'
 import { MenuDataItem } from './_typing'
-
-// 根级菜单
-const rootRouter: MenuDataItem = {
-  name: '/home',
-  path: '/',
-  redirect: '/home',
-  meta: {
-    title: '首页'
-  },
-  component: () => import('@/layouts/basic-layout.vue'),
-  children: [] as MenuDataItem[]
-}
 
 const generator = (router: MenuDataItem[], roles: string[]): MenuDataItem[] => {
   return router
@@ -30,6 +19,6 @@ const generator = (router: MenuDataItem[], roles: string[]): MenuDataItem[] => {
 }
 
 export const generatorDynamicRouter = (router: MenuDataItem[], roles: string[]): MenuDataItem => {
-  rootRouter.children = generator(router, roles)
-  return rootRouter
+  dynamicRootRouter.children = generator(router, roles)
+  return dynamicRootRouter
 }

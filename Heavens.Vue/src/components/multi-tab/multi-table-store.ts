@@ -4,6 +4,7 @@ import { cloneDeep, last, take, takeRight, remove } from 'lodash-es'
 import { IndexSign } from '@/typing'
 import { RouteLocationNormalized } from 'vue-router'
 import { notify } from 'src/utils/notify'
+import { sleepAsync } from '@/utils'
 
 export type CacheKey = string
 export interface CacheItem {
@@ -12,10 +13,11 @@ export interface CacheItem {
   icon?: string
 }
 
-export interface MultiTabStore extends IndexSign {
+export interface MultiTabStore {
   tagCaches: CacheItem[]
   current: CacheKey
   exclude: string[]
+  loading: boolean
 }
 export interface IMultiTabAction {
   /**
@@ -39,16 +41,16 @@ export interface IMultiTabAction {
    */
   closeOther: (name: CacheKey) => void
   /**
-   * 获取缓存列表
-   */
-  getCaches: () => CacheItem[]
-  /**
    * 刷新指定路径
    */
-  refreshAsync: (name?: CacheKey | undefined) => void
+  refreshAsync: (name: CacheKey) => void
+  /**
+   * 清空所有缓存
+   */
+  clear: () => void
 }
 
-export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
+const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   const removeItemsAsync = async (tabNames: string[]) => {
     if (state.tagCaches.length <= 1) {
       notify.warn('最后一个标签无法被关闭！')
@@ -106,28 +108,33 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
     removeItemsAsync(state.tagCaches.filter((t) => t.name != name).map((t) => t.name))
   }
 
-  const getCaches = () => {
-    return state.tagCaches
-  }
-
-  const refreshAsync = async (name?: CacheKey | undefined) => {
-    router.push(name as string)
+  const refreshAsync = async (name: CacheKey) => {
+    // debugger
+    // router.push(name as string)
     state.exclude = [state.tagCaches.find((c) => c.name == name)?.name as string]
     // 刷新延时，可去除
     // await sleepAsync(500)
-
     // 下次页面更新时再刷新 exclude
     nextTick(() => (state.exclude = []))
   }
 
   const addToRouter = (to: RouteLocationNormalized) => {
-    add({
-      name: to.name as string,
-      tabTitle: to.meta.title as string,
-      icon: to.meta.icon as string
-    })
+    if (to.meta?.keepAlive)
+      add({
+        name: to.name as string,
+        tabTitle: to.meta.title as string,
+        icon: to.meta.icon as string
+      })
   }
 
+  const clear = () => {
+    state.loading = true
+    state.exclude = cloneDeep(state.tagCaches.map((t) => t.name))
+    state.tagCaches = []
+    // 下次页面更新时再刷新 exclude
+    nextTick(() => (state.exclude = []))
+    state.loading = false
+  }
   // 监听路由改变时，添加标签
   watch(router.currentRoute, (v, ov) => {
     addToRouter(v)
@@ -135,13 +142,14 @@ export const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   // 首次加载无法监听到，需要手动添加标签
   // addToRouter(router.currentRoute.value)
 
-  return { add, close, closeLeft, closeRight, closeOther, getCaches, refreshAsync }
+  return { add, close, closeLeft, closeRight, closeOther, refreshAsync, clear }
 }
 
 export const multiTabState = reactive({
   tagCaches: [],
   current: computed(() => router.currentRoute.value.name),
-  exclude: []
+  exclude: [],
+  loading: false
 }) as MultiTabStore
 
 export const multiTabAction = MultiTabAction(multiTabState)

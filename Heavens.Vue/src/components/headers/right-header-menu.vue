@@ -6,6 +6,23 @@
     <q-btn class="text-gray-700" size="1.0rem" dense flat icon="r_assignment">
       <q-tooltip>{{ t('任务') }}</q-tooltip>
     </q-btn>
+    <q-btn
+      :class="appStore.multiTabVisible ? 'text-gray-700' : 'text-gray-200'"
+      size="1.0rem"
+      dense
+      flat
+      icon="r_tab"
+      @click="appStore.multiTabVisible = !appStore.multiTabVisible"
+    >
+      <q-tooltip>
+        <div class="flex flex-col">
+          {{ t('多标签栏') }}
+          <q-badge :color="appStore.multiTabVisible ? 'green' : 'gray'">{{
+            appStore.multiTabVisible ? t('已启用') : t('已禁用')
+          }}</q-badge>
+        </div>
+      </q-tooltip>
+    </q-btn>
     <q-btn class="text-gray-700" size="1.0rem" dense flat icon="r_settings" @click="toSettings">
       <q-tooltip>{{ t('设置') }}</q-tooltip>
     </q-btn>
@@ -34,6 +51,7 @@ export default {
 </script>
 <script lang="ts" setup>
 import { TO_SETTINGS_FUN } from '@/layouts'
+import { appStore } from '@/store/app-store'
 import { userStore } from '@/store/user-store'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'

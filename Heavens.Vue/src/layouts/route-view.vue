@@ -4,6 +4,7 @@
       <component :is="multiTabState.loading ? '' : Component" />
     </keep-alive>
     <component :is="multiTabState.loading ? '' : Component" v-else />
+
     <q-inner-loading :showing="multiTabState.loading" />
   </router-view>
 </template>

@@ -6,6 +6,7 @@
         :key="i"
         v-close-popup
         clickable
+        :active="appStore.lang == lang"
         @click="appStore.lang = lang"
       >
         <q-item-section>{{ langTitle }}</q-item-section>

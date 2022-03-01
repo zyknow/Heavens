@@ -14,9 +14,9 @@ export const appStore = reactive({
    */
   lang: 'zh-CN',
   /**
-   * 多标签栏
+   * 多标签栏显示
    */
-  multiTabEnabled: true,
+  multiTabVisible: true,
   /**
    * 多标签栏缓存启用
    */

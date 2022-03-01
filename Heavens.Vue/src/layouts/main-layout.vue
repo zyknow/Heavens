@@ -18,7 +18,7 @@
       </q-scroll-area>
     </q-drawer>
     <q-page-container class="basic-page-container">
-      <multi-tabs v-if="appStore.multiTabEnabled && !$q.platform.is.mobile" class="bg-white layout-rounded" />
+      <multi-tabs v-if="appStore.multiTabVisible && !$q.platform.is.mobile" class="bg-white layout-rounded" />
       <div v-else class="w-full h-full flex bg-white layout-rounded">
         <router-view class="w-full h-full" />
       </div>

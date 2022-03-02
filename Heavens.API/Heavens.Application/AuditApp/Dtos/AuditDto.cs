@@ -7,7 +7,6 @@ namespace Heavens.Application.AuditApp.Dtos;
 /// </summary>
 public class AuditDto : BaseEntityProp
 {
-
     /// <summary>
     /// 用户持有角色
     /// </summary>

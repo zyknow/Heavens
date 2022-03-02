@@ -1,4 +1,5 @@
-﻿using Heavens.Core.Entities.Base;
+﻿using Bing;
+using Heavens.Core.Entities.Base;
 using Heavens.Core.Extension.Bing.CsCommentReader;
 using System.Text.RegularExpressions;
 
@@ -292,11 +293,16 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
     public void GenVuePage(string path)
     {
         string pagePath = path.IsEmpty() ? Path.Combine(GetProjectPath(), "Heavens.Vue", "src", "pages") : Path.Combine(path, "api");
-        // 获取所有实体
+
         List<Type> entities = Assembly.Load("Heavens.Core").GetTypes().Where(p => p.Namespace == "Heavens.Core.Entities" && p.IsClass && p.Name != "BaseEntity" && !p.Name.Contains("<>")).ToList();
 
-        foreach (Type entity in entities)
+        var entityNames = entities.Select(e => e.Name).ToList();
+        Assembly assembly = Assembly.Load("Heavens.Application");
+        IEnumerable<Type> types = assembly.GetTypes().Where(a => a.Namespace.Contains("Dtos") && a.Name != "Mapper" && !a.Name.Contains("<>") && entityNames.Contains(a.Name.Replace("Dto", "")));
+
+        foreach (Type type in types)
         {
+            var props = type.GetProperties();
             string str = @$"
 <template>
   <div class=""p-2 h-full"">
@@ -322,11 +328,11 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
       </template>
 
       <template #top>
-        <div class=""w-full flex-row flex-j-bet"">
-          <div class=""flex-row space-x-1"">
+        <div class=""w-full flex flex-row justify-between"">
+          <div class=""flex flex-row space-x-1"">
             <q-input
               outlined
-              :label=""`${{t('用户名')}}/${{t('账号')}}`""
+              :label=""``""
               dense
               v-model=""state.searchKey""
               @keyup.enter=""get[Name]s""
@@ -400,7 +406,10 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
 
         <q-card-section class=""q-pt-none mt-8"">
           <q-form class=""space-y-2"" @submit=""dialogFormSubmit"">
-            <q-input dense outlined v-model=""state.form.name"" :label=""t('用户名')""></q-input>
+            {string.Join("", props.Select(p =>
+                            @$"<q-input dense outlined v-model=""state.form.{p.Name.ToCamelCase()}"" :label=""t('{CsCommentReader.Create(p).Summary ?? p.Name.ToCamelCase() }')""></q-input>"
+                            + "\r\n"))}
+            
 
             <q-btn class=""float-right"" :label=""t(state.dialogTitle)"" color=""primary"" type=""submit"" />
             <q-card-actions class=""w-full""></q-card-actions>
@@ -429,38 +438,23 @@ import {{ FilterCondition, FilterOperate, ListSortType }} from '@/utils/page-req
 const [NAME]_VISIBLE_COLUMNS = `[name]_visibleColumns`
 
 // 默认显示的Table列
-const defaultVisibleColumns = ['name']
+const defaultVisibleColumns = [{string.Join("", props.Select(p => @$"'{p.Name.ToCamelCase()}'"))}]
 
 // Form表单默认内容
-const defaultForm = {{
-//  name: '',
-}} as [Name]
+const defaultForm: [Name] = {{
+}}
 
 const $q = useQuasar()
 const t = useI18n().t
 const columns = [
-  {{
-    label: t('用户名'),
-    name: 'name',
-    field: 'name',
+    {string.Join("", props.Select(p => @$"{{
+    label: t('{CsCommentReader.Create(p).Summary ?? p.Name.ToCamelCase() }'),
+    name: '{p.Name.ToCamelCase()}',
+    field: '{p.Name.ToCamelCase()}',
     sortable: true,
     align: 'center',
     textClasses: '',
-  }},
-  {{
-    label: t('创建时间'),
-    name: 'createdTime',
-    field: 'createdTime',
-    sortable: true,
-    align: 'center',
-  }},
-  {{
-    label: t('修改时间'),
-    name: 'updatedTime',
-    field: 'updatedTime',
-    sortable: true,
-    align: 'center',
-  }},
+  }},"))}
   {{
     label: t('操作'),
     name: 'actions',
@@ -582,11 +576,11 @@ get[Name]s()
 <style lang=""sass""></style>
 ";
             str = str
-                .Replace("[NAME]", entity.Name.ToUpper())
-                .Replace("[Name]", entity.Name.ToUpperFirstLetter())
-                .Replace("[name]", entity.Name.ToCamelCase());
+                .Replace("[NAME]", type.Name.Replace("Dto","").ToUpper())
+                .Replace("[Name]", type.Name.Replace("Dto", "").ToUpperFirstLetter())
+                .Replace("[name]", type.Name.Replace("Dto", "").ToCamelCase());
 
-            string dirPath = Path.Combine(pagePath, entity.Name.ToCamelCase());
+            string dirPath = Path.Combine(pagePath, type.Name.Replace("Dto", "").ToCamelCase());
             string filePath = Path.Combine(dirPath, "index.vue");
 
             if (!File.Exists(filePath))

@@ -438,7 +438,7 @@ import {{ FilterCondition, FilterOperate, ListSortType }} from '@/utils/page-req
 const [NAME]_VISIBLE_COLUMNS = `[name]_visibleColumns`
 
 // 默认显示的Table列
-const defaultVisibleColumns = [{string.Join("", props.Select(p => @$"'{p.Name.ToCamelCase()}'"))}]
+const defaultVisibleColumns = [{string.Join(",", props.Select(p => @$"'{p.Name.ToCamelCase()}'"))}]
 
 // Form表单默认内容
 const defaultForm: [Name] = {{
@@ -576,7 +576,7 @@ get[Name]s()
 <style lang=""sass""></style>
 ";
             str = str
-                .Replace("[NAME]", type.Name.Replace("Dto","").ToUpper())
+                .Replace("[NAME]", type.Name.Replace("Dto", "").ToUpper())
                 .Replace("[Name]", type.Name.Replace("Dto", "").ToUpperFirstLetter())
                 .Replace("[name]", type.Name.Replace("Dto", "").ToCamelCase());
 

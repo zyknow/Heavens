@@ -149,7 +149,7 @@ import { FilterCondition, FilterOperate, ListSortType } from '@/utils/page-reque
 const AUDIT_VISIBLE_COLUMNS = `audit_visibleColumns`
 
 // 默认显示的Table列
-const defaultVisibleColumns = ['userRoles''serviceName''methodName''path''body''query''httpMethod''returnValue''executionMs''clientIpAddress''exception''id''createdId''createdBy''createdTime''updatedId''updatedBy''updatedTime']
+const defaultVisibleColumns = ['userRoles','serviceName','methodName','path','body','query','httpMethod','returnValue','executionMs','clientIpAddress','exception','id','createdId','createdBy','createdTime','updatedId','updatedBy','updatedTime']
 
 // Form表单默认内容
 const defaultForm: Audit = {

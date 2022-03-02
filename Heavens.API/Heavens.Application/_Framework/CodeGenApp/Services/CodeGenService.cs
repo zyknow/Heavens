@@ -305,7 +305,7 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
             var props = type.GetProperties();
             string str = @$"
 <template>
-  <div class=""p-2 h-full"">
+  <div class=""h-full"">
     <!-- Table -->
     <q-table
       :rows=""state.[name]s""
@@ -323,10 +323,11 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
       class=""h-full relative sticky-header-column-table sticky-right-column-table""
       :virtual-scroll=""state.[name]s.length >= 200""
     >
+    <!-- 加载动画 -->
       <template #loading>
         <q-inner-loading showing color=""primary"" />
       </template>
-
+    <!-- table 顶部操作栏 -->
       <template #top>
         <div class=""w-full flex flex-row justify-between"">
           <div class=""flex flex-row space-x-1"">
@@ -365,7 +366,7 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
           </div>
         </div>
       </template>
-
+    <!-- 底部分页查询器 -->
       <template #pagination>
         <q-pagination
           v-model=""state.pagination.page""
@@ -376,24 +377,14 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
           @click=""get[Name]s""
         />
       </template>
-
+    <!-- #region Table 自定义显示 -->
       <template #body-cell-actions=""props"">
         <q-td :props=""props"" class=""space-x-1 w-1"">
           <q-btn dense color=""primary"" icon=""edit"" @click=""showDialog(t('编辑'), props.row.id)"" />
           <q-btn dense color=""danger"" icon=""remove"" @click=""deleteByIds([props.row.id])"" />
         </q-td>
       </template>
-
-      <!-- <template #body-cell-sex=""props"">
-        <q-td :props=""props"" class=""w-1"">
-          <q-icon
-            size=""2rem""
-            :color=""props.row.sex ? 'primary' : 'pink-3'""
-            :name=""props.row.sex ? 'male' : 'female'""
-          ></q-icon>
-        </q-td> 
-      </template> -->
-
+    <!-- #endregion -->
     </q-table>
 
     <!-- Dialog -->
@@ -422,27 +413,36 @@ import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
 <script lang=""ts"">
 // 声明额外的选项
 export default {{
-  name:'[name]'
+  name:'[Name]'
 }}
 </script>
 <script lang=""ts"" setup>
 import {{ Add[Name], Delete[Name]ByIds, Get[Name]ById, Get[Name]Page, Update[Name], [Name] }} from '@/api/[name]'
-import {{ ref, defineComponent, toRefs, reactive, computed, watch }} from 'vue'
+import {{ ref, defineComponent, toRefs, reactive, computed, watch, onBeforeUnmount }} from 'vue'
 import {{ useI18n }} from 'vue-i18n'
 import {{ dateFormat }} from '@/utils/date-util'
 import {{ useQuasar }} from 'quasar'
 import {{ ls }} from '@/utils'
 import {{ PageRequest }} from '@/utils/page-request'
-import {{ FilterCondition, FilterOperate, ListSortType }} from '@/utils/page-request/enums'
+import {{ FilterCondition, FilterOperate }} from '@/utils/page-request/enums'
 
-const [NAME]_VISIBLE_COLUMNS = `[name]_visibleColumns`
+// 显示列
+const [NAME]_VISIBLE_COLUMNS = `[NAME]_VISIBLE_COLUMNS`
 
+// 分页大小
+const [NAME]_ROWS_PER_PAGE = '[NAME]_ROWS_PER_PAGE'
 // 默认显示的Table列
 const defaultVisibleColumns = [{string.Join(",", props.Select(p => @$"'{p.Name.ToCamelCase()}'"))}]
 
 // Form表单默认内容
 const defaultForm: [Name] = {{
 }}
+
+// 卸载前保存缓存
+onBeforeUnmount(() => {{
+  ls.set([NAME]_VISIBLE_COLUMNS, state.visibleColumns)
+  ls.set([NAME]_ROWS_PER_PAGE, state.pagination.rowsPerPage)
+}})
 
 const $q = useQuasar()
 const t = useI18n().t
@@ -485,7 +485,7 @@ const state = reactive({{
     sortBy: 'id',
     descending: false,
     page: 1,
-    rowsPerPage: 10,
+    rowsPerPage: ls.getItem<number>([NAME]_ROWS_PER_PAGE) || 10,
     rowsNumber: 1,
     totalPages: 1,
   }},
@@ -494,15 +494,8 @@ const state = reactive({{
   form: {{ ...defaultForm }},
 }})
 
-watch(
-  () => state.visibleColumns,
-  (v, ov) => {{
-    ls.set([NAME]_VISIBLE_COLUMNS, v)
-  }},
-)
-
 // 排序触发事件
-const tableHandler = async ({{ pagination, filter }}) => {{
+const tableHandler = async ({{ pagination, filter }}:any) => {{
   state.pagination = pagination
   await get[Name]s()
 }}

@@ -33,24 +33,6 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     }
 
     /// <summary>
-    /// 获取分页
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost]
-    public async virtual Task<PagedList<TEntityDto>> Page(PageRequest request)
-    {
-
-        var data = await _repository
-            .Where(request.GetRulesExpression<TEntity>())
-            .SortBy(request.Sort)
-            .Select(x => x.Adapt<TEntityDto>())
-            .ToPagedListAsync(request.Page, request.PageSize);
-
-        return data;
-    }
-
-    /// <summary>
     /// 根据Id查询
     /// </summary>
     /// <param name="id"></param>

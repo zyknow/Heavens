@@ -621,14 +621,14 @@ export async function Get{appName.ToUpperFirstLetter()}Page(req: PageRequest): P
 }}
 
 /**
- * 添加用户
+ * 添加
  */
 export async function Add{appName.ToUpperFirstLetter()}({appName.ToCamelCase()}: {appName.ToUpperFirstLetter()}): Promise<RequestResult<{appName.ToUpperFirstLetter()}>> {{
   return request.post<{appName.ToUpperFirstLetter()}, RequestResult<{appName.ToUpperFirstLetter()}>>('/api/{appName.ToCamelCase()}', {appName.ToCamelCase()})
 }}
 
 /**
- * 编辑用户
+ * 编辑
  */
 export async function Update{appName.ToUpperFirstLetter()}({appName.ToCamelCase()}: {appName.ToUpperFirstLetter()}): Promise<RequestResult<{appName.ToUpperFirstLetter()}>> {{
   return request.put<{appName.ToUpperFirstLetter()}, RequestResult<{appName.ToUpperFirstLetter()}>>('/api/{appName.ToCamelCase()}', {appName.ToCamelCase()})
@@ -642,17 +642,10 @@ export async function Get{appName.ToUpperFirstLetter()}ById(id: number): Promise
 }}
 
 /**
- * 获取所有用户
+ * 获取所有
  */
 export async function GetAll{appName.ToUpperFirstLetter()}(): Promise<RequestResult<{appName.ToUpperFirstLetter()}[]>> {{
   return request.get<any, RequestResult<{appName.ToUpperFirstLetter()}[]>>('/api/{appName.ToUpperFirstLetter()}/all')
-}}
-
-/**
- * 根据 token 获取用户信息
- */
-export async function Get{appName.ToUpperFirstLetter()}ByToken(): Promise<RequestResult<{appName.ToUpperFirstLetter()}>> {{
-  return request.get<any, RequestResult<{appName.ToUpperFirstLetter()}>>('/api/{appName.ToCamelCase()}/by-token')
 }}
 
 /**

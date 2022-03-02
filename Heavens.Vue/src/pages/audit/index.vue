@@ -23,11 +23,11 @@
       </template>
 
       <template #top>
-        <div class="w-full flex-row flex-j-bet">
-          <div class="flex-row space-x-1">
+        <div class="w-full flex flex-row justify-between">
+          <div class="flex flex-row space-x-1">
             <q-input
               outlined
-              :label="`${t('用户名')}/${t('账号')}`"
+              :label="``"
               dense
               v-model="state.searchKey"
               @keyup.enter="getAudits"
@@ -101,7 +101,26 @@
 
         <q-card-section class="q-pt-none mt-8">
           <q-form class="space-y-2" @submit="dialogFormSubmit">
-            <q-input dense outlined v-model="state.form.name" :label="t('用户名')"></q-input>
+            <q-input dense outlined v-model="state.form.userRoles" :label="t('用户持有角色')"></q-input>
+<q-input dense outlined v-model="state.form.serviceName" :label="t('服务 (类/接口) 名')"></q-input>
+<q-input dense outlined v-model="state.form.methodName" :label="t('执行方法名称')"></q-input>
+<q-input dense outlined v-model="state.form.path" :label="t('请求路径')"></q-input>
+<q-input dense outlined v-model="state.form.body" :label="t('Body参数')"></q-input>
+<q-input dense outlined v-model="state.form.query" :label="t('Query参数')"></q-input>
+<q-input dense outlined v-model="state.form.httpMethod" :label="t('Http请求方法')"></q-input>
+<q-input dense outlined v-model="state.form.returnValue" :label="t('返回值')"></q-input>
+<q-input dense outlined v-model="state.form.executionMs" :label="t('方法调用的总持续时间（毫秒）')"></q-input>
+<q-input dense outlined v-model="state.form.clientIpAddress" :label="t('客户端的IP地址')"></q-input>
+<q-input dense outlined v-model="state.form.exception" :label="t('方法执行期间发生异常')"></q-input>
+<q-input dense outlined v-model="state.form.id" :label="t('id主键')"></q-input>
+<q-input dense outlined v-model="state.form.createdId" :label="t('创建者id')"></q-input>
+<q-input dense outlined v-model="state.form.createdBy" :label="t('创建者')"></q-input>
+<q-input dense outlined v-model="state.form.createdTime" :label="t('创建时间')"></q-input>
+<q-input dense outlined v-model="state.form.updatedId" :label="t('更新者id')"></q-input>
+<q-input dense outlined v-model="state.form.updatedBy" :label="t('更新者')"></q-input>
+<q-input dense outlined v-model="state.form.updatedTime" :label="t('更新时间')"></q-input>
+
+            
 
             <q-btn class="float-right" :label="t(state.dialogTitle)" color="primary" type="submit" />
             <q-card-actions class="w-full"></q-card-actions>
@@ -130,37 +149,141 @@ import { FilterCondition, FilterOperate, ListSortType } from '@/utils/page-reque
 const AUDIT_VISIBLE_COLUMNS = `audit_visibleColumns`
 
 // 默认显示的Table列
-const defaultVisibleColumns = ['name']
+const defaultVisibleColumns = ['userRoles''serviceName''methodName''path''body''query''httpMethod''returnValue''executionMs''clientIpAddress''exception''id''createdId''createdBy''createdTime''updatedId''updatedBy''updatedTime']
 
 // Form表单默认内容
-const defaultForm = {
-//  name: '',
-} as Audit
+const defaultForm: Audit = {
+}
 
 const $q = useQuasar()
 const t = useI18n().t
 const columns = [
-  {
-    label: t('用户名'),
-    name: 'name',
-    field: 'name',
+    {
+    label: t('用户持有角色'),
+    name: 'userRoles',
+    field: 'userRoles',
     sortable: true,
     align: 'center',
     textClasses: '',
-  },
-  {
+  },{
+    label: t('服务 (类/接口) 名'),
+    name: 'serviceName',
+    field: 'serviceName',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('执行方法名称'),
+    name: 'methodName',
+    field: 'methodName',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('请求路径'),
+    name: 'path',
+    field: 'path',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('Body参数'),
+    name: 'body',
+    field: 'body',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('Query参数'),
+    name: 'query',
+    field: 'query',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('Http请求方法'),
+    name: 'httpMethod',
+    field: 'httpMethod',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('返回值'),
+    name: 'returnValue',
+    field: 'returnValue',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('方法调用的总持续时间（毫秒）'),
+    name: 'executionMs',
+    field: 'executionMs',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('客户端的IP地址'),
+    name: 'clientIpAddress',
+    field: 'clientIpAddress',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('方法执行期间发生异常'),
+    name: 'exception',
+    field: 'exception',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('id主键'),
+    name: 'id',
+    field: 'id',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('创建者id'),
+    name: 'createdId',
+    field: 'createdId',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('创建者'),
+    name: 'createdBy',
+    field: 'createdBy',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
     label: t('创建时间'),
     name: 'createdTime',
     field: 'createdTime',
     sortable: true,
     align: 'center',
-  },
-  {
-    label: t('修改时间'),
+    textClasses: '',
+  },{
+    label: t('更新者id'),
+    name: 'updatedId',
+    field: 'updatedId',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('更新者'),
+    name: 'updatedBy',
+    field: 'updatedBy',
+    sortable: true,
+    align: 'center',
+    textClasses: '',
+  },{
+    label: t('更新时间'),
     name: 'updatedTime',
     field: 'updatedTime',
     sortable: true,
     align: 'center',
+    textClasses: '',
   },
   {
     label: t('操作'),

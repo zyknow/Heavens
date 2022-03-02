@@ -1,5 +1,6 @@
 ﻿using Furion.DatabaseAccessor;
 using Heavens.Core.Authorizations;
+using System;
 
 namespace Heavens.Core.Entities.Base;
 
@@ -61,45 +62,4 @@ public abstract class CommonEntity<TKey, TDbContextLocator1> : PrivateCommonEnti
 
 public abstract class PrivateCommonEntity<TKey> : BaseEntityProp<TKey>, IPrivateEntity
 {
-}
-
-public class BaseEntityProp<TKey>
-{
-    /// <summary>
-    /// id主键
-    /// </summary>
-    public TKey Id { get; set; }
-    /// <summary>
-    /// 是否已被删除
-    /// </summary>
-    public bool IsDeleted { get; set; } = false;
-    /// <summary>
-    /// 创建者id
-    /// </summary>
-    public int CreatedId { get; set; }
-    /// <summary>
-    /// 创建者
-    /// </summary>
-    public string CreatedBy { get; set; }
-    /// <summary>
-    /// 创建时间
-    /// </summary>
-    public DateTime CreatedTime { get; set; } = DateTime.Now;
-    /// <summary>
-    /// 更新者id
-    /// </summary>
-    public int UpdatedId { get; set; }
-    /// <summary>
-    /// 更新者
-    /// </summary>
-    public string UpdatedBy { get; set; }
-    /// <summary>
-    /// 更新时间
-    /// </summary>
-    public DateTime UpdatedTime { get; set; } = DateTime.Now;
-}
-
-public class BaseEntityProp : BaseEntityProp<int>
-{
-
 }

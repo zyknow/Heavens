@@ -22,6 +22,9 @@ public class UserAppService : BaseAppService<User, UserDto>
     public async Task<UserDto> GetByToken()
     {
         int userId = TokenInfo.Id;
+
+        var roles = TokenInfo.Roles;
+
         if (userId.IsZeroOrMinus())
         {
             throw Oops.Oh(Excode.DATA_NO_EXSITS);

@@ -65,9 +65,6 @@ public class User : BaseEntity, IEntityTypeBuilder<User>, IEntitySeedData<User>
     public void Configure(EntityTypeBuilder<User> entityBuilder, DbContext dbContext, Type dbContextLocator)
     {
 
-        entityBuilder
-            .HasQueryFilter(e => !e.IsDeleted);
-
         // 登录账号必填
         entityBuilder.Property(e => e.Account).IsRequired();
 

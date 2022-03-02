@@ -1,11 +1,14 @@
 ﻿using Furion;
 using Furion.DependencyInjection;
 using Heavens.Core.Authorizations;
+using Heavens.Core.Extension.AOP;
 using Heavens.Core.Extension.Cacheing;
 using Heavens.EntityFramework.Core.DbContexts;
 using Heavens.Web.Core.Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,7 +29,11 @@ public class Startup : AppStartup
         // 添加跨域
         services.AddCorsAccessor();
 
-        services.AddControllers()
+        services.AddControllers(o =>
+        {
+            // 审计过滤器
+            o.Filters.Add(typeof(AuditActionFilter));
+        })
                 .AddInjectWithUnifyResult()
                 .AddFriendlyException()
                 .AddNewtonsoftJson(option =>
@@ -38,6 +45,14 @@ public class Startup : AppStartup
                 })
                 // 注册多语言
                 .AddAppLocalization();
+
+
+
+        //services.Configure<MvcOptions>(options =>
+        //{
+        //    //审计过滤器
+        //    options.Filters.Add<AuditActionFilter>();
+        //});
 
         // 注册远程 http get,post 请求
         services.AddRemoteRequest();
@@ -66,6 +81,13 @@ public class Startup : AppStartup
         app.UseAppLocalization();
 
         app.UseHttpsRedirection();
+
+        // 启用EnableBuffering，否则Filter获取不到body
+        app.Use(next => context =>
+        {
+            context.Request.EnableBuffering();
+            return next(context);
+        });
 
         app.UseStaticFiles();
         app.UseSerilogRequestLogging();    // 必须在 UseStaticFiles 和 UseRouting 之间

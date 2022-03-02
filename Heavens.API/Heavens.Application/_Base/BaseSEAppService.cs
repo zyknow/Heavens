@@ -1,9 +1,11 @@
-﻿using Heavens.Core.Entities.Base;
+﻿using Furion.DatabaseAccessor;
+using Heavens.Core.Entities.Base;
 using Heavens.Core.Extension.SearchEngine;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Heavens.Application._Base;
 
+#region BaseSE
 /// <summary>
 /// 基础CURD
 /// CURD带搜索引擎CURD
@@ -12,11 +14,10 @@ namespace Heavens.Application._Base;
 /// <typeparam name="TEntity"></typeparam>
 /// <typeparam name="TEntityDto"></typeparam>
 /// <typeparam name="TEntitySE"></typeparam>
-public abstract class BaseSEAppService<TKey, TEntity, TEntityDto, TEntitySE> : BaseAppService<TKey, TEntity, TEntityDto>
-    where TEntity : class, IBaseEntity<TKey>, IPrivateEntity, new()
+public abstract class BaseSEAppService<TKey, TEntity, TEntityDto, TEntitySE> : BaseAppService<TKey, TEntity, TEntityDto> where TEntity : class, IBaseEntity<TKey>, IPrivateEntity, new()
     where TEntityDto : class, new()
 {
-    public ISearchEngine _searchEngine { get; }
+    protected ISearchEngine _searchEngine { get; }
 
     protected string searchIndex => typeof(TEntity).Name.ToCamelCase();
 
@@ -55,10 +56,10 @@ public abstract class BaseSEAppService<TKey, TEntity, TEntityDto, TEntitySE> : B
         return await base.DeleteByIds(ids);
     }
 
-    public override async Task<TKey> DeleteById([Required] TKey id)
+    public override async Task DeleteById([Required] TKey id)
     {
         await _searchEngine.DeleteDocuments(searchIndex, new string[] { id.ToString() });
-        return await base.DeleteById(id);
+        await base.DeleteById(id);
     }
 }
 public abstract class SE_BaseAppService<TEntity, TEntityDto, TEntitySE> : BaseSEAppService<int, TEntity, TEntityDto, TEntitySE>
@@ -76,3 +77,7 @@ public abstract class SE_BaseAppService<TEntity, TEntitySE> : BaseSEAppService<i
     {
     }
 }
+#endregion
+
+
+

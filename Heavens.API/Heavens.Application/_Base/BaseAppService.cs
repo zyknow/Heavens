@@ -1,15 +1,11 @@
-﻿using Furion;
-using Furion.UnifyResult;
+﻿using Furion.DatabaseAccessor;
 using Heavens.Core.Entities.Base;
-using Heavens.Core.Extension.Extensions;
-using Heavens.Core.Extension.PageQueayFilter;
-using Heavens.Core.Extension.PageQueayFilter.common;
-using Heavens.Core.Extentions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq.Expressions;
 
 namespace Heavens.Application._Base;
 
+#region Base
 /// <summary>
 /// 继承此类即可实现基础方法
 /// 方法包括：CURD
@@ -18,7 +14,8 @@ namespace Heavens.Application._Base;
 /// <typeparam name="TEntity">数据实体类型</typeparam>
 /// <typeparam name="TEntityDto">数据实体Dto类型</typeparam>
 [ApiDescriptionSettings(Order = 0)]
-[Authorize]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
 public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiController
     where TEntity : class, IBaseEntity<TKey>, IPrivateEntity, new()
     where TEntityDto : class, new()
@@ -34,6 +31,7 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     {
         _repository = repository;
     }
+
     /// <summary>
     /// 获取分页
     /// </summary>
@@ -42,17 +40,13 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     [HttpPost]
     public async virtual Task<PagedList<TEntityDto>> Page(PageRequest request)
     {
-        Expression<Func<TEntity, bool>> exp = request.GetRulesExpression<TEntity>();
-
-        // 开发环境下填入过滤条件
-        if (App.HostEnvironment.IsDevelopment())
-            UnifyContext.Fill(exp.ToLambdaString());
 
         var data = await _repository
-            .Where(exp)
+            .Where(request.GetRulesExpression<TEntity>())
             .SortBy(request.Sort)
             .Select(x => x.Adapt<TEntityDto>())
             .ToPagedListAsync(request.Page, request.PageSize);
+
         return data;
     }
 
@@ -105,9 +99,9 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     /// <param name="id"></param>
     /// <returns>被删除的实体主键</returns>
     [HttpDelete]
-    public virtual Task<TKey> DeleteById([Required] TKey id)
+    public virtual Task DeleteById([Required] TKey id)
     {
-        return _repository.FakeDeleteSetInfoNowAsync(id);
+        return _repository.DeleteNowAsync(id);
     }
 
     /// <summary>
@@ -122,9 +116,12 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
         {
             throw Oops.Oh(Excode.REQUEST_DATA_EMPTY);
         }
+        foreach (TKey id in ids)
+            _repository.Delete(id);
 
-        return _repository.FakeDeleteSetInfoNowAsync(ids.Select(id => id));
+        return _repository.SaveNowAsync();
     }
+
 }
 
 
@@ -155,3 +152,5 @@ public abstract class BaseAppService<TEntity> : BaseAppService<int, TEntity, TEn
     {
     }
 }
+
+#endregion

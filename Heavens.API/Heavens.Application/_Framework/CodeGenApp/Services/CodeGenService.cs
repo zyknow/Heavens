@@ -113,7 +113,7 @@ namespace Heavens.Application.{apidirName};
 /// {CsCommentReader.Create(item)?.Summary ?? item.Name}接口
 /// </summary>
 [Authorize]
-public class {apidirName}Service : {(item.BaseType.Name.Contains("BaseEntity") ? @$"BaseAppService<{item.Name}, {item.Name}Dto>" : "IDynamicApiController")}
+public class {apidirName}Service : {(item.BaseType.Name.Contains("BaseEntity") ? @$"BaseAppService<{item.Name}, {item.Name}Dto>" : "IDynamicApiController")}, IScoped
 {{
     {(item.BaseType.Name.Contains("BaseEntity") ?
     @$"public I{item.Name}Service _{item.Name.ToCamelCase()}Service {{ get; set; }}

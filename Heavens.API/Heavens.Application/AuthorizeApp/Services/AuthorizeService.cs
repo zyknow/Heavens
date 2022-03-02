@@ -34,8 +34,7 @@ public class AuthorizeService : IAuthorizeService, IScoped
                 //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
-        user.Roles?.Split("|")?.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
+        user.Roles?.Split("|")?.ForEach(role => claims.Add(new Claim("role", role)));
 
         SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.IssuerSigningKey));
         SigningCredentials creds = new SigningCredentials(key, jwtSettings.Algorithm);

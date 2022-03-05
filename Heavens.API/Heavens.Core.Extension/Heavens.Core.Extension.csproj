@@ -22,7 +22,7 @@
 		<Using Include="System.Threading.Tasks" />
 		<Using Include="Bing.Extensions" />
 		<Using Include="Mapster" />
-		<Using Include="Heavens.Core.Extension.PageQueayFilter.attributes" />
+		<Using Include="Heavens.Core.Extension.QueayFilter.attributes" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Heavens.EntityFramework.Core.DbContexts;
 
-[AppDbContext("Sqlite3ConnectionString", DbProvider.Sqlite)]
+[AppDbContext("MysqlConnectionString", DbProvider.MySql)]
 public class DefaultDbContext : AppDbContext<DefaultDbContext>
 {
     public DefaultDbContext(DbContextOptions<DefaultDbContext> options) : base(options)

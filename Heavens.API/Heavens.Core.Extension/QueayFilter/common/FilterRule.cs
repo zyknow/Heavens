@@ -1,6 +1,7 @@
-﻿using System.ComponentModel;
+﻿using Heavens.Core.Extension.QueayFilter.attributes;
+using System.ComponentModel;
 
-namespace Heavens.Core.Extension.PageQueayFilter.common;
+namespace Heavens.Core.Extension.QueayFilter.common;
 
 /// <summary>
 /// 筛选规则

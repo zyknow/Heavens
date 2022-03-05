@@ -10,7 +10,7 @@ public class AuditDto : BaseEntityProp
     /// <summary>
     /// 用户持有角色
     /// </summary>
-    public string UserRoles { get; set; }
+    public string[] UserRoles { get; set; }
     /// <summary>
     /// 服务 (类/接口) 名
     /// </summary>

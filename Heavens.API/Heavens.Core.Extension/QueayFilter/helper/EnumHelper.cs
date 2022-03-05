@@ -1,6 +1,6 @@
-﻿using Heavens.Core.Extension.PageQueayFilter.attributes;
+﻿using Heavens.Core.Extension.QueayFilter.attributes;
 
-namespace Heavens.Core.Extension.PageQueayFilter.helper;
+namespace Heavens.Core.Extension.QueayFilter.helper;
 
 /// <summary>
 /// 枚举操作类

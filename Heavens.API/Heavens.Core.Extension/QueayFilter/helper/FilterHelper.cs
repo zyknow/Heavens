@@ -1,7 +1,7 @@
 ﻿using EasyCaching.Core.Internal;
 using Furion.FriendlyException;
-using Heavens.Core;
-using Heavens.Core.Extension.PageQueayFilter.common;
+using Heavens.Core.Extension.QueayFilter;
+using Heavens.Core.Extension.QueayFilter.common;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text.Json;
 
-namespace Heavens.Core.Extension.PageQueayFilter.helper;
+namespace Heavens.Core.Extension.QueayFilter.helper;
 
 /// <summary>
 /// 查询表达式辅助操作类
@@ -235,15 +235,14 @@ public static class FilterHelper
     {
         var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && rule.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter());
 
-        if (action != null)
-        {
-            Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
-            Expression body = action.FilterExp;
-            var data = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
-            return data;
-        }
-        else
+        if (action == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()))
             return null;
+
+        Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
+        Expression body = action.FilterExp;
+        var data = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
+        return data;
+
 
     }
 
@@ -256,7 +255,7 @@ public static class FilterHelper
     private static Expression GetExpressionBody(ParameterExpression param, FilterRule rule)
     {
         // if (rule == null || rule.Value == null || string.IsNullOrEmpty(rule.Value.ToString()))
-        if (rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value.ToString()))
+        if (rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()))
         {
             return Expression.Constant(true);
         }

@@ -27,14 +27,17 @@ public class AuthorizeService : IAuthorizeService, IScoped
     {
         JWTSettings jwtSettings = App.GetConfig<JWTSettings>("JWTSettings");
 
+
+        
+
         List<Claim> claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sid,user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub,user.Account),
+                new Claim(ClaimTypes.Sid,user.Id.ToString()),
+                new Claim(ClaimTypes.Name,user.Account),
                 //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-        user.Roles?.Split("|")?.ForEach(role => claims.Add(new Claim("role", role)));
+        user.Roles?.Split("|")?.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
 
         SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.IssuerSigningKey));
         SigningCredentials creds = new SigningCredentials(key, jwtSettings.Algorithm);

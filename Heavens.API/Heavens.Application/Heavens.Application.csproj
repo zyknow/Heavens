@@ -39,8 +39,8 @@
 		<Using Include="Heavens.Enums" />
 		<Using Include="Heavens.Core.Authorizations" />
 		<Using Include="Furion.DynamicApiController" />
-		<Using Include="Heavens.Core.Extension.PageQueayFilter" />
-		<Using Include="Heavens.Core.Extension.PageQueayFilter.common" />
+		<Using Include="Heavens.Core.Extension.QueayFilter" />
+		<Using Include="Heavens.Core.Extension.QueayFilter.common" />
 	</ItemGroup>
 
 	<ItemGroup>

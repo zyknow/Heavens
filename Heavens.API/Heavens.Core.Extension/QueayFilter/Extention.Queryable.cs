@@ -1,10 +1,10 @@
-﻿using Heavens.Core.Extension.PageQueayFilter.common;
-using Heavens.Core.Extension.PageQueayFilter.helper;
+﻿using Heavens.Core.Extension.QueayFilter.common;
+using Heavens.Core.Extension.QueayFilter.helper;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Heavens.Core.Extension.PageQueayFilter;
+namespace Heavens.Core.Extension.QueayFilter;
 
 /// <summary>
 /// IQueryable 扩展

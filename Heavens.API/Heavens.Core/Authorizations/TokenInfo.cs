@@ -12,18 +12,18 @@ public class TokenInfo
     /// <summary>
     /// 用户Id
     /// </summary>
-    public static int Id { get => (App.User?.FindFirst(JwtRegisteredClaimNames.Sid)?.Value).ToInt(); private set { } }
+    public static int Id { get => (App.User?.FindFirst(ClaimTypes.Sid)?.Value).ToInt(); private set { } }
     /// <summary>
     /// 用户名
     /// </summary>
-    public static string Account { get => App.User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value; private set { } }
+    public static string Account { get => App.User?.FindFirst(ClaimTypes.Name)?.Value; private set { } }
     
     /// <summary>
     /// 用户持有角色
     /// </summary>
     public static List<string> Roles
     {
-        get => App.User?.FindAll("role")?.Select(p => p.Value).ToList() ?? default;
+        get => App.User?.FindAll(ClaimTypes.Role)?.Select(p => p.Value).ToList() ?? default;
         private set { }
     }
 

@@ -1,4 +1,6 @@
 ﻿using Heavens.Application.UserApp.Dtos;
+using Heavens.Core.Extension.QueayFilter;
+using Heavens.Core.Extension.QueayFilter.common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Heavens.Application.UserApp;

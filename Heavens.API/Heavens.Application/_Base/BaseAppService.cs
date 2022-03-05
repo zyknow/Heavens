@@ -1,5 +1,11 @@
-﻿using Furion.DatabaseAccessor;
+﻿using Furion;
+using Furion.DatabaseAccessor;
+using Furion.UnifyResult;
+using Heavens.Application.AuditApp.Dtos;
 using Heavens.Core.Entities.Base;
+using Heavens.Core.Extension.Extensions;
+using Heavens.Core.Extension.QueayFilter;
+using Heavens.Core.Extension.QueayFilter.common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,6 +55,30 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     public virtual Task<List<TEntityDto>> GetAll()
     {
         return _repository.AsQueryable().Select(u => u.Adapt<TEntityDto>()).ToListAsync();
+    }
+
+    /// <summary>
+    /// 根据过滤条件查询
+    /// </summary>
+    /// <returns></returns>
+    public virtual async Task<List<TEntityDto>> GetByRequest(Request request)
+    {
+        var exp = request.GetRulesExpression<TEntity>();
+
+        // 开发环境下填入过滤条件
+        if (App.HostEnvironment.IsDevelopment())
+            UnifyContext.Fill(exp.ToLambdaString());
+
+        var query = _repository
+            .Where(exp)
+            .SortBy(request.Sort)
+            .Select(x => x.Adapt<TEntityDto>());
+
+        if (request.Limit > 0)
+            query.Take(request.Limit);
+
+        return await query.ToListAsync();
+
     }
 
     /// <summary>

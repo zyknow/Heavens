@@ -1,9 +1,9 @@
 ﻿using Bing.Utils.IdGenerators.Core;
+using Furion;
 using Furion.DatabaseAccessor;
 using Furion.JsonSerialization;
 using Heavens.Core.Authorizations;
 using Heavens.Core.Entities;
-using Heavens.Core.Extension.Audit;
 using Meilisearch;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Heavens.Core.Extension.AOP;
+namespace Heavens.Core.Extension.Audit;
 
 public class AuditActionFilter : IAsyncActionFilter
 {
@@ -39,7 +39,9 @@ public class AuditActionFilter : IAsyncActionFilter
 
 
         var watch = Stopwatch.StartNew();
+
         var result = await next();
+
         watch.Stop();
 
         // 请求用户所持有的角色
@@ -53,6 +55,8 @@ public class AuditActionFilter : IAsyncActionFilter
         //请求的方法
         var method = (context.ActionDescriptor as ControllerActionDescriptor)?.MethodInfo;
 
+        // 异常拦截
+        var exception = string.Empty;
 
         // 返回数据
         var returnValue = string.Empty;
@@ -65,6 +69,14 @@ public class AuditActionFilter : IAsyncActionFilter
                     break;
 
                 case JsonResult jsonResult:
+
+                    dynamic rtValue = jsonResult.Value;
+
+                    if (rtValue?.Errors != null)
+                    {
+                        exception = JsonConvert.SerializeObject(rtValue?.Errors);
+                    }
+
                     returnValue = JsonConvert.SerializeObject(jsonResult.Value);
                     break;
 
@@ -73,9 +85,6 @@ public class AuditActionFilter : IAsyncActionFilter
                     break;
             }
         }
-
-        // 异常拦截
-        var exception = string.Empty;
         if (result?.Exception != null)
         {
             exception = result.Exception.ToString();
@@ -107,7 +116,7 @@ public class AuditActionFilter : IAsyncActionFilter
         audit.SetCreateByHttpToken();
 
 #pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
-        _auditRepository.InsertAsync(audit);
+        await _auditRepository.InsertAsync(audit);
 #pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
     }
 
@@ -120,7 +129,7 @@ public class AuditActionFilter : IAsyncActionFilter
     private Encoding GetRequestEncoding(HttpRequest request)
     {
         var requestContentType = request.ContentType;
-        var requestMediaType = requestContentType == null ? default(MediaType) : new MediaType(requestContentType);
+        var requestMediaType = requestContentType == null ? default : new MediaType(requestContentType);
         var requestEncoding = requestMediaType.Encoding;
         if (requestEncoding == null)
         {

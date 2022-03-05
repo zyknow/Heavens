@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Heavens.Core.Extension.PageQueayFilter.common;
+namespace Heavens.Core.Extension.QueayFilter.common;
 
 public class ParameterReplacementVisitor : ExpressionVisitor
 {

@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Heavens.Core.Extension.PageQueayFilter.common;
+namespace Heavens.Core.Extension.QueayFilter.common;
 
 /// <summary>
 /// PageRequest增强查询过滤
@@ -26,11 +26,12 @@ public interface IQueryAction<T>
 /// <summary>
 /// PageRequest增强查询过滤
 /// </summary>
-/// <typeparam name="T"></typeparam>
-/// <typeparam name="TKey"></typeparam>
-public class QueryAction<T, TKey> : IQueryAction<T>
+/// <typeparam name="T">实体类型</typeparam>
+/// <typeparam name="TSortResult">排序类型</typeparam>
+/// <typeparam name="TValueResult">值比对类型</typeparam>
+public class QueryAction<T, TSortResult, TValueResult> : IQueryAction<T>
 {
-    public QueryAction(string field, Expression<Func<T, TKey>> sortKeySelector, Expression<Func<T, TKey>> filterFunc)
+    public QueryAction(string field, Expression<Func<T, TSortResult>> sortKeySelector, Expression<Func<T, TValueResult>> filterFunc)
     {
         Field = field;
         SortExp = sortKeySelector;

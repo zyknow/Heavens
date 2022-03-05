@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Heavens.Application.AuditApp.Dtos;
-public class AuditPage:AuditDto
+public class AuditPage : AuditDto
 {
-    public bool HasBody { get; set; }
-    public bool HasQuery { get; set; }
-    public bool HasException { get; set; }
+    public bool? HasBody { get; set; } 
+    public bool? HasQuery { get; set; }
+    public bool? HasException { get; set; }
+    public bool? HasReturnValue { get; set; } 
 }

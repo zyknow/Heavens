@@ -1,4 +1,4 @@
-﻿namespace Heavens.Core.Extension.PageQueayFilter.common;
+﻿namespace Heavens.Core.Extension.QueayFilter.common;
 
 /// <summary>
 /// 搜索排序

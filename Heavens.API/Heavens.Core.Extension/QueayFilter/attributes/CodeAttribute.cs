@@ -1,4 +1,4 @@
-﻿namespace Heavens.Core.Extension.PageQueayFilter.attributes;
+﻿namespace Heavens.Core.Extension.QueayFilter.attributes;
 
 /// <summary>
 /// 操作码

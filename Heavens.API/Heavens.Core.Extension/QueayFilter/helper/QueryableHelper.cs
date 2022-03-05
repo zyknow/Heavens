@@ -1,6 +1,5 @@
 ﻿using Furion.FriendlyException;
-using Heavens.Core;
-using Heavens.Core.Extension.PageQueayFilter.common;
+using Heavens.Core.Extension.QueayFilter.common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Heavens.Core.Extension.PageQueayFilter.helper;
+namespace Heavens.Core.Extension.QueayFilter.helper;
 
 internal class QueryableHelper
 {

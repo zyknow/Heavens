@@ -1,7 +1,7 @@
-﻿using Heavens.Core.Extension.PageQueayFilter.helper;
+﻿using Heavens.Core.Extension.QueayFilter.helper;
 using System.Linq.Expressions;
 
-namespace Heavens.Core.Extension.PageQueayFilter.common;
+namespace Heavens.Core.Extension.QueayFilter.common;
 
 /// <summary>
 /// 
@@ -36,3 +36,4 @@ public class PageRequest
         return FilterHelper.GetExpression(Filters, queryActions);
     }
 }
+

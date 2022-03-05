@@ -1,7 +1,7 @@
 ﻿using Furion;
 using Furion.DependencyInjection;
 using Heavens.Core.Authorizations;
-using Heavens.Core.Extension.AOP;
+using Heavens.Core.Extension.Audit;
 using Heavens.Core.Extension.Cacheing;
 using Heavens.EntityFramework.Core.DbContexts;
 using Heavens.Web.Core.Handlers;
@@ -35,7 +35,6 @@ public class Startup : AppStartup
             o.Filters.Add(typeof(AuditActionFilter));
         })
                 .AddInjectWithUnifyResult()
-                .AddFriendlyException()
                 .AddNewtonsoftJson(option =>
                 {
                     //忽略循环引用

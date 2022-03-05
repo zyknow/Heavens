@@ -1,6 +1,7 @@
-﻿using System.ComponentModel;
+﻿using Furion.Extensions;
+using System.ComponentModel;
 
-namespace Heavens.Core.Extension.PageQueayFilter;
+namespace Heavens.Core.Extension.QueayFilter;
 
 /// <summary>
 /// Object拓展方法，.Net4.0以上
@@ -31,6 +32,10 @@ internal class ObjectHelper
         {
             return Guid.Parse(value.ToString());
         }
+
+        if(conversionType == typeof(DateTimeOffset) && value.GetType() == typeof(DateTime))
+            return ((DateTime)value).ConvertToDateTimeOffset();
+
         return Convert.ChangeType(value, conversionType);
     }
 

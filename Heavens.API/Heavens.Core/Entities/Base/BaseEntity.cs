@@ -7,9 +7,6 @@ namespace Heavens.Core.Entities.Base;
 public abstract class BaseEntity<TKey> : CommonEntity<TKey>, IBaseEntity<TKey>
     where TKey : IEquatable<TKey>
 {
-    /// <summary>
-    /// 根据httpToken设置更新字段,如果没有token信息则只设置UpdatedTime
-    /// </summary>
     public void SetUpdateByHttpToken()
     {
 
@@ -25,9 +22,7 @@ public abstract class BaseEntity<TKey> : CommonEntity<TKey>, IBaseEntity<TKey>
 
         UpdatedTime = DateTime.Now;
     }
-    /// <summary>
-    /// 根据httpToken设置创建字段,如果没有token信息则只设置CreatedTime
-    /// </summary>
+    
     public void SetCreateByHttpToken()
     {
         if (!TokenInfo.Account.IsEmpty())

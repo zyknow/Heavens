@@ -1,10 +1,10 @@
-import { APP, appStore } from './../store/app-store'
 import { ls } from './../utils/index'
 import { boot } from 'quasar/wrappers'
 import { createI18n } from 'vue-i18n'
 
 import messages from 'src/i18n/_index'
 import { Quasar } from 'quasar'
+import { appStore } from '@/store/app-store'
 
 const lang = appStore?.lang
 export const i18n = createI18n({

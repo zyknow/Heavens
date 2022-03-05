@@ -47,9 +47,8 @@ import { RequestResult } from 'src/api/_typing'
 import { notify } from 'src/utils/notify'
 import router from 'src/router'
 import LanguageSelect from '@/components/I18n/language-select.vue'
-import { userStore } from '@/store/user-store'
 import { defaultRoutePath } from '@/router/routes'
-
+import { userStore } from '@/store/user-store'
 const t = useI18n().t
 const state = reactive({
   loading: false,

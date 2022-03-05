@@ -36,7 +36,7 @@
             @click.stop="refresh(tab.name)"
           />
           <!-- X按钮 -->
-          <q-icon class="page-tab-icon" name="close" @click.stop="multiTabAction.close(tab.name)" />
+          <q-icon class="page-tab-icon" name="close" @click.stop="multiTabState.close(tab.name)" />
           <!-- 右键菜单 -->
           <q-menu touch-position context-menu>
             <q-list dense>
@@ -44,17 +44,17 @@
                 <q-item-section @click="refresh(tab.name)">{{ $t('刷新') }}</q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="multiTabAction.closeOther(tab.name)">
+                <q-item-section @click="multiTabState.closeOther(tab.name)">
                   {{ t('关闭其他') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="multiTabAction.closeLeft(tab.name)">
+                <q-item-section @click="multiTabState.closeLeft(tab.name)">
                   {{ t('关闭左侧所有') }}
                 </q-item-section>
               </q-item>
               <q-item v-close-popup clickable>
-                <q-item-section @click="multiTabAction.closeRight(tab.name)">
+                <q-item-section @click="multiTabState.closeRight(tab.name)">
                   {{ t('关闭右侧所有') }}
                 </q-item-section>
               </q-item>
@@ -95,11 +95,10 @@
 </template>
 <script lang="ts" setup>
 import { defineComponent, reactive, toRefs, computed } from 'vue'
-import { multiTabAction, multiTabState } from './multi-table-store'
-import router from 'src/router'
 import { isDev, ls, sleepAsync } from 'src/utils'
 import { useI18n } from 'vue-i18n'
 import RouteView from '@/layouts/route-view.vue'
+import multiTabState from './multi-tab-state'
 import { appStore } from '@/store/app-store'
 const t = useI18n().t
 const state = reactive({
@@ -116,7 +115,7 @@ const setCachingEnabled = async (enabled: boolean) => {
 
 const refresh = async (name: string) => {
   multiTabState.loading = true
-  await multiTabAction.refreshAsync(name)
+  await multiTabState.refreshAsync(name)
   multiTabState.loading = false
 }
 </script>

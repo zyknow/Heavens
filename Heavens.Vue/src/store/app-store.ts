@@ -1,8 +1,10 @@
+import router from '@/router'
 import { computed, provide, watch, reactive } from 'vue'
 import { copyByKeys, ls } from 'src/utils'
 import { Quasar } from 'quasar'
 import { notify } from 'src/utils/notify'
 import { i18n } from '@/boot/i18n'
+import multiTabState from '@/components/multi-tab/multi-tab-state'
 export const APP = 'APP'
 
 const actions = {}
@@ -48,6 +50,18 @@ watch(
       notify.error('切换语言失败，请重试')
       // Requested Quasar Language Pack does not exist,
       // let's not break the app, so catching error
+    }
+  }
+)
+
+watch(
+  () => appStore.multiTabVisible,
+  (v) => {
+    if (!v) {
+      appStore.multiTabCacheEnabled = v
+      multiTabState.clear()
+    } else {
+      multiTabState.addByRouter(router.currentRoute.value)
     }
   }
 )

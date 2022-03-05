@@ -36,6 +36,7 @@ import { CHANGE_LEFT_DRAWER_FUN, LEFT_DRAWER_CLOSED_KEY } from '.'
 import { MenuDataItem } from '@/router/_typing'
 import { userStore } from '@/store/user-store'
 import { appStore } from '@/store/app-store'
+
 const $q = useQuasar()
 const state = reactive({
   drawerMini: false,

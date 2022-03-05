@@ -10,6 +10,6 @@
 </template>
 
 <script lang="ts" setup>
-import { multiTabState } from '@/components/multi-tab/multi-table-store'
+import multiTabState from '@/components/multi-tab/multi-tab-state'
 import { appStore } from '@/store/app-store'
 </script>

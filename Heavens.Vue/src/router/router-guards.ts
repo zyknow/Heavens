@@ -1,8 +1,8 @@
-import { userStore } from '../store/user-store'
 import router from './index'
 import { LoadingBar } from 'quasar'
 import { intersectionWith } from 'lodash-es'
 import { allowList, loginRoutePath } from './routes'
+import { userStore } from '@/store/user-store'
 
 router.beforeEach(async (to, from) => {
   // 白名单路由直接不检查

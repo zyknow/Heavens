@@ -1,4 +1,3 @@
-import { multiTabAction } from '../components/multi-tab/multi-table-store'
 import { computed, provide, watch, reactive } from 'vue'
 import { copyByKeys, ls } from 'src/utils'
 import { GetUserByToken, User } from '@/api/user'
@@ -8,6 +7,7 @@ import { generatorDynamicRouter } from '@/router/generator-router'
 import { dynamicRouter, loginRoutePath } from '@/router/routes'
 import router from '@/router'
 import { MenuDataItem } from '@/router/_typing'
+import multiTabState from '@/components/multi-tab/multi-tab-state'
 
 export const TOKEN_INFO = 'TOKEN_INFO'
 
@@ -60,7 +60,7 @@ const actions = {
     this.resetInfo()
     userStore.tokenInfo = undefined
     router.push(loginRoutePath)
-    multiTabAction.clear()
+    multiTabState.clear()
   }
 }
 

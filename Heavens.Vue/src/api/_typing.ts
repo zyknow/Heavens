@@ -62,11 +62,11 @@ export interface BaseEntity {
   /**
    * 创建者id
    */
-  createdId: number
+  createdId?: number
   /**
    * 创建者
    */
-  createdBy?: string
+  createdBy: string
   /**
    * 创建时间
    */
@@ -74,13 +74,13 @@ export interface BaseEntity {
   /**
    * 更新者id
    */
-  updatedId: number
+  updatedId?: number
   /**
    * 更新者
    */
-  updatedBy?: string
+  updatedBy: string
   /**
    * 更新时间
    */
-  updatedTime: string
+  updatedTime?: string
 }

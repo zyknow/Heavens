@@ -48,6 +48,12 @@ export const dynamicRouter: MenuDataItem[] = [
     meta: { title: '用户管理', icon: 'r_manage_accounts', authority: [staticRoles.admin], keepAlive: true },
     component: import('pages/user/index.vue')
   },
+  {
+    path: '/audit',
+    name: 'Audit',
+    meta: { title: '审计', icon: 'r_receipt_long', authority: [staticRoles.admin], keepAlive: true },
+    component: import('pages/audit/index.vue')
+  },
   // 演示多级标签
   {
     path: '/user1',

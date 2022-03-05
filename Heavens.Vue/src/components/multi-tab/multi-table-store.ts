@@ -109,7 +109,6 @@ const MultiTabAction = (state: MultiTabStore): IMultiTabAction => {
   }
 
   const refreshAsync = async (name: CacheKey) => {
-    // debugger
     // router.push(name as string)
     state.exclude = [state.tagCaches.find((c) => c.name == name)?.name as string]
     // 刷新延时，可去除

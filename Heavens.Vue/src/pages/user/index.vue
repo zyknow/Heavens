@@ -181,12 +181,26 @@ const defaultForm: User = {
   phone: '',
   sex: false,
   description: '',
-  lastLoginTime: undefined,
   id: 0,
-  createdId: 0,
+  createdBy: '',
   createdTime: '',
-  updatedId: 0,
-  updatedTime: ''
+  updatedBy: ''
+}
+
+const queryForm: User = {
+  name: '',
+  account: '',
+  passwd: '',
+  enabled: false,
+  roles: [],
+  email: '',
+  phone: '',
+  sex: false,
+  description: '',
+  id: 0,
+  createdBy: '',
+  createdTime: '',
+  updatedBy: ''
 }
 
 const $q = useQuasar()
@@ -293,7 +307,7 @@ const state = reactive({
   users: [] as User[],
   loading: false,
   searchKey: '',
-  pageRequest: new PageRequest(1, 10, [
+  pageRequest: new PageRequest([
     {
       field: 'name',
       value: '123',
@@ -304,19 +318,7 @@ const state = reactive({
       value: '',
       operate: FilterOperate.contains
     },
-    {},
-    {
-      field: 'createdTime',
-      value: '2023-02-12',
-      operate: FilterOperate.greater,
-      condition: FilterCondition.and
-    },
-    {
-      field: 'createdTime',
-      value: '2023-02-12',
-      operate: FilterOperate.greater,
-      condition: FilterCondition.and
-    }
+    {}
   ]),
   pagination: {
     sortBy: 'id',
@@ -348,7 +350,7 @@ const getUsers = async () => {
   const { pageRequest } = state
 
   // pageRequest.setAllRulesValue(state.searchKey, ['createdTime'])
-  pageRequest.setOrder(state.pagination)
+  pageRequest.setPagination(state.pagination)
 
   state.loading = true
   const res = await GetUserPage(pageRequest)

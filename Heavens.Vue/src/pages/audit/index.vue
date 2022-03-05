@@ -1,66 +1,128 @@
-﻿
-<template>
-  <div class="p-2 h-full">
+﻿<template>
+  <div class="h-full">
     <!-- Table -->
     <q-table
+      v-model:selected.sync="state.selected"
+      v-model:pagination="state.pagination"
       :rows="state.audits"
       :columns="state.columns"
       selection="multiple"
       :loading="state.loading"
-      :row-key="v => v.id"
+      :row-key="(v) => v.id"
       :visible-columns="state.visibleColumns"
-      v-model:selected.sync="state.selected"
       flat
-      @request="tableHandler"
-      v-model:pagination="state.pagination"
       :rows-per-page-options="[10, 15, 50, 500, 1000, 10000]"
       table-header-class="bg-gray-100"
       class="h-full relative sticky-header-column-table sticky-right-column-table"
       :virtual-scroll="state.audits.length >= 200"
+      @request="tableHandler"
     >
+      <!-- 加载动画 -->
       <template #loading>
         <q-inner-loading showing color="primary" />
       </template>
-
+      <!-- table 顶部操作栏 -->
       <template #top>
-        <div class="w-full flex flex-row justify-between">
-          <div class="flex flex-row space-x-1">
-            <q-input
-              outlined
-              :label="``"
-              dense
-              v-model="state.searchKey"
-              @keyup.enter="getAudits"
-            ></q-input>
-            <q-btn icon="search" color="primary" @click="getAudits" />
-            <q-btn color="primary" :label="t('添加')" @click="showDialog(t('添加'))" />
-            <q-btn
-              color="danger"
-              :label="t('删除')"
-              @click="deleteByIds(state.selected.map(s => s.id))"
-            />
-          </div>
-          <div>
+        <div class="w-full flex flex-row">
+          <div class="flex flex-row flex-wrap mr-20 items-center space-x-0.5 space-y-0.5">
+            <q-input v-model="state.query.createdId" outlined :label="t('调用者Id')" dense @keyup.enter="getAudits" />
+            <q-input v-model="state.query.createdBy" outlined :label="t('调用者')" dense @keyup.enter="getAudits" />
+            <q-input v-model="state.query.serviceName" outlined :label="t('服务名')" dense @keyup.enter="getAudits" />
+            <q-input v-model="state.query.methodName" outlined :label="t('执行方法')" dense @keyup.enter="getAudits" />
+            <q-input v-model="state.query.path" outlined :label="t('请求路径')" dense @keyup.enter="getAudits" />
             <q-select
-              v-model="state.visibleColumns"
-              multiple
+              v-model="state.query.httpMethod"
+              class="w-40"
+              :options="['GET', 'POST', 'DELETE', 'PATH']"
+              :label="t('Http请求方法')"
               outlined
+              clearable
               dense
-              options-dense
-              :display-value="$q.lang.table.columns"
-              emit-value
-              map-options
-              :options="state.columns"
-              option-value="name"
-              options-cover
-              class="float-right"
-              menu-anchor="bottom middle"
-              menu-self="bottom middle"
             />
+            <q-input
+              v-model="state.query.clientIpAddress"
+              outlined
+              :label="t('请求IP')"
+              dense
+              @keyup.enter="getAudits"
+            />
+            <q-checkbox v-model="state.query.hasBody" toggle-indeterminate :label="t('Body')" />
+            <q-input
+              v-if="state.query.hasBody"
+              v-model="state.query.body"
+              outlined
+              :label="t('Body')"
+              dense
+              @keyup.enter="getAudits"
+            />
+            <q-checkbox v-model="state.query.hasQuery" toggle-indeterminate :label="t('Query')" />
+            <q-input
+              v-if="state.query.hasQuery"
+              v-model="state.query.query"
+              outlined
+              :label="t('Query')"
+              dense
+              @keyup.enter="getAudits"
+            />
+            <q-checkbox v-model="state.query.hasException" toggle-indeterminate :label="t('异常')" />
+            <q-input
+              v-if="state.query.hasException"
+              v-model="state.query.exception"
+              outlined
+              :label="t('异常')"
+              dense
+              @keyup.enter="getAudits"
+            />
+            <q-input
+              v-model="state.query['min.executionMs']"
+              type="number"
+              outlined
+              :label="t('最小执行毫秒')"
+              dense
+              @keyup.enter="getAudits"
+            />
+            —
+            <q-input
+              v-model="state.query['max.executionMs']"
+              type="number"
+              outlined
+              :label="t('最大执行毫秒')"
+              dense
+              @keyup.enter="getAudits"
+            />
+            <q-date-time v-model="state.query['min.createdTime']" outlined dense :label="t('最小创建时间')" />
+            —
+            <q-date-time v-model="state.query['max.createdTime']" outlined dense :label="t('最大创建时间')" />
+            <div class="flex flex-row space-x-1">
+              <q-btn icon="search" color="primary" @click="getAudits" />
+              <q-btn
+                icon="r_restart_alt"
+                color="primary"
+                :label="t('重置过滤')"
+                @click="state.query = { ...defaultQuery }"
+              />
+            </div>
           </div>
+          <q-select
+            v-model="state.visibleColumns"
+            multiple
+            outlined
+            dense
+            options-dense
+            :display-value="$q.lang.table.columns"
+            emit-value
+            map-options
+            :options="state.columns"
+            option-value="name"
+            options-cover
+            class="absolute right-4 top-3"
+            menu-anchor="bottom middle"
+            menu-self="bottom middle"
+          />
         </div>
       </template>
 
+      <!-- 底部分页查询器 -->
       <template #pagination>
         <q-pagination
           v-model="state.pagination.page"
@@ -72,59 +134,193 @@
         />
       </template>
 
-      <template #body-cell-actions="props">
-        <q-td :props="props" class="space-x-1 w-1">
-          <q-btn dense color="primary" icon="edit" @click="showDialog(t('编辑'), props.row.id)" />
-          <q-btn dense color="danger" icon="remove" @click="deleteByIds([props.row.id])" />
+      <!-- #region Table 自定义显示 -->
+      <template #body-cell-userRoles="props">
+        <q-td :props="props">
+          <q-chip v-for="role in props.row.userRoles" :key="role" dense outline square color="primary" :label="role" />
+        </q-td>
+      </template>
+      <template #body-cell-hasQuery="props">
+        <q-td :props="props">
+          <q-chip
+            v-if="props.row.hasQuery"
+            clickable
+            dense
+            icon="info"
+            outline
+            square
+            color="primary"
+            @click="showParaDialog('Query', props.row.id)"
+            >{{ props.row.hasQuery ? '详细' : '' }}</q-chip
+          >
         </q-td>
       </template>
 
-      <!-- <template #body-cell-sex="props">
-        <q-td :props="props" class="w-1">
-          <q-icon
-            size="2rem"
-            :color="props.row.sex ? 'primary' : 'pink-3'"
-            :name="props.row.sex ? 'male' : 'female'"
-          ></q-icon>
-        </q-td> 
-      </template> -->
+      <template #body-cell-hasBody="props">
+        <q-td :props="props">
+          <q-chip
+            v-if="props.row.hasBody"
+            clickable
+            dense
+            icon="info"
+            outline
+            square
+            color="primary"
+            @click="showParaDialog('Body', props.row.id)"
+            >{{ props.row.hasBody ? '详细' : '' }}</q-chip
+          >
+        </q-td>
+      </template>
 
+      <template #body-cell-hasException="props">
+        <q-td :props="props">
+          <q-chip
+            v-if="props.row.hasException"
+            clickable
+            dense
+            outline
+            icon="info"
+            square
+            color="primary"
+            @click="showParaDialog('Exception', props.row.id)"
+            >{{ props.row.hasException ? '详细' : '' }}</q-chip
+          >
+        </q-td>
+      </template>
+
+      <template #body-cell-hasReturnValue="props">
+        <q-td :props="props">
+          <q-chip
+            v-if="props.row.hasReturnValue"
+            icon="info"
+            clickable
+            dense
+            outline
+            square
+            color="primary"
+            @click="showParaDialog('ReturnValue', props.row.id)"
+            >{{ props.row.hasReturnValue ? '详细' : '' }}</q-chip
+          >
+        </q-td>
+      </template>
+
+      <template #body-cell-actions="props">
+        <q-td :props="props" class="space-x-1 w-1">
+          <q-btn dense color="primary" :label="t('详情')" @click="showDetailDialog(props.row.id)" />
+        </q-td>
+      </template>
+      <!-- #endregion -->
     </q-table>
 
-    <!-- Dialog -->
-    <q-dialog v-model="state.dialogVisible">
-      <q-card class="w-2/4">
+    <!-- 详细  dialog-->
+    <q-dialog v-model="state.paraDialogVisible" full-width>
+      <q-card>
         <q-card-section>
-          <div class="text-h6">{{ t(state.dialogTitle) }}</div>
+          <div class="text-h6">{{ t(state.paraDialogTitle) }}</div>
         </q-card-section>
-        <q-separator></q-separator>
+        <q-separator />
+        <q-card-section>
+          <JsonViewer
+            :value="state.paraDetail"
+            expanded
+            :expandDepth="100"
+            copyable
+            boxed
+            sort
+            previewMode
+            theme="dark"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
 
-        <q-card-section class="q-pt-none mt-8">
-          <q-form class="space-y-2" @submit="dialogFormSubmit">
-            <q-input dense outlined v-model="state.form.userRoles" :label="t('用户持有角色')"></q-input>
-<q-input dense outlined v-model="state.form.serviceName" :label="t('服务 (类/接口) 名')"></q-input>
-<q-input dense outlined v-model="state.form.methodName" :label="t('执行方法名称')"></q-input>
-<q-input dense outlined v-model="state.form.path" :label="t('请求路径')"></q-input>
-<q-input dense outlined v-model="state.form.body" :label="t('Body参数')"></q-input>
-<q-input dense outlined v-model="state.form.query" :label="t('Query参数')"></q-input>
-<q-input dense outlined v-model="state.form.httpMethod" :label="t('Http请求方法')"></q-input>
-<q-input dense outlined v-model="state.form.returnValue" :label="t('返回值')"></q-input>
-<q-input dense outlined v-model="state.form.executionMs" :label="t('方法调用的总持续时间（毫秒）')"></q-input>
-<q-input dense outlined v-model="state.form.clientIpAddress" :label="t('客户端的IP地址')"></q-input>
-<q-input dense outlined v-model="state.form.exception" :label="t('方法执行期间发生异常')"></q-input>
-<q-input dense outlined v-model="state.form.id" :label="t('id主键')"></q-input>
-<q-input dense outlined v-model="state.form.createdId" :label="t('创建者id')"></q-input>
-<q-input dense outlined v-model="state.form.createdBy" :label="t('创建者')"></q-input>
-<q-input dense outlined v-model="state.form.createdTime" :label="t('创建时间')"></q-input>
-<q-input dense outlined v-model="state.form.updatedId" :label="t('更新者id')"></q-input>
-<q-input dense outlined v-model="state.form.updatedBy" :label="t('更新者')"></q-input>
-<q-input dense outlined v-model="state.form.updatedTime" :label="t('更新时间')"></q-input>
+    <!-- 详情  dialog-->
+    <q-dialog v-model="state.detailDialogVisible" full-width>
+      <q-card>
+        <q-card-section class="flex flex-row justify-between">
+          <div class="text-h6">{{ t('详情') }}</div>
+          <q-btn icon="close" flat class="fixed right-12 z-10" @click="state.detailDialogVisible = false" />
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="flex flex-col space-y-1">
+            <div>
+              <span>调用者角色：</span>
+              <q-chip
+                v-for="role in state.auditDetail.userRoles"
+                :key="role"
+                dense
+                outline
+                square
+                color="primary"
+                :label="role"
+              />
+            </div>
+            <span>调用者Id：{{ state.auditDetail.createdId }}</span>
+            <span>服务名Id：{{ state.auditDetail.serviceName }}</span>
+            <span>执行方法：{{ state.auditDetail.methodName }}</span>
+            <span>请求路径：{{ state.auditDetail.path }}</span>
+            <span>Http请求方法：{{ state.auditDetail.httpMethod }}</span>
+            <span>创建时间：{{ state.auditDetail.createdTime }}</span>
+            <span>请求Ip：{{ state.auditDetail.clientIpAddress }}</span>
+          </div>
+        </q-card-section>
+        <q-card-section class="json-view-section">
+          <div v-if="state.auditDetail.bodyObj || state.auditDetail.body">
+            <div class="text-xl">{{ t('body') }}</div>
+            <JsonViewer
+              :value="state.auditDetail.bodyObj || state.auditDetail.body"
+              expanded
+              :expandDepth="100"
+              copyable
+              boxed
+              sort
+              previewMode
+              theme="dark"
+            />
+          </div>
 
-            
+          <div v-if="state.auditDetail.queryObj || state.auditDetail.query">
+            <div class="text-xl">{{ t('query') }}</div>
+            <JsonViewer
+              :value="state.auditDetail.queryObj || state.auditDetail.query"
+              expanded
+              :expandDepth="100"
+              copyable
+              boxed
+              sort
+              previewMode
+              theme="dark"
+            />
+          </div>
 
-            <q-btn class="float-right" :label="t(state.dialogTitle)" color="primary" type="submit" />
-            <q-card-actions class="w-full"></q-card-actions>
-          </q-form>
+          <div v-if="state.auditDetail.exceptionObj || state.auditDetail.exception">
+            <div class="text-xl">{{ t('异常') }}</div>
+            <JsonViewer
+              :value="state.auditDetail.exceptionObj || state.auditDetail.exception"
+              expanded
+              :expandDepth="100"
+              copyable
+              boxed
+              sort
+              previewMode
+              theme="dark"
+            />
+          </div>
+
+          <div v-if="state.auditDetail.returnValueObj || state.auditDetail.returnValue">
+            <div class="text-xl">{{ t('返回值') }}</div>
+            <JsonViewer
+              :value="state.auditDetail.returnValueObj || state.auditDetail.returnValue"
+              expanded
+              :expandDepth="100"
+              copyable
+              boxed
+              sort
+              previewMode
+              theme="dark"
+            />
+          </div>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -133,274 +329,317 @@
 <script lang="ts">
 // 声明额外的选项
 export default {
-  name:'audit'
+  name: 'Audit'
 }
 </script>
 <script lang="ts" setup>
-import { AddAudit, DeleteAuditByIds, GetAuditById, GetAuditPage, UpdateAudit, Audit } from '@/api/audit'
-import { ref, defineComponent, toRefs, reactive, computed, watch } from 'vue'
+import {
+  AddAudit,
+  DeleteAuditByIds,
+  GetAuditById,
+  GetAuditPage,
+  UpdateAudit,
+  Audit,
+  AuditPageRequestField
+} from '@/api/audit'
+import { ref, defineComponent, toRefs, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { dateFormat } from '@/utils/date-util'
 import { useQuasar } from 'quasar'
-import { ls } from '@/utils'
-import { PageRequest } from '@/utils/page-request'
-import { FilterCondition, FilterOperate, ListSortType } from '@/utils/page-request/enums'
+import { copyByKeys, ls } from '@/utils'
+import { PageRequest, Pagination } from '@/utils/page-request'
+import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
+import { AuditPage } from '../../api/audit'
+import 'vue3-json-viewer/dist/index.css'
+import { camelCase } from 'lodash-es'
+import QDateTime from '@/components/quasar-extension/q-date-time.vue'
+import { staticRoles } from '@/router/routes'
 
-const AUDIT_VISIBLE_COLUMNS = `audit_visibleColumns`
+const t = useI18n().t
 
-// 默认显示的Table列
-const defaultVisibleColumns = ['userRoles','serviceName','methodName','path','body','query','httpMethod','returnValue','executionMs','clientIpAddress','exception','id','createdId','createdBy','createdTime','updatedId','updatedBy','updatedTime']
-
-// Form表单默认内容
-const defaultForm: Audit = {
+interface AuditDetail extends Audit {
+  returnValueObj?: object | string
+  bodyObj: object | string
+  queryObj: object | string
+  exceptionObj: object | string
 }
 
-const $q = useQuasar()
-const t = useI18n().t
-const columns = [
-    {
-    label: t('用户持有角色'),
+// 显示列
+const AUDIT_VISIBLE_COLUMNS = `AUDIT_VISIBLE_COLUMNS`
+
+// 分页大小
+const AUDIT_ROWS_PER_PAGE = 'AUDIT_ROWS_PER_PAGE'
+
+// 默认显示的Table列
+const defaultVisibleColumns = [
+  'userRoles',
+  'serviceName',
+  'methodName',
+  'path',
+  'hasBody',
+  'hasQuery',
+  'httpMethod',
+  'hasReturnValue',
+  'executionMs',
+  'clientIpAddress',
+  'hasException',
+  'id',
+  'createdId',
+  'createdBy',
+  'createdTime',
+  'updatedId',
+  'updatedBy',
+  'updatedTime',
+  'actions'
+]
+
+const columns: any[] = [
+  {
+    label: t('调用者角色'),
     name: 'userRoles',
     field: 'userRoles',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('服务 (类/接口) 名'),
+    textClasses: ''
+  },
+  {
+    label: t('调用者Id'),
+    name: 'createdId',
+    field: 'createdId',
+    sortable: true,
+    align: 'center',
+    textClasses: ''
+  },
+  {
+    label: t('调用者'),
+    name: 'createdBy',
+    field: 'createdBy',
+    sortable: true,
+    align: 'center',
+    textClasses: ''
+  },
+  {
+    label: t('服务名'),
     name: 'serviceName',
     field: 'serviceName',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('执行方法名称'),
+    textClasses: ''
+  },
+  {
+    label: t('执行方法'),
     name: 'methodName',
     field: 'methodName',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
+    textClasses: ''
+  },
+  {
     label: t('请求路径'),
     name: 'path',
     field: 'path',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('Body参数'),
-    name: 'body',
-    field: 'body',
+    textClasses: ''
+  },
+  {
+    label: t('Body'),
+    name: 'hasBody',
+    field: 'hasBody',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('Query参数'),
-    name: 'query',
-    field: 'query',
+    textClasses: ''
+  },
+  {
+    label: t('Query'),
+    name: 'hasQuery',
+    field: 'hasQuery',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
+    textClasses: ''
+  },
+  {
     label: t('Http请求方法'),
     name: 'httpMethod',
     field: 'httpMethod',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('返回值'),
-    name: 'returnValue',
-    field: 'returnValue',
-    sortable: true,
-    align: 'center',
-    textClasses: '',
-  },{
-    label: t('方法调用的总持续时间（毫秒）'),
+    textClasses: ''
+  },
+  {
+    label: t('执行时间'),
     name: 'executionMs',
     field: 'executionMs',
     sortable: true,
+    format: (v: number) => `${v}ms`,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('客户端的IP地址'),
-    name: 'clientIpAddress',
-    field: 'clientIpAddress',
+    textClasses: ''
+  },
+  {
+    label: t('异常'),
+    name: 'hasException',
+    field: 'hasException',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('方法执行期间发生异常'),
-    name: 'exception',
-    field: 'exception',
-    sortable: true,
-    align: 'center',
-    textClasses: '',
-  },{
-    label: t('id主键'),
-    name: 'id',
-    field: 'id',
-    sortable: true,
-    align: 'center',
-    textClasses: '',
-  },{
-    label: t('创建者id'),
-    name: 'createdId',
-    field: 'createdId',
-    sortable: true,
-    align: 'center',
-    textClasses: '',
-  },{
-    label: t('创建者'),
-    name: 'createdBy',
-    field: 'createdBy',
-    sortable: true,
-    align: 'center',
-    textClasses: '',
-  },{
+    textClasses: ''
+  },
+  {
     label: t('创建时间'),
     name: 'createdTime',
     field: 'createdTime',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('更新者id'),
-    name: 'updatedId',
-    field: 'updatedId',
+    textClasses: ''
+  },
+  {
+    label: t('请求IP'),
+    name: 'clientIpAddress',
+    field: 'clientIpAddress',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('更新者'),
-    name: 'updatedBy',
-    field: 'updatedBy',
+    textClasses: ''
+  },
+  {
+    label: t('返回数据'),
+    name: 'hasReturnValue',
+    field: 'hasReturnValue',
     sortable: true,
     align: 'center',
-    textClasses: '',
-  },{
-    label: t('更新时间'),
-    name: 'updatedTime',
-    field: 'updatedTime',
-    sortable: true,
-    align: 'center',
-    textClasses: '',
+    textClasses: ''
   },
   {
     label: t('操作'),
     name: 'actions',
     align: 'center',
-    required: true,
-  },
-] as any[]
+    required: true
+  }
+]
+// 卸载前保存缓存
+onBeforeUnmount(() => {
+  ls.set(AUDIT_VISIBLE_COLUMNS, state.visibleColumns)
+  ls.set(AUDIT_ROWS_PER_PAGE, state.pagination.rowsPerPage)
+})
+
+//#region 分页数据
+
+const defaultQuery: AuditPageRequestField = {
+  serviceName: '',
+  methodName: '',
+  path: '',
+  body: '',
+  query: '',
+  httpMethod: '',
+  returnValue: '',
+  clientIpAddress: '',
+  exception: ''
+}
+const query: AuditPageRequestField = {
+  ...defaultQuery
+}
+const pagination = {
+  sortBy: 'id',
+  descending: false,
+  page: 1,
+  rowsPerPage: ls.getItem<number>(AUDIT_ROWS_PER_PAGE) || 10,
+  rowsNumber: 1,
+  totalPages: 1
+} as Pagination
+
+//#endregion
+
+const roles = computed(() => Object.values<string>(staticRoles))
+
 const state = reactive({
   columns,
   visibleColumns: (ls.getItem(AUDIT_VISIBLE_COLUMNS) || defaultVisibleColumns) as string[],
   // table选中项
-  selected: [] as Audit[],
+  selected: [] as AuditPage[],
   // table 数据
-  audits: [] as Audit[],
+  audits: [] as AuditPage[],
   loading: false,
-  // 搜索框值
-  searchKey: '',
+  query,
   // 搜索过滤
-  pageRequest: new PageRequest(1, 10, [
-    {
-      field: 'name',
-      value: '',
-      operate: FilterOperate.contains,
-      condition: FilterCondition.or,
-    },
-  ]),
-  pagination: {
-    sortBy: 'id',
-    descending: false,
-    page: 1,
-    rowsPerPage: 10,
-    rowsNumber: 1,
-    totalPages: 1,
-  },
-  dialogVisible: false,
-  dialogTitle: '添加',
-  form: { ...defaultForm },
+  pagination,
+
+  // para
+  paraDialogVisible: false,
+  paraDialogTitle: 'Body',
+  paraDetail: '',
+
+  // detail
+  auditDetail: {} as AuditDetail,
+  detailDialogVisible: false
 })
 
-watch(
-  () => state.visibleColumns,
-  (v, ov) => {
-    ls.set(AUDIT_VISIBLE_COLUMNS, v)
-  },
-)
-
 // 排序触发事件
-const tableHandler = async ({ pagination, filter }) => {
+const tableHandler = async ({ pagination }: any) => {
   state.pagination = pagination
   await getAudits()
 }
 
 // 获取Audit数据
 const getAudits = async () => {
-  const { pageRequest } = state
-
-  pageRequest.setAllRulesValue(state.searchKey)
-  pageRequest.setOrder(state.pagination)
-
   state.loading = true
-  const res = await GetAuditPage(pageRequest)
+  const res = await GetAuditPage(state.pagination, state.query)
   state.loading = false
   res.notifyOnErr()
   if (res.succeeded) {
-    state.audits = res.data?.items as Audit[]
+    state.audits = res.data?.items as AuditPage[]
     state.pagination.rowsNumber = res.data?.totalCount as number
     state.pagination.totalPages = res.data?.totalPages as number
   }
 }
 
-// 显示 dialog
-const showDialog = async (type: string, id?: number) => {
-  if (type == t('添加')) {
-    state.form = { ...defaultForm }
-  } else {
-    const res = await GetAuditById(id as number)
-    res.notifyOnErr()
-    if (!res.succeeded) return
-    state.form = { ...res.data } as Audit
+const showParaDialog = async (type: string, id: number) => {
+  state.loading = true
+  const auditRes = await GetAuditById(id)
+  state.loading = false
+
+  auditRes.notifyOnErr()
+  if (!auditRes.succeeded) return
+
+  const audit = auditRes.data
+  state.paraDialogTitle = type
+  state.paraDialogVisible = true
+  try {
+    state.paraDetail = JSON.parse(audit[camelCase(type)])
+  } catch (error) {
+    state.paraDetail = audit[camelCase(type)]
   }
-  state.dialogTitle = type
-  state.dialogVisible = true
 }
 
-// dialog form 表单提交
-const dialogFormSubmit = async () => {
-  const type = state.dialogTitle
-  let res
-  if (type == t('添加')) {
-    res = await AddAudit({ ...state.form })
-  } else {
-    res = await UpdateAudit({ ...state.form })
-  }
-  res.notify()
-  state.dialogVisible = !res?.succeeded
-  if (res?.succeeded) getAudits()
-}
+const showDetailDialog = async (id: number) => {
+  state.loading = true
+  var auditRes = await GetAuditById(id)
+  state.loading = false
 
-// 根据Id 数组删除 Audit
-const deleteByIds = (ids: number[]) => {
-  $q.dialog({
-    message:
-      ids.length > 1
-        ? `${t('已选中')}${ids.length}，${t('确定要删除这些数据吗')}`
-        : t('确定要删除这个数据吗'),
-  }).onOk(async () => {
-    state.loading = true
-    const res = await DeleteAuditByIds(ids)
-    state.loading = false
-    res.notify()
-    if (res.succeeded) getAudits()
-  })
+  auditRes.notifyOnErr()
+  if (!auditRes.succeeded) return
+
+  const audit = auditRes.data
+  copyByKeys(state.auditDetail, audit)
+
+  try {
+    state.auditDetail.bodyObj = JSON.parse(audit.body)
+  } catch (e) {}
+  try {
+    state.auditDetail.queryObj = JSON.parse(audit.query)
+  } catch (e) {}
+  try {
+    state.auditDetail.exceptionObj = JSON.parse(audit.exception)
+  } catch (e) {}
+  try {
+    state.auditDetail.returnValueObj = JSON.parse(audit.returnValue)
+  } catch (e) {}
+
+  state.detailDialogVisible = true
 }
 
 // 获取数据
 getAudits()
-
 </script>
-<style lang="sass"></style>
+<style lang="sass">
+.json-view-section
+  div
+    @apply flex flex-col
+</style>

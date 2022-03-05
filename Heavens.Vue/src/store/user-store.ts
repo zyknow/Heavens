@@ -7,7 +7,7 @@ import { generatorDynamicRouter } from '@/router/generator-router'
 import { dynamicRouter, loginRoutePath } from '@/router/routes'
 import router from '@/router'
 import { MenuDataItem } from '@/router/_typing'
-import multiTabState from '@/components/multi-tab/multi-tab-state'
+import { multiTabState } from '@/components/multi-tab/multi-tab-state'
 
 export const TOKEN_INFO = 'TOKEN_INFO'
 

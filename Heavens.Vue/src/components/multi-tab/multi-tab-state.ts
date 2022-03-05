@@ -87,10 +87,11 @@ const actions = {
    * 刷新指定路径
    */
   async refreshAsync(name: CacheKey) {
-    // router.push(name as string)
     multiTabState.exclude = [multiTabState.tagCaches.find((c) => c.name == name)?.name as string]
+
     // 刷新延时，可去除
     // await sleepAsync(500)
+
     // 下次页面更新时再刷新 exclude
     nextTick(() => (multiTabState.exclude = []))
   },
@@ -119,7 +120,8 @@ const actions = {
   }
 }
 
-const multiTabState = reactive({
+export const multiTabState = reactive({
+  ...actions,
   tagCaches: [] as CacheItem[],
   current: computed(() => router.currentRoute.value.name),
   exclude: [] as string[],
@@ -130,5 +132,3 @@ const multiTabState = reactive({
 watch(router.currentRoute, (v, ov) => {
   actions.addByRouter(v)
 })
-
-export default { ...multiTabState, ...actions }

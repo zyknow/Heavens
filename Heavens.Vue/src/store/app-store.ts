@@ -4,7 +4,7 @@ import { copyByKeys, ls } from 'src/utils'
 import { Quasar } from 'quasar'
 import { notify } from 'src/utils/notify'
 import { i18n } from '@/boot/i18n'
-import multiTabState from '@/components/multi-tab/multi-tab-state'
+import { multiTabState } from '@/components/multi-tab/multi-tab-state'
 export const APP = 'APP'
 
 const actions = {}

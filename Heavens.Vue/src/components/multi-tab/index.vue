@@ -98,8 +98,8 @@ import { defineComponent, reactive, toRefs, computed } from 'vue'
 import { isDev, ls, sleepAsync } from 'src/utils'
 import { useI18n } from 'vue-i18n'
 import RouteView from '@/layouts/route-view.vue'
-import multiTabState from './multi-tab-state'
 import { appStore } from '@/store/app-store'
+import { multiTabState } from './multi-tab-state'
 const t = useI18n().t
 const state = reactive({
   cachingEnabledLoading: false

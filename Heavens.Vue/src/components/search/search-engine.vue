@@ -70,7 +70,6 @@ import { IndexSign } from '@/typing'
 import { useQuasar } from 'quasar'
 import { reactive, watch, computed, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { searchEngine } from './index'
 defineEmits(['onClick'])
 const props = defineProps({
   debounce: {
@@ -103,32 +102,6 @@ const state = reactive({
   options: {} as IndexSign,
   searchContextVisible: false
 })
-watch(
-  () => state.searchText,
-  (v) => {
-    onSearch(v)
-  }
-)
-
-const onSearch = async (inputValue: string) => {
-  state.loading = true
-  if (!inputValue) {
-    state.loading = false
-    state.options = {}
-  } else {
-    state.options = {}
-    const opt = state.options as IndexSign
-    state.searchContextVisible = true
-    for (let index = 0; index < props.searchIndexs.length; index++) {
-      const indexName = props.searchIndexs[index]
-      const res = await searchEngine.search(indexName as string, inputValue)
-      if (!opt[indexName + '']) opt[indexName + ''] = []
-      opt[indexName + ''].push(...res.hits)
-    }
-    state.loading = false
-  }
-}
-
 const getWidth = computed(() => {
   if ($q.platform.is.mobile) {
     return `width:${props.phoneWidth}`

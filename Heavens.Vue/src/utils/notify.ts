@@ -130,28 +130,6 @@ export const notifyI18n = {
 }
 
 /**
- * 该接口会把提示信息转换成 I18n
- */
-export type INotify = {
-  info(msg: string, opt?: NotifyOption): void
-  error(msg: string, opt?: NotifyOption): void
-  warn(msg: string, opt?: NotifyOption): void
-  success(msg: string, opt?: NotifyOption): void
-  /**
-   * axios执行结果提示
-   * @param res
-   * @param opt ?: NotifyOption
-   */
-  response(res: RequestResult, opt?: NotifyOption): void
-  /**
-   * axios执行消息提示，仅当执行失败时
-   * @param res
-   * @param opt ?: NotifyOption
-   */
-  responseOnErr(res: RequestResult, opt?: NotifyOption): void
-}
-
-/**
  * notify基础设置
  * @param msg
  * @returns
@@ -173,7 +151,7 @@ const responseActionFalid = '执行失败'
 /**
  * 该接口会把提示信息转换成 I18n
  */
-export const notify: INotify = {
+export const notify = {
   info(msg: string, opt?: NotifyOption): void {
     const options: NotifyOption = {
       icon: 'info',
@@ -202,6 +180,11 @@ export const notify: INotify = {
     }
     Notify.create({ ...baseNotify(msg), ...options, ...opt })
   },
+  /**
+   * axios执行结果提示
+   * @param res
+   * @param opt ?: NotifyOption
+   */
   response(res: RequestResult, opt?: NotifyOption): void {
     if (!res || !res.succeeded) {
       // notify.error(res.errors?.toString() || responseActionFalid, opt)
@@ -210,6 +193,11 @@ export const notify: INotify = {
       notify.success(responseActionSuccess, opt)
     }
   },
+  /**
+   * axios执行消息提示，仅当执行失败时
+   * @param res
+   * @param opt ?: NotifyOption
+   */
   responseOnErr(res: RequestResult, opt?: NotifyOption): void {
     if (!res || !res.succeeded) notify.response(res, opt)
   }

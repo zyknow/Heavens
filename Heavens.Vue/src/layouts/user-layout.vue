@@ -14,12 +14,13 @@
       </q-card>
 
       <div class="absolute bottom-4">
-        <span>版本号：0.1.0.0</span>
+        <span>版本号：{{ appStore.version }}</span>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { appStore } from '@/store/app-store'
 import { particles } from '.'
 </script>
 <style lang="sass" scoped></style>

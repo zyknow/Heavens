@@ -1,5 +1,5 @@
 import { IndexSign } from '@/typing'
-import { PageRequest, Pagination } from '@/utils/page-request'
+import { PageRequest, Request } from '@/utils/page-request'
 import request from 'src/utils/request'
 import { BaseEntity, PagedList, RequestResult } from './_typing'
 
@@ -59,6 +59,13 @@ export interface User extends IndexSign, BaseEntity {
 //  */
 export async function GetUserPage(req: PageRequest): Promise<RequestResult<PagedList<User>>> {
   return request.post<any, RequestResult<PagedList<User>>>('/api/user/page', req)
+}
+
+/**
+ * 获取数据集
+ */
+export async function GetByRequest(req: Request): Promise<RequestResult<User[]>> {
+  return request.post<any, RequestResult<User[]>>('/api/audit/by-request', req)
 }
 
 /**

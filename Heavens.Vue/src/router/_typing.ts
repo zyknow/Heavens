@@ -1,5 +1,4 @@
-import { RouteRecordRaw, RouteMeta, RouteComponent, RouteRecordRedirectOption } from 'vue-router'
-import { VNodeChild } from 'vue'
+import { RouteRecordRaw, RouteMeta, RouteComponent } from 'vue-router'
 
 type Lazy<T> = () => Promise<T>
 

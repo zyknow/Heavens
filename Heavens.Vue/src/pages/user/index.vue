@@ -2,7 +2,7 @@
   <div class="h-full">
     <q-table
       v-model:selected.sync="state.selected"
-      v-model:pagination="state.pagination"
+      v-model:pagination="pageQuery.pagination"
       :rows="state.users"
       :columns="columns"
       selection="multiple"
@@ -25,7 +25,7 @@
         <div class="w-full flex flex-row justify-between">
           <div class="flex flex-row space-x-1">
             <q-input
-              v-model="state.searchKey"
+              v-model="pageQuery.entity"
               outlined
               :label="`${t('用户名')}/${t('账号')}`"
               dense
@@ -58,10 +58,10 @@
 
       <template #pagination>
         <q-pagination
-          v-model="state.pagination.page"
+          v-model="pageQuery.pagination.page"
           color="primary"
           :max-pages="9"
-          :max="state.pagination.totalPages"
+          :max="pageQuery.pagination.totalPages"
           boundary-numbers
           @click="getUsers"
         />
@@ -165,29 +165,17 @@ import { useI18n } from 'vue-i18n'
 import { dateFormat } from '@/utils/date-util'
 import { useQuasar } from 'quasar'
 import { ls } from '@/utils'
-import { PageRequest } from '@/utils/page-request'
+import { PageQuery, PageRequest } from '@/utils/page-request'
 import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
 import { staticRoles } from '@/router/routes'
 
 const USER_VISIBLE_COLUMNS = `USER_VISIBLE_COLUMNS`
+
+// 分页大小
+const USER_ROWS_PER_PAGE = 'USER_ROWS_PER_PAGE'
+
 const defaultVisibleColumns = ['name', 'account', 'roles', 'enabled', 'sex', 'birth', 'createdTime']
 const defaultForm: User = {
-  name: '',
-  account: '',
-  passwd: '',
-  enabled: false,
-  roles: [],
-  email: '',
-  phone: '',
-  sex: false,
-  description: '',
-  id: 0,
-  createdBy: '',
-  createdTime: '',
-  updatedBy: ''
-}
-
-const queryForm: User = {
   name: '',
   account: '',
   passwd: '',
@@ -301,33 +289,37 @@ const columns: any[] = [
   }
 ]
 
+const pageQuery = reactive(
+  new PageQuery<string>(
+    '',
+    [
+      {
+        field: 'name',
+        value: '',
+        operate: FilterOperate.contains
+      },
+      {
+        field: 'account',
+        value: '',
+        operate: FilterOperate.contains
+      }
+    ],
+    {
+      sortBy: 'id',
+      descending: false,
+      page: 1,
+      rowsPerPage: ls.getItem<number>(USER_ROWS_PER_PAGE) || 10,
+      rowsNumber: 1,
+      totalPages: 1
+    }
+  )
+)
+
 const state = reactive({
   visibleColumns: (ls.getItem(USER_VISIBLE_COLUMNS) || defaultVisibleColumns) as string[],
   selected: [] as User[],
   users: [] as User[],
   loading: false,
-  searchKey: '',
-  pageRequest: new PageRequest([
-    {
-      field: 'name',
-      value: '123',
-      operate: FilterOperate.contains
-    },
-    {
-      field: 'account',
-      value: '',
-      operate: FilterOperate.contains
-    },
-    {}
-  ]),
-  pagination: {
-    sortBy: 'id',
-    descending: false,
-    page: 1,
-    rowsPerPage: 10,
-    rowsNumber: 1,
-    totalPages: 1
-  },
   dialogVisible: false,
   dialogTitle: '添加',
   form: { ...defaultForm }
@@ -342,24 +334,19 @@ watch(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tableHandler = async ({ pagination }: any) => {
-  state.pagination = pagination
+  pageQuery.pagination = pagination
   await getUsers()
 }
 
 const getUsers = async () => {
-  const { pageRequest } = state
-
-  // pageRequest.setAllRulesValue(state.searchKey, ['createdTime'])
-  pageRequest.setPagination(state.pagination)
-
   state.loading = true
-  const res = await GetUserPage(pageRequest)
+  const res = await GetUserPage(pageQuery.toPageRequest())
   state.loading = false
   res.notifyOnErr()
   if (res.succeeded) {
     state.users = res.data?.items as User[]
-    state.pagination.rowsNumber = res.data?.totalCount as number
-    state.pagination.totalPages = res.data?.totalPages as number
+    pageQuery.pagination.rowsNumber = res.data?.totalCount as number
+    pageQuery.pagination.totalPages = res.data?.totalPages as number
   }
 }
 

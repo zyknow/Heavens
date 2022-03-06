@@ -42,10 +42,6 @@ public class AuditAppService : BaseAppService<Audit, AuditDto>
     {
         var exp = request.GetRulesExpression(queryAcions);
 
-        // 开发环境下填入过滤条件
-        if (App.HostEnvironment.IsDevelopment())
-            UnifyContext.Fill(exp.ToLambdaString());
-
         var data = await _repository
             .Where(exp)
             .SortBy(request.Sort, queryAcions)

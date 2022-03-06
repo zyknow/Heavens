@@ -24,7 +24,6 @@ public class UserAppService : BaseAppService<User, UserDto>
     [HttpPost]
     public async Task<PagedList<UserDto>> Page(PageRequest request)
     {
-
         var data = await _repository
             .Where(request.GetRulesExpression<User>())
             .SortBy(request.Sort)

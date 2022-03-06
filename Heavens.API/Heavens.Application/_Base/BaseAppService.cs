@@ -65,10 +65,6 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     {
         var exp = request.GetRulesExpression<TEntity>();
 
-        // 开发环境下填入过滤条件
-        if (App.HostEnvironment.IsDevelopment())
-            UnifyContext.Fill(exp.ToLambdaString());
-
         var query = _repository
             .Where(exp)
             .SortBy(request.Sort)

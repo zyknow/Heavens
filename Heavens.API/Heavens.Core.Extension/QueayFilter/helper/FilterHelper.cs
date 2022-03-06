@@ -1,4 +1,5 @@
-﻿using EasyCaching.Core.Internal;
+﻿using AspectCore.DynamicProxy.Parameters;
+using EasyCaching.Core.Internal;
 using Furion.FriendlyException;
 using Heavens.Core.Extension.QueayFilter;
 using Heavens.Core.Extension.QueayFilter.common;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -136,7 +138,7 @@ public static class FilterHelper
     /// <typeparam name="T">表达式实体类型</typeparam>
     /// <param name="rules">查询条件组，如果为null，则直接返回 true 表达式</param>
     /// <returns>查询表达式</returns>
-    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules, List<IQueryAction<T>> queryActions)
+    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules, List<IQueryAction<T>>? queryActions)
     {
 
         // 检查参数名
@@ -218,33 +220,34 @@ public static class FilterHelper
 
             if (dgroup.Rules.Count > 1)
             {
-                groupExps.Add(dgroup.Rules.Select(x => GetActionExpression(x, queryActions) ?? GetExpressionBody(param, x)).Aggregate(Expression.AndAlso));
+                var list = new List<Expression>();
+                dgroup.Rules.ForEach(x =>
+                {
+                    var exp = GetExpressionBody(param, x, queryActions);
+                    if (exp != null)
+                        list.Add(exp);
+                });
+                if (!list.IsEmpty())
+                    groupExps.Add(list.Aggregate(Expression.AndAlso));
             }
             else
             {
-                groupExps.Add(GetActionExpression(dgroup.Rules.First(), queryActions) ?? GetExpressionBody(param, dgroup.Rules.First()));
+                var exp = GetExpressionBody(param, dgroup.Rules.First(), queryActions);
+                if (exp != null)
+                    groupExps.Add(exp);
             }
         }
+
+        if (groupExps.IsEmpty())
+            groupExps.Add(Expression.Constant(true));
+
 
         bodies.Add(groupExps.Aggregate(Expression.OrElse));
 
         return bodies.Aggregate(Expression.AndAlso);
     }
 
-    private static Expression? GetActionExpression<T>(FilterRule rule, List<IQueryAction<T>>? queryActions = null)
-    {
-        var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && rule.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter());
-
-        if (action == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()))
-            return null;
-
-        Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
-        Expression body = action.FilterExp;
-        var data = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
-        return data;
-
-
-    }
+    private static bool IsValid(FilterRule rule) => !(rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()));
 
     /// <summary>
     /// 
@@ -252,20 +255,29 @@ public static class FilterHelper
     /// <param name="param"></param>
     /// <param name="rule"></param>
     /// <returns></returns>
-    private static Expression GetExpressionBody(ParameterExpression param, FilterRule rule)
+    private static Expression? GetExpressionBody<T>(ParameterExpression param, FilterRule rule, List<IQueryAction<T>>? queryActions = null)
     {
-        // if (rule == null || rule.Value == null || string.IsNullOrEmpty(rule.Value.ToString()))
-        if (rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()))
+        if (!IsValid(rule)) return null;
+
+        var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && rule.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter());
+
+        if (action != null)
         {
-            return Expression.Constant(true);
+            Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
+            Expression body = action.FilterExp;
+            var data = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
+            return data;
         }
-        LambdaExpression expression = GetPropertyLambdaExpression(param, rule);
-        if (expression == null)
+        else
         {
-            return Expression.Constant(true);
+            LambdaExpression expression = GetPropertyLambdaExpression(param, rule);
+            if (expression == null)
+                return null;
+
+            Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
+            return ExpressionDict[rule.Operate](expression.Body, constant);
         }
-        Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
-        return ExpressionDict[rule.Operate](expression.Body, constant);
+
     }
 
     private static LambdaExpression GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)

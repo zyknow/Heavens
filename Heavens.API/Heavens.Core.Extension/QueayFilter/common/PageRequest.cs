@@ -1,12 +1,16 @@
-﻿using Heavens.Core.Extension.QueayFilter.helper;
+﻿using Furion.UnifyResult;
+using Furion;
+using Heavens.Core.Extension.QueayFilter.helper;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Hosting;
+using Heavens.Core.Extension.Extensions;
 
 namespace Heavens.Core.Extension.QueayFilter.common;
 
 /// <summary>
 /// 
 /// </summary>
-public class PageRequest
+public class PageRequest : BaseRequest
 {
     /// <summary>
     /// 页码
@@ -16,24 +20,5 @@ public class PageRequest
     /// 每页大小
     /// </summary>
     public int PageSize { get; set; } = 50;
-    /// <summary>
-    /// 排序集合
-    /// </summary>
-    public SortBy Sort { get; set; } = new SortBy() { Field = "Id" };
-
-    /// <summary>
-    /// 查询条件组
-    /// </summary>
-    public ICollection<FilterRule> Filters { get; set; } = new List<FilterRule>();
-
-    /// <summary>
-    /// 获取查询条件表达式树
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public Expression<Func<T, bool>> GetRulesExpression<T>(List<IQueryAction<T>>? queryActions = null)
-    {
-        return FilterHelper.GetExpression(Filters, queryActions);
-    }
 }
 

@@ -5,6 +5,7 @@ import { Quasar } from 'quasar'
 import { notify } from 'src/utils/notify'
 import { i18n } from '@/boot/i18n'
 import { multiTabState } from '@/components/multi-tab/multi-tab-state'
+import { GetCoreVersion } from '@/api/system'
 export const APP = 'APP'
 
 const actions = {}
@@ -22,14 +23,27 @@ export const appStore = reactive({
   /**
    * 多标签栏缓存启用
    */
-  multiTabCacheEnabled: false
+  multiTabCacheEnabled: false,
+
+  version: ''
 })
 
-// 初始化 根据缓存获取配置
-const app = ls.getItem(APP)
-if (app) {
-  copyByKeys(appStore, app)
+const init = async () => {
+  // 初始化 根据缓存获取配置
+  const app = ls.getItem(APP)
+  if (app) {
+    copyByKeys(appStore, app)
+  }
+
+  // 初始化 version
+  const versionRes = await GetCoreVersion()
+  versionRes.notifyOnErr()
+  if (versionRes.succeeded) {
+    appStore.version = versionRes.data
+  }
 }
+
+init()
 
 //#region 监听对象
 

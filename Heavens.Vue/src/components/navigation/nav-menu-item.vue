@@ -93,11 +93,9 @@ const props = defineProps({
   }
 })
 const t = useI18n().t
-const libDialog = ref()
 const state = reactive({
   drawerMini: inject(LEFT_DRAWER_CLOSED_KEY, ref(true)),
-  rightMenuVisible: false,
-  addLibDialogVisible: false
+  rightMenuVisible: false
 })
 const showRightMenu = () => {
   if (state.drawerMini) state.rightMenuVisible = !state.rightMenuVisible

@@ -8,10 +8,6 @@ export interface AppSettings {
     baseURL: string
     timeout: number
   }
-  searchEngine: {
-    host: string
-    masterKey: string
-  }
 }
 
 export const getAppSettingsByLocalStorage = (): AppSettings => {

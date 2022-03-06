@@ -8,26 +8,16 @@ export interface ResponseBody<T = any> {
 }
 
 /** 统一返回结构体 */
-
 export interface PagedList<T = any> {
   pageIndex?: number
   pageSize?: number
   totalCount?: number
   totalPages?: number
-  items?: Array<T>
+  items?: T[]
   hasPrevPages?: boolean
   hasNextPages?: boolean
 }
 
-export interface RequestResult<T = any> {
-  statusCode?: number
-  data: T
-  succeeded?: boolean
-  errors?: Array<string | any> | string
-  extras?: Array<any>
-  timestamp?: number
-  excption?: AxiosError // 请求异常时会包含此字段
-}
 export class RequestResult<T = any> {
   constructor(req: RequestResult) {
     this.statusCode = req.statusCode
@@ -38,6 +28,15 @@ export class RequestResult<T = any> {
     this.timestamp = req.timestamp
     this.excption = req.excption
   }
+
+  statusCode?: number
+  data: T
+  succeeded?: boolean
+  errors?: string[] | string
+  extras?: any[]
+  timestamp?: number
+  excption?: AxiosError // 请求异常时会包含此字段
+
   /**
    * axios执行结果提示
    * @param opt ?: NotifyOption

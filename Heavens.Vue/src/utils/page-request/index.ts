@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash-es'
 import { find } from 'lodash'
 import { FilterCondition, FilterOperate, SortType } from './enums'
 
@@ -22,7 +23,13 @@ export interface Filter {
    * 获取或设置 属性值
    */
   value?: FilterValue
+  /**
+   * 筛选操作方式
+   */
   operate?: FilterOperate
+  /**
+   * 筛选条件
+   */
   condition?: FilterCondition
 }
 
@@ -31,8 +38,13 @@ export interface SortBy {
    * 字段名
    */
   field?: string
+  /**
+   * 排序类型
+   */
   sortType?: SortType
 }
+
+//#region Request | PageRequest
 abstract class BaseRequest {
   /**
    * 排序集合
@@ -41,93 +53,38 @@ abstract class BaseRequest {
   /**
    * 查询条件组
    */
-  filters: Array<Filter> = []
+  filters: Filter[] = []
+
   /**
-   * 清空所有规则
+   * 根据 entity 设置 filters中的值
+   * @param entity
    */
-  clearRules = (): void => {
-    this.filters = []
-  }
-  /**
-   * 统一设置查询条件value值
-   * @param value
-   * @param exclude 排除的字段
-   */
-  setAllRulesValue = (value: string | number | [], exclude?: string[]): void => {
-    this.filters?.filter((f) => !exclude?.includes(f.field as never)).forEach((r) => (r.value = value))
-  }
-  /**
-   * 设置指定field的 Rule value,没有则创建该field
-   * @param field
-   * @param value
-   */
-  setRule = (rule: Filter): void => {
-    if (!this.filters?.length) {
-      this.filters = []
+  setFiltersByEntity = (entity: any) => {
+    switch (typeof entity) {
+      case 'string':
+      case 'number':
+        for (const filter of this.filters) {
+          filter.value = entity
+          filter.field = filter?.field?.split('-')[1] || filter.field
+        }
+        break
+
+      default:
+        for (const filter of this.filters) {
+          if (filter.field && filter.field in entity) filter.value = entity[filter.field as string]
+          filter.field = filter?.field?.split('-')[1] || filter.field
+        }
+        break
     }
-    const index = this.filters?.findIndex((r) => r.field == rule.field)
-    if (index < 0) {
-      this.filters.push(rule)
-    } else {
-      this.filters[index] = rule
-    }
-  }
-  /**
-   * 清除基于field的规则
-   * @param field
-   * @param value
-   */
-  setRuleValue = (field: string, value: FilterValue): void => {
-    const rule = find(this.filters, (f) => f.field == field)
-    if (!rule) return
-    rule.value = value
-  }
-  /**
-   * 获取字段
-   * @param field 字段名
-   */
-  setRuleOperate = (field: string, operate: FilterOperate): void => {
-    const rule = find(this.filters, (f) => f.field == field)
-    if (!rule) return
-    rule.operate = operate
-  }
-  /**
-   * 获取 Filter 根据字段名
-   * @param field
-   * @returns
-   */
-  getRuleByField = (field: string): Filter | undefined => {
-    if (this.filters?.length) return undefined
-    return find(this.filters, (f) => f.field == field) as Filter
-  }
-  /**
-   * 根据 QueryForm 设置 查询 value
-   * @param queryForm
-   */
-  setRuleByField = (queryForm: any) => {
-    for (const rule of this.filters) {
-      if (rule.field && rule.field in queryForm) rule.value = queryForm[rule.field as string]
-      rule.field = rule?.field?.split('.')[1] || rule.field
-    }
-  }
-  /**
-   * 清除基于field的规则
-   * @param field
-   * @param value
-   */
-  removeRules = (field: string): void => {
-    if (!this.filters?.length) {
-      return
-    }
-    const index = this.filters?.findIndex((r) => r.field == field)
-    if (index >= 0) {
-      this.filters.splice(index, 1)
+
+    if (typeof entity == 'string') {
+    } else if (typeof entity) {
     }
   }
 }
 
 export class Request extends BaseRequest {
-  constructor(filters: Filter[], sortBy: SortBy = {}, limit?: number) {
+  constructor(filters: Filter[] = [], sortBy: SortBy = {}, limit?: number) {
     super()
     this.filters = filters
     if (sortBy?.field) this.sort = sortBy
@@ -169,3 +126,111 @@ export class PageRequest extends BaseRequest {
     }
   }
 }
+//#endregion
+
+//#region Query | BaseQuery
+class BaseQuery<T> {
+  constructor(entity: T, filters: Filter[]) {
+    this.entity = entity
+    this.defaultEntity = cloneDeep(entity)
+    this.filters = filters
+  }
+  /**
+   * 过滤字段实体
+   */
+  entity: T
+  /**
+   * 过滤集合
+   */
+  filters: Filter[]
+  /**
+   * 初始过滤字段实体
+   */
+  private defaultEntity: T
+
+  /**
+   * 重置查询实体
+   */
+  resetEntity() {
+    this.entity = cloneDeep(this.defaultEntity)
+  }
+
+  /**
+   * 设置指定field的 filter 值,没有则创建该field
+   * @param field
+   * @param value
+   */
+  addOrUpdateFilter = (filter: Filter): void => {
+    if (!this.filters?.length) {
+      this.filters = []
+    }
+    const index = this.filters?.findIndex((r) => r.field == filter.field)
+    if (index < 0) {
+      this.filters.push(filter)
+    } else {
+      this.filters[index] = filter
+    }
+  }
+
+  /**
+   * 清除基于field的规则
+   * @param field
+   * @param value
+   */
+  removeFilterByField = (field: string): void => {
+    if (!this.filters?.length) {
+      return
+    }
+    const index = this.filters?.findIndex((r) => r.field == field)
+    if (index >= 0) {
+      this.filters.splice(index, 1)
+    }
+  }
+}
+
+export class PageQuery<T> extends BaseQuery<T> {
+  constructor(entity: T, filters: Filter[], pagination: Pagination) {
+    super(entity, filters)
+    this.pagination = pagination
+  }
+  /**
+   * 分页参数
+   */
+  pagination: Pagination
+
+  /**
+   * 获取 PageRequest
+   * @returns
+   */
+  toPageRequest() {
+    const req = new PageRequest()
+    req.filters = cloneDeep(this.filters)
+    req.setFiltersByEntity(this.entity)
+    req.setPagination(this.pagination)
+    return req
+  }
+}
+
+export class Query<T> extends BaseQuery<T> {
+  constructor(entity: T, filters: Filter[], limit = 0) {
+    super(entity, filters)
+    this.limit = limit
+  }
+  /**
+   * 数据限制
+   */
+  limit: number
+
+  /**
+   * 获取 Request
+   * @returns
+   */
+  toRequest() {
+    const req = new Request()
+    req.filters = cloneDeep(this.filters)
+    req.setFiltersByEntity(this.entity)
+    req.limit = this.limit
+    return req
+  }
+}
+//#endregion

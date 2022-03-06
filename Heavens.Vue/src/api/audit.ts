@@ -1,11 +1,7 @@
-﻿import { cloneDeep } from 'lodash-es'
-import { Pagination } from './../utils/page-request/index'
-import { IndexSign } from '@/typing'
-import { Filter, PageRequest } from '@/utils/page-request'
-import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
-import request from 'src/utils/request'
+﻿import { IndexSign } from '@/typing'
+import { PageRequest, Request } from '@/utils/page-request'
 import { BaseEntity, PagedList, RequestResult } from './_typing'
-
+import request from 'src/utils/request'
 /**
  * Audit
  */
@@ -63,165 +59,18 @@ export interface AuditPage extends Audit {
   hasReturnValue?: boolean
 }
 
-export interface AuditPageRequestField {
-  [propName: string]: any
-
-  hasBody?: boolean
-  hasQuery?: boolean
-  hasException?: boolean
-  hasReturnValue?: boolean
-  userRoles?: string[]
-  serviceName: string
-  methodName: string
-  path: string
-  body: string
-  query: string
-  httpMethod: string
-  returnValue: string
-  clientIpAddress: string
-  exception: string
-  createdId?: number
-  createdBy?: string
-  'min.createdTime'?: string
-  'max.createdTime'?: string
-  'min.executionMs'?: string
-  'max.executionMs'?: string
-}
-
-const filterRules: Filter[] = [
-  {
-    field: 'hasBody',
-    value: undefined,
-    operate: FilterOperate.equal,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'hasQuery',
-    value: undefined,
-    operate: FilterOperate.equal,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'hasException',
-    value: undefined,
-    operate: FilterOperate.equal,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'hasReturnValue',
-    value: undefined,
-    operate: FilterOperate.equal,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'userRoles',
-    value: undefined,
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'serviceName',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'methodName',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'path',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'body',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'query',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'httpMethod',
-    value: '',
-    operate: FilterOperate.equal,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'returnValue',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'createdId',
-    value: '',
-    operate: FilterOperate.equal,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'exception',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'createdBy',
-    value: '',
-    operate: FilterOperate.contains,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'clientIpAddress',
-    value: '',
-    operate: FilterOperate.equal,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'min.createdTime',
-    value: '',
-    operate: FilterOperate.greaterOrEqual,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'max.createdTime',
-    value: '',
-    operate: FilterOperate.lessOrEqual,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'min.executionMs',
-    value: '',
-    operate: FilterOperate.greaterOrEqual,
-    condition: FilterCondition.and
-  },
-  {
-    field: 'max.executionMs',
-    value: '',
-    operate: FilterOperate.lessOrEqual,
-    condition: FilterCondition.and
-  }
-]
-
 /**
  * 获取分页
  */
-export async function GetAuditPage(
-  pagination: Pagination,
-  fieldObj: AuditPageRequestField
-): Promise<RequestResult<PagedList<AuditPage>>> {
-  const req = new PageRequest(cloneDeep(filterRules))
-  req.setPagination(pagination)
-  req.setRuleByField(fieldObj)
+export async function GetAuditPage(req: PageRequest): Promise<RequestResult<PagedList<AuditPage>>> {
   return request.post<any, RequestResult<PagedList<AuditPage>>>('/api/audit/page', req)
+}
+
+/**
+ * 获取数据集
+ */
+export async function GetByRequest(req: Request): Promise<RequestResult<Audit[]>> {
+  return request.post<any, RequestResult<Audit[]>>('/api/audit/by-request', req)
 }
 
 /**

@@ -269,9 +269,9 @@ public interface I{item.Name}Service
 
             string imports =
 @$"import {{ IndexSign }} from '@/typing'
-import {{ PageRequest }} from '@/utils/page-request'
+import {{ PageRequest, Request }} from '@/utils/page-request'
 import request from 'src/utils/request'
-import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
+import {{ BaseEntity, PagedList, RequestResult }} from './_typing'
 {string.Join("", importotherInterfaces.Select(p =>
 @$"import {{ {p} }} from './{p.ToCamelCase()}'"
 ))}
@@ -605,6 +605,13 @@ get[Name]s()
 //  */
 export async function Get{appName.ToUpperFirstLetter()}Page(req: PageRequest): Promise<RequestResult<PagedList<{appName.ToUpperFirstLetter()}>>> {{
   return request.post<any, RequestResult<PagedList<{appName.ToUpperFirstLetter()}>>>('/api/{appName.ToCamelCase()}/page', req)
+}}
+
+/**
+ * 获取数据集
+ */
+export async function GetByRequest(req: Request): Promise<RequestResult<{appName.ToUpperFirstLetter()}[]>> {{
+  return request.post<any, RequestResult<{appName.ToUpperFirstLetter()}[]>>('/api/{appName.ToCamelCase()}/by-request', req)
 }}
 
 /**

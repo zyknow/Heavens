@@ -33,20 +33,21 @@ builder.Host.UseSerilogDefault(config =>//默认集成了 控制台 和 文件 方式。如需自
 
     #region 2.按LogEventLevel.输出独立发布/单文件
 
-        ///2.1仅输出 LogEventLevel.Debug 类型
+        // Debug 
         .WriteTo.Logger(lg => lg.Filter.ByIncludingOnly(evt => evt.Level == LogEventLevel.Debug)//筛选过滤
             .WriteTo.File($"log/{LogEventLevel.Debug}/{date}.log",
                 outputTemplate: outputTemplate,
                 encoding: Encoding.UTF8            // 文件字符编码
              )
         )
+        // Warning 
         .WriteTo.Logger(lg => lg.Filter.ByIncludingOnly(evt => evt.Level == LogEventLevel.Warning)//筛选过滤
             .WriteTo.File($"log/{LogEventLevel.Warning}/{date}.log",
                 outputTemplate: outputTemplate,
                 encoding: Encoding.UTF8            // 文件字符编码
              )
         )
-        ///2.2仅输出 LogEventLevel.Error 类型
+        // Error 
         .WriteTo.Logger(lg => lg.Filter.ByIncludingOnly(evt => evt.Level == LogEventLevel.Error)//筛选过滤
             .WriteTo.File($"log/{LogEventLevel.Error}/{date}.log",
                 outputTemplate: outputTemplate,

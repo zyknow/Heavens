@@ -79,7 +79,7 @@ public class Startup : AppStartup
         // 配置多语言，必须在 路由注册之前
         app.UseAppLocalization();
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
 
         // 启用EnableBuffering，否则Filter获取不到body
         app.Use(next => context =>

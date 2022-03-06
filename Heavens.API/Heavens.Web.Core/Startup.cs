@@ -31,8 +31,10 @@ public class Startup : AppStartup
 
         services.AddControllers(o =>
         {
-            // 审计过滤器
-            o.Filters.Add(typeof(AuditActionFilter));
+            var auditEnbale = App.GetConfig<bool>("AuditEnable");
+            if (auditEnbale)
+                // 审计过滤器
+                o.Filters.Add(typeof(AuditActionFilter));
         })
                 .AddInjectWithUnifyResult()
                 .AddNewtonsoftJson(option =>
@@ -55,9 +57,6 @@ public class Startup : AppStartup
 
         // 注册远程 http get,post 请求
         services.AddRemoteRequest();
-
-        // 注册 选项 服务
-        services.AddOptionServices();
 
         // 注册定时任务
         //services.AddTaskScheduler();

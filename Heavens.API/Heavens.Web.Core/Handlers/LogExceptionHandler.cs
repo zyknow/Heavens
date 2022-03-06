@@ -1,4 +1,5 @@
 ﻿using Bing.Expressions;
+using Furion.ClayObject.Extensions;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -23,8 +24,10 @@ public class LogExceptionHandler : IGlobalExceptionHandler, ISingleton
     {
         dynamic exp = context.Exception;
 
+        var dic = context.ToDictionary();
+
         #region 写日志
-        if (exp.ErrorCode != null)
+        if (dic.ContainsKey("ErrorCode"))
             _logger.LogWarning(context.Exception, context.Exception.Message);
         else
             _logger.LogError(context.Exception, context.Exception.Message);

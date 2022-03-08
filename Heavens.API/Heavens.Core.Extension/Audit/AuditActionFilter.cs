@@ -24,6 +24,9 @@ using System.Threading.Tasks;
 
 namespace Heavens.Core.Extension.Audit;
 
+/// <summary>
+/// 审计 Filter
+/// </summary>
 public class AuditActionFilter : IAsyncActionFilter
 {
     public AuditActionFilter(IRepository<Entities.Audit> auditRepository)

@@ -1,4 +1,6 @@
 ﻿using AspectCore.DynamicProxy.Parameters;
+using Bing.Expressions;
+using Bing.Extensions;
 using EasyCaching.Core.Internal;
 using Furion.FriendlyException;
 using Heavens.Core.Extension.QueayFilter;
@@ -6,6 +8,7 @@ using Heavens.Core.Extension.QueayFilter.common;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -21,8 +24,7 @@ namespace Heavens.Core.Extension.QueayFilter.helper;
 public static class FilterHelper
 {
     #region 字段
-
-    private static readonly Dictionary<FilterOperate, Func<Expression, Expression, Expression>> ExpressionDict =
+    private static Dictionary<FilterOperate, Func<Expression, Expression, Expression>> ExpressionDict { get; set; } =
         new Dictionary<FilterOperate, Func<Expression, Expression, Expression>>
         {
                 {
@@ -106,12 +108,13 @@ public static class FilterHelper
                         {
                             return null;
                         }
-                        return Expression.Call(typeof (Enumerable), "Contains", new[] {left.Type}, right, left);
+                        var exp =  Expression.Call(typeof (Enumerable), "Contains", new[] {left.Type}, right, left);
+                        return exp;
                     }
                 }
         };
 
-    private static readonly Dictionary<Type, Func<JsonElement, object>> jsonElementConvertDic = new Dictionary<Type, Func<JsonElement, object>>()
+    private static Dictionary<Type, Func<JsonElement, object>> jsonElementConvertDic { get; set; } = new Dictionary<Type, Func<JsonElement, object>>()
     {
         {typeof(short),e=> e.GetInt16()},
         {typeof(short?),e=> e.GetInt16()},
@@ -255,7 +258,7 @@ public static class FilterHelper
     /// <param name="param"></param>
     /// <param name="rule"></param>
     /// <returns></returns>
-    private static Expression? GetExpressionBody<T>(ParameterExpression param, FilterRule rule, List<IQueryAction<T>>? queryActions = null)
+    public static Expression? GetExpressionBody<T>(ParameterExpression param, FilterRule rule, List<IQueryAction<T>>? queryActions = null)
     {
         if (!IsValid(rule)) return null;
 
@@ -265,39 +268,81 @@ public static class FilterHelper
         {
             Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
             Expression body = action.FilterExp;
-            var data = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
-            return data;
+            var exp = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
+            return exp;
         }
         else
         {
             LambdaExpression expression = GetPropertyLambdaExpression(param, rule);
-            if (expression == null)
-                return null;
+            // 如果包含Any，则表示已经完成了表达式树，直接返回 Body
+            if (expression == null || expression.ToString().Contains("Any"))
+                return expression?.Body;
 
             Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
-            return ExpressionDict[rule.Operate](expression.Body, constant);
+            var exp = ExpressionDict[rule.Operate](expression.Body, constant);
+            return exp;
         }
-
     }
 
     private static LambdaExpression GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
     {
+        LambdaExpression exp = null;
         Expression propertyAccess = param;
         Type type = param.Type;
-        string propertyName = rule.Field;
-        PropertyInfo property = type.GetProperty(propertyName) ?? type.GetProperty(propertyName.ToUpperFirstLetter());
-        if (property == null)
+
+        var fields = rule.Field.Split(".");
+
+        for (int i = 0; i < fields.Length; i++)
         {
-            throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, propertyName, type.FullName);
+            var field = fields[i];
+
+
+            var pTypeIsCollectionType = type.IsCollectionType();
+            // 获取集合类型中的类型
+            type = pTypeIsCollectionType ? type.GetGenericArguments().First() : type;
+
+            PropertyInfo property = type.GetProperty(field) ?? type.GetProperty(field.ToUpperFirstLetter());
+            if (property == null)
+                throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, @$"{rule.Field}中的{field}", type.FullName);
+
+            // 最后一个属性验证属性与属性值是否匹配
+            if (i == fields.Length - 1)
+            {
+                bool flag = CheckFilterRule(property.PropertyType, rule);
+                if (!flag)
+                    return null;
+            }
+
+            // 父类型为集合类型
+            if (pTypeIsCollectionType)
+            {
+                // 生成参数
+                ParameterExpression parameterExpression = Expression.Parameter(type, "v");
+
+                // 生成访问参数
+                var access = Expression.MakeMemberAccess(parameterExpression, property);
+
+                // 获取操作数据
+                var value = ChangeTypeToExpression(rule, property.PropertyType);
+
+                // 
+                var expr = ExpressionDict[rule.Operate](access, value);
+
+                // 生成lamda
+                var lamd = Expression.Lambda(expr, parameterExpression);
+
+                // 拼接到Any里
+                propertyAccess = Expression.Call(typeof(Enumerable), "Any", new[] { type }, propertyAccess, lamd);
+
+             }
+            else
+                propertyAccess = Expression.MakeMemberAccess(propertyAccess, property);
+
+            type = property.PropertyType;
         }
-        //验证属性与属性值是否匹配
-        bool flag = CheckFilterRule(property.PropertyType, rule);
-        if (!flag)
-        {
-            return null;
-        }
-        propertyAccess = Expression.MakeMemberAccess(propertyAccess, property);
-        return Expression.Lambda(propertyAccess, param);
+
+        exp = Expression.Lambda(propertyAccess, param);
+        return exp;
     }
 
     /// <summary>
@@ -327,7 +372,6 @@ public static class FilterHelper
 
     private static Expression ChangeTypeToExpression(FilterRule rule, Type conversionType)
     {
-
         if (rule.Operate.Equals(FilterOperate.In))
         {
             List<Expression> expressionList = new List<Expression>();
@@ -336,10 +380,6 @@ public static class FilterHelper
                 JsonElement values = (JsonElement)rule.Value;
                 if (values.ValueKind.Equals(JsonValueKind.Array))
                 {
-                    //if (conversionType.IsNullableType()) 
-                    //{
-                    //    conversionType = conversionType.GetUnNullableType();
-                    //}
                     if (jsonElementConvertDic.ContainsKey(conversionType))
                     {
                         foreach (JsonElement e in values.EnumerateArray())
@@ -354,7 +394,7 @@ public static class FilterHelper
 
                 }
             }
-            else if (rule.Value.GetType() == typeof(JArray))
+            else if (rule.Value is JArray)
             {
                 foreach (var item in (JArray)rule.Value)
                 {
@@ -362,7 +402,13 @@ public static class FilterHelper
                     expressionList.Add(Expression.Constant(dt, conversionType));
                 }
             }
-            var init = Expression.NewArrayInit(conversionType, expressionList);
+            else if (rule.Value is Array)
+            {
+                foreach (var item in (Array)rule.Value)
+                {
+                    expressionList.Add(Expression.Constant(item, conversionType));
+                }
+            }
             return Expression.NewArrayInit(conversionType, expressionList);
         }
         else if (rule.Value is JsonElement)

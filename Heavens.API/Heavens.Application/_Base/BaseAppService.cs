@@ -19,33 +19,65 @@ namespace Heavens.Application._Base;
 /// <typeparam name="TKey">数据实体主键类型</typeparam>
 /// <typeparam name="TEntity">数据实体类型</typeparam>
 /// <typeparam name="TEntityDto">数据实体Dto类型</typeparam>
+/// <typeparam name="TPageEntity">Page 返回类型</typeparam>
 [ApiDescriptionSettings(Order = 0)]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
-public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiController
+public abstract class BaseAppService<TKey, TEntity, TEntityDto, TPageEntity> : IDynamicApiController
     where TEntity : class, IBaseEntity<TKey>, IPrivateEntity, new()
     where TEntityDto : class, new()
 {
     protected IRepository<TEntity> _repository { get; }
+
+    protected List<IQueryAction<TEntity>> _queryAcions;
 
     /// <summary>
     /// 继承此类即可实现基础方法
     /// 方法包括：CURD、获取全部、分页获取 
     /// </summary>
     /// <param name="repository"></param>
-    protected BaseAppService(IRepository<TEntity> repository)
+    /// <param name="queryAcions"></param>
+    protected BaseAppService(IRepository<TEntity> repository, List<IQueryAction<TEntity>> queryAcions = null)
     {
-        _repository = repository;
+        this._repository = repository;
+        this._queryAcions = queryAcions;
     }
 
     /// <summary>
-    /// 根据Id查询
+    /// 获取分页
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="request"></param>
     /// <returns></returns>
-    public virtual Task<TEntityDto> GetById([Required] TKey id)
+    [HttpPost]
+    public async Task<PagedList<TPageEntity>> Page(PageRequest request)
     {
-        return _repository.Where(r => r.Id.Equals(id)).Select(u => u.Adapt<TEntityDto>()).FirstOrDefaultAsync();
+        var exp = request.GetRulesExpression(_queryAcions);
+
+        var data = await _repository
+            .Where(exp)
+            .SortBy(request.Sort, _queryAcions)
+            .Select(x => x.Adapt<TPageEntity>())
+            .ToPagedListAsync(request.Page, request.PageSize);
+        return data;
+    }
+
+    /// <summary>
+    /// 根据过滤条件查询
+    /// </summary>
+    /// <returns></returns>
+    public virtual async Task<List<TEntityDto>> GetByRequest(Request request)
+    {
+        var exp = request.GetRulesExpression(_queryAcions);
+
+        var query = _repository
+            .Where(exp)
+            .SortBy(request.Sort, _queryAcions)
+            .Select(x => x.Adapt<TEntityDto>());
+
+        if (request.Limit > 0)
+            query.Take(request.Limit);
+
+        return await query.ToListAsync();
     }
 
     /// <summary>
@@ -58,24 +90,16 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
     }
 
     /// <summary>
-    /// 根据过滤条件查询
+    /// 根据Id查询
     /// </summary>
+    /// <param name="id"></param>
     /// <returns></returns>
-    public virtual async Task<List<TEntityDto>> GetByRequest(Request request)
+    public virtual Task<TEntityDto> GetById([Required] TKey id)
     {
-        var exp = request.GetRulesExpression<TEntity>();
-
-        var query = _repository
-            .Where(exp)
-            .SortBy(request.Sort)
-            .Select(x => x.Adapt<TEntityDto>());
-
-        if (request.Limit > 0)
-            query.Take(request.Limit);
-
-        return await query.ToListAsync();
-
+        return _repository.Where(r => r.Id.Equals(id)).Select(u => u.Adapt<TEntityDto>()).FirstOrDefaultAsync();
     }
+
+
 
     /// <summary>
     /// 添加
@@ -139,11 +163,11 @@ public abstract class BaseAppService<TKey, TEntity, TEntityDto> : IDynamicApiCon
 /// </summary>
 /// <typeparam name="TEntity">数据实体类型</typeparam>
 /// <typeparam name="TEntityDto">数据实体类型</typeparam>
-public abstract class BaseAppService<TEntity, TEntityDto> : BaseAppService<int, TEntity, TEntityDto>
+public abstract class BaseAppService<TEntity, TEntityDto> : BaseAppService<int, TEntity, TEntityDto, TEntityDto>
     where TEntity : class, IBaseEntity, IPrivateEntity, new()
     where TEntityDto : class, new()
 {
-    protected BaseAppService(IRepository<TEntity> repository) : base(repository)
+    protected BaseAppService(IRepository<TEntity> repository, List<IQueryAction<TEntity>> queryAcions = null) : base(repository, queryAcions)
     {
     }
 }
@@ -153,10 +177,10 @@ public abstract class BaseAppService<TEntity, TEntityDto> : BaseAppService<int, 
 /// 方法包括：CURD
 /// </summary>
 /// <typeparam name="TEntity">数据实体类型</typeparam>
-public abstract class BaseAppService<TEntity> : BaseAppService<int, TEntity, TEntity>
+public abstract class BaseAppService<TEntity> : BaseAppService<int, TEntity, TEntity, TEntity>
     where TEntity : class, IBaseEntity, IPrivateEntity, new()
 {
-    protected BaseAppService(IRepository<TEntity> repository) : base(repository)
+    protected BaseAppService(IRepository<TEntity> repository, List<IQueryAction<TEntity>> queryAcions = null) : base(repository, queryAcions)
     {
     }
 }

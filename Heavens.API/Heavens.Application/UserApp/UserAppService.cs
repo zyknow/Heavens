@@ -17,23 +17,6 @@ public class UserAppService : BaseAppService<User, UserDto>
     }
 
     /// <summary>
-    /// 获取分页
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost]
-    public async Task<PagedList<UserDto>> Page(PageRequest request)
-    {
-        var data = await _repository
-            .Where(request.GetRulesExpression<User>())
-            .SortBy(request.Sort)
-            .Select(x => x.Adapt<UserDto>())
-            .ToPagedListAsync(request.Page, request.PageSize);
-
-        return data;
-    }
-
-    /// <summary>
     /// 获取用户信息，请求头中带token
     /// </summary>
     /// <returns></returns>

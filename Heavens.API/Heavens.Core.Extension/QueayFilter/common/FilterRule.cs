@@ -147,8 +147,7 @@ public enum FilterOperate
     /// </summary>
     [Code("in")]
     [Description("包括在")]
-    In = 13
-    //    ,
+    In = 13,
 
     ///// <summary>
     ///// 不包括在

@@ -22,10 +22,7 @@ public class LogExceptionHandler : IGlobalExceptionHandler, ISingleton
 
     public Task OnExceptionAsync(ExceptionContext context)
     {
-        dynamic exp = context.Exception;
-
         var dic = context.ToDictionary();
-
         #region 写日志
         if (dic.ContainsKey("ErrorCode"))
             _logger.LogWarning(context.Exception, context.Exception.Message);

@@ -33,7 +33,7 @@ public abstract class BaseRequest
         var exp = FilterHelper.GetExpression(Filters, queryActions);
 
         // 开发环境下填入过滤条件
-        if (App.HostEnvironment.IsDevelopment())
+        if (App.HostEnvironment != null && App.HostEnvironment.IsDevelopment())
             UnifyContext.Fill(@$"{exp.ToLambdaString()}");
 
         return exp;

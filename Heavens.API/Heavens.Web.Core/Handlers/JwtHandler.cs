@@ -5,6 +5,7 @@ using Heavens.Application.AuthorizeApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 
 namespace Heavens.Web.Core.Handlers;
 
@@ -48,7 +49,14 @@ public class JwtHandler : AppAuthorizeHandler
 
             JsonWebToken tokenInfo = JWTEncryption.ReadJwtToken(token);
 
-            int userId = tokenInfo.Claims.First(c => c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sid).Value.ToInt();
+            int userId = tokenInfo.Claims.First(c => c.Type == ClaimTypes.Sid)?.Value?.ToInt() ?? 0;
+
+            if(userId == 0)
+            {
+                context.Fail();    // 授权失败
+                return;
+            }
+
             User user = await userRepository.FirstOrDefaultAsync(c => c.Id == userId);
 
             if (user == null)

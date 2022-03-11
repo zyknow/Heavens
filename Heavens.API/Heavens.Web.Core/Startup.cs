@@ -47,14 +47,6 @@ public class Startup : AppStartup
                 // 注册多语言
                 .AddAppLocalization();
 
-
-
-        //services.Configure<MvcOptions>(options =>
-        //{
-        //    //审计过滤器
-        //    options.Filters.Add<AuditActionFilter>();
-        //});
-
         // 注册远程 http get,post 请求
         services.AddRemoteRequest();
 

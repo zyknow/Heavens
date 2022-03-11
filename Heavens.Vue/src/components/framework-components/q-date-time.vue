@@ -1,5 +1,5 @@
 <template>
-  <q-input :model-value="modelValue" label="最大执行时间" @update:model-value="(v) => $emit('update:modelValue', v)">
+  <q-input :model-value="modelValue" @update:model-value="(v) => $emit('update:modelValue', v)">
     <template #prepend>
       <q-icon name="event" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">

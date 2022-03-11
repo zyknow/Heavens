@@ -268,9 +268,6 @@ import { FieldType, Operate } from '@/utils/page-request/typing'
 import { enumToOption } from '@/utils/enum'
 const t = useI18n().t
 
-const dt = enumToOption(HttpMethod)
-debugger
-
 interface AuditDetail extends Audit {
   returnValueObj?: object | string
   bodyObj: object | string

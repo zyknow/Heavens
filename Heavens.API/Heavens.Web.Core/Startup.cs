@@ -31,8 +31,10 @@ public class Startup : AppStartup
 
         services.AddControllers(o =>
         {
-            // 审计过滤器
-            o.Filters.Add(typeof(AuditActionFilter));
+            var auditEnbale = App.GetConfig<bool>("AuditEnable");
+            if (auditEnbale)
+                // 审计过滤器
+                o.Filters.Add(typeof(AuditActionFilter));
         })
                 .AddInjectWithUnifyResult()
                 .AddNewtonsoftJson(option =>
@@ -45,19 +47,8 @@ public class Startup : AppStartup
                 // 注册多语言
                 .AddAppLocalization();
 
-
-
-        //services.Configure<MvcOptions>(options =>
-        //{
-        //    //审计过滤器
-        //    options.Filters.Add<AuditActionFilter>();
-        //});
-
         // 注册远程 http get,post 请求
         services.AddRemoteRequest();
-
-        // 注册 选项 服务
-        services.AddOptionServices();
 
         // 注册定时任务
         //services.AddTaskScheduler();
@@ -79,7 +70,7 @@ public class Startup : AppStartup
         // 配置多语言，必须在 路由注册之前
         app.UseAppLocalization();
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
 
         // 启用EnableBuffering，否则Filter获取不到body
         app.Use(next => context =>

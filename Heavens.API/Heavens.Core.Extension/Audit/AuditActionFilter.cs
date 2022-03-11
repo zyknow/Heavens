@@ -1,5 +1,6 @@
 ﻿using Bing.Utils.IdGenerators.Core;
 using Furion;
+using Furion.ClayObject.Extensions;
 using Furion.DatabaseAccessor;
 using Furion.JsonSerialization;
 using Heavens.Core.Authorizations;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +24,9 @@ using System.Threading.Tasks;
 
 namespace Heavens.Core.Extension.Audit;
 
+/// <summary>
+/// 审计 Filter
+/// </summary>
 public class AuditActionFilter : IAsyncActionFilter
 {
     public AuditActionFilter(IRepository<Entities.Audit> auditRepository)
@@ -65,23 +70,22 @@ public class AuditActionFilter : IAsyncActionFilter
             switch (result.Result)
             {
                 case ObjectResult objectResult:
-                    returnValue = JsonConvert.SerializeObject(objectResult.Value);
+                    if (objectResult.Value != null)
+                        returnValue = JsonConvert.SerializeObject(objectResult.Value);
                     break;
 
                 case JsonResult jsonResult:
-
-                    dynamic rtValue = jsonResult.Value;
-
-                    if (rtValue?.Errors != null)
+                    if (jsonResult.Value != null)
                     {
-                        exception = JsonConvert.SerializeObject(rtValue?.Errors);
+                        var dic = jsonResult.Value.ToDictionary();
+                        if (dic.ContainsKey("Errors") && dic["Errors"] != null)
+                            exception = JsonConvert.SerializeObject(dic["Errors"]);
+                        returnValue = JsonConvert.SerializeObject(jsonResult.Value);
                     }
-
-                    returnValue = JsonConvert.SerializeObject(jsonResult.Value);
                     break;
 
                 case ContentResult contentResult:
-                    returnValue = contentResult.Content;
+                        returnValue = contentResult.Content;
                     break;
             }
         }
@@ -115,9 +119,7 @@ public class AuditActionFilter : IAsyncActionFilter
         };
         audit.SetCreateByHttpToken();
 
-#pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
-        await _auditRepository.InsertAsync(audit);
-#pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+        _auditRepository.InsertAsync(audit);
     }
 
     #region 私有方法

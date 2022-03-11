@@ -16,44 +16,20 @@ namespace Heavens.Application.AuditApp;
 /// 审计接口
 /// </summary>
 [Authorize, IgnoreAudit]
-public class AuditAppService : BaseAppService<Audit, AuditDto>
+public class AuditAppService : BaseAppService<int, Audit, AuditDto, AuditPage>
 {
     public IAuditService _auditService { get; set; }
     public AuditAppService(IRepository<Audit> auditRepository, IAuditService auditService) : base(auditRepository)
     {
         _auditService = auditService;
-    }
 
-    private static List<IQueryAction<Audit>> queryAcions = new List<IQueryAction<Audit>>()
-    {
-        new QueryAction<Audit, double,bool>(nameof(AuditPage.HasBody),p=> p.Body.Length,p=> !string.IsNullOrEmpty(p.Body)),
-        new QueryAction<Audit, double,bool>(nameof(AuditPage.HasQuery),p=> p.Query.Length,p=> !string.IsNullOrEmpty(p.Query)),
-        new QueryAction<Audit, double,bool>(nameof(AuditPage.HasException),p=> p.Exception.Length,p=> !string.IsNullOrEmpty(p.Exception)),
-        new QueryAction<Audit, double,bool>(nameof(AuditPage.HasReturnValue),p=> p.ReturnValue.Length,p=> !string.IsNullOrEmpty(p.ReturnValue)),
-    };
-
-    /// <summary>
-    /// 获取分页
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost]
-    public async Task<PagedList<AuditPage>> Page(PageRequest request)
-    {
-        var exp = request.GetRulesExpression(queryAcions);
-
-        // 开发环境下填入过滤条件
-        if (App.HostEnvironment.IsDevelopment())
-            UnifyContext.Fill(exp.ToLambdaString());
-
-        var data = await _repository
-            .Where(exp)
-            .SortBy(request.Sort, queryAcions)
-            .Select(x => x.Adapt<AuditPage>())
-            .ToPagedListAsync(request.Page, request.PageSize);
-
-
-        return data;
+        _queryAcions = new List<IQueryAction<Audit>>()
+        {
+            new QueryAction<Audit, double, bool>(nameof(AuditPage.HasBody),p=> p.Body.Length,p=> !string.IsNullOrEmpty(p.Body)),
+            new QueryAction<Audit, double, bool>(nameof(AuditPage.HasQuery),p=> p.Query.Length,p=> !string.IsNullOrEmpty(p.Query)),
+            new QueryAction<Audit, double, bool>(nameof(AuditPage.HasException),p=> p.Exception.Length,p=> !string.IsNullOrEmpty(p.Exception)),
+            new QueryAction<Audit, double, bool>(nameof(AuditPage.HasReturnValue),p=> p.ReturnValue.Length,p=> !string.IsNullOrEmpty(p.ReturnValue)),
+        };
     }
 
     #region 禁用接口

@@ -8,21 +8,12 @@ namespace Heavens.Core.Extension.Cacheing;
 public static class OptionsServicesExtentions
 {
     /// <summary>
-    /// Options扩展
-    /// </summary>
-    /// <param name="services"></param>
-    public static void AddOptionServices(this IServiceCollection services)
-    {
-        services.AddConfigurableOptions<CacheingOptions>();
-    }
-
-    /// <summary>
     /// 添加缓存Services
     /// </summary>
     /// <param name="services"></param>
     public static void AddCache(this IServiceCollection services)
-
     {
+        services.AddConfigurableOptions<CacheingOptions>();
         CacheingOptions cacheOpt = App.GetConfig<CacheingOptions>("Cacheing");
 
         switch (cacheOpt.CacheMode)

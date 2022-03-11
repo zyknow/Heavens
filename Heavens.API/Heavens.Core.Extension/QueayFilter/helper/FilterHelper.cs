@@ -1,11 +1,16 @@
-﻿using EasyCaching.Core.Internal;
+﻿using AspectCore.DynamicProxy.Parameters;
+using Bing.Expressions;
+using Bing.Extensions;
+using EasyCaching.Core.Internal;
 using Furion.FriendlyException;
 using Heavens.Core.Extension.QueayFilter;
 using Heavens.Core.Extension.QueayFilter.common;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -19,8 +24,7 @@ namespace Heavens.Core.Extension.QueayFilter.helper;
 public static class FilterHelper
 {
     #region 字段
-
-    private static readonly Dictionary<FilterOperate, Func<Expression, Expression, Expression>> ExpressionDict =
+    private static Dictionary<FilterOperate, Func<Expression, Expression, Expression>> ExpressionDict { get; set; } =
         new Dictionary<FilterOperate, Func<Expression, Expression, Expression>>
         {
                 {
@@ -104,12 +108,13 @@ public static class FilterHelper
                         {
                             return null;
                         }
-                        return Expression.Call(typeof (Enumerable), "Contains", new[] {left.Type}, right, left);
+                        var exp =  Expression.Call(typeof (Enumerable), "Contains", new[] {left.Type}, right, left);
+                        return exp;
                     }
                 }
         };
 
-    private static readonly Dictionary<Type, Func<JsonElement, object>> jsonElementConvertDic = new Dictionary<Type, Func<JsonElement, object>>()
+    private static Dictionary<Type, Func<JsonElement, object>> jsonElementConvertDic { get; set; } = new Dictionary<Type, Func<JsonElement, object>>()
     {
         {typeof(short),e=> e.GetInt16()},
         {typeof(short?),e=> e.GetInt16()},
@@ -136,7 +141,7 @@ public static class FilterHelper
     /// <typeparam name="T">表达式实体类型</typeparam>
     /// <param name="rules">查询条件组，如果为null，则直接返回 true 表达式</param>
     /// <returns>查询表达式</returns>
-    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules, List<IQueryAction<T>> queryActions)
+    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules, List<IQueryAction<T>>? queryActions)
     {
 
         // 检查参数名
@@ -218,33 +223,34 @@ public static class FilterHelper
 
             if (dgroup.Rules.Count > 1)
             {
-                groupExps.Add(dgroup.Rules.Select(x => GetActionExpression(x, queryActions) ?? GetExpressionBody(param, x)).Aggregate(Expression.AndAlso));
+                var list = new List<Expression>();
+                dgroup.Rules.ForEach(x =>
+                {
+                    var exp = GetExpressionBody(param, x, queryActions);
+                    if (exp != null)
+                        list.Add(exp);
+                });
+                if (!list.IsEmpty())
+                    groupExps.Add(list.Aggregate(Expression.AndAlso));
             }
             else
             {
-                groupExps.Add(GetActionExpression(dgroup.Rules.First(), queryActions) ?? GetExpressionBody(param, dgroup.Rules.First()));
+                var exp = GetExpressionBody(param, dgroup.Rules.First(), queryActions);
+                if (exp != null)
+                    groupExps.Add(exp);
             }
         }
+
+        if (groupExps.IsEmpty())
+            groupExps.Add(Expression.Constant(true));
+
 
         bodies.Add(groupExps.Aggregate(Expression.OrElse));
 
         return bodies.Aggregate(Expression.AndAlso);
     }
 
-    private static Expression? GetActionExpression<T>(FilterRule rule, List<IQueryAction<T>>? queryActions = null)
-    {
-        var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && rule.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter());
-
-        if (action == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()))
-            return null;
-
-        Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
-        Expression body = action.FilterExp;
-        var data = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
-        return data;
-
-
-    }
+    private static bool IsValid(FilterRule rule) => !(rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()));
 
     /// <summary>
     /// 
@@ -252,40 +258,91 @@ public static class FilterHelper
     /// <param name="param"></param>
     /// <param name="rule"></param>
     /// <returns></returns>
-    private static Expression GetExpressionBody(ParameterExpression param, FilterRule rule)
+    public static Expression? GetExpressionBody<T>(ParameterExpression param, FilterRule rule, List<IQueryAction<T>>? queryActions = null)
     {
-        // if (rule == null || rule.Value == null || string.IsNullOrEmpty(rule.Value.ToString()))
-        if (rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()))
+        if (!IsValid(rule)) return null;
+
+        var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && rule.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter());
+
+        if (action != null)
         {
-            return Expression.Constant(true);
+            Expression constant = ChangeTypeToExpression(rule, action.FilterExp.Body.Type);
+            Expression body = action.FilterExp;
+            var exp = ExpressionDict[rule.Operate](action.FilterExp.Body, constant);
+            return exp;
         }
-        LambdaExpression expression = GetPropertyLambdaExpression(param, rule);
-        if (expression == null)
+        else
         {
-            return Expression.Constant(true);
+            LambdaExpression expression = GetPropertyLambdaExpression(param, rule);
+            // 如果包含Any，则表示已经完成了表达式树，直接返回 Body
+            if (expression == null || expression.ToString().Contains("Any"))
+                return expression?.Body;
+
+            Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
+            var exp = ExpressionDict[rule.Operate](expression.Body, constant);
+            return exp;
         }
-        Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
-        return ExpressionDict[rule.Operate](expression.Body, constant);
     }
 
     private static LambdaExpression GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
     {
+        LambdaExpression exp = null;
         Expression propertyAccess = param;
         Type type = param.Type;
-        string propertyName = rule.Field;
-        PropertyInfo property = type.GetProperty(propertyName) ?? type.GetProperty(propertyName.ToUpperFirstLetter());
-        if (property == null)
+
+        var fields = rule.Field.Split(".");
+
+        for (int i = 0; i < fields.Length; i++)
         {
-            throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, propertyName, type.FullName);
+            var field = fields[i];
+
+
+            var pTypeIsCollectionType = type.IsCollectionType();
+            // 获取集合类型中的类型
+            type = pTypeIsCollectionType ? type.GetGenericArguments().First() : type;
+
+            PropertyInfo property = type.GetProperty(field) ?? type.GetProperty(field.ToUpperFirstLetter());
+            if (property == null)
+                throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, @$"{rule.Field}中的{field}", type.FullName);
+
+            // 最后一个属性验证属性与属性值是否匹配
+            if (i == fields.Length - 1)
+            {
+                bool flag = CheckFilterRule(property.PropertyType, rule);
+                if (!flag)
+                    return null;
+            }
+
+            // 父类型为集合类型
+            if (pTypeIsCollectionType)
+            {
+                // 生成参数
+                ParameterExpression parameterExpression = Expression.Parameter(type, "v");
+
+                // 生成访问参数
+                var access = Expression.MakeMemberAccess(parameterExpression, property);
+
+                // 获取操作数据
+                var value = ChangeTypeToExpression(rule, property.PropertyType);
+
+                // 
+                var expr = ExpressionDict[rule.Operate](access, value);
+
+                // 生成lamda
+                var lamd = Expression.Lambda(expr, parameterExpression);
+
+                // 拼接到Any里
+                propertyAccess = Expression.Call(typeof(Enumerable), "Any", new[] { type }, propertyAccess, lamd);
+
+             }
+            else
+                propertyAccess = Expression.MakeMemberAccess(propertyAccess, property);
+
+            type = property.PropertyType;
         }
-        //验证属性与属性值是否匹配
-        bool flag = CheckFilterRule(property.PropertyType, rule);
-        if (!flag)
-        {
-            return null;
-        }
-        propertyAccess = Expression.MakeMemberAccess(propertyAccess, property);
-        return Expression.Lambda(propertyAccess, param);
+
+        exp = Expression.Lambda(propertyAccess, param);
+        return exp;
     }
 
     /// <summary>
@@ -315,7 +372,6 @@ public static class FilterHelper
 
     private static Expression ChangeTypeToExpression(FilterRule rule, Type conversionType)
     {
-
         if (rule.Operate.Equals(FilterOperate.In))
         {
             List<Expression> expressionList = new List<Expression>();
@@ -324,10 +380,6 @@ public static class FilterHelper
                 JsonElement values = (JsonElement)rule.Value;
                 if (values.ValueKind.Equals(JsonValueKind.Array))
                 {
-                    //if (conversionType.IsNullableType()) 
-                    //{
-                    //    conversionType = conversionType.GetUnNullableType();
-                    //}
                     if (jsonElementConvertDic.ContainsKey(conversionType))
                     {
                         foreach (JsonElement e in values.EnumerateArray())
@@ -342,7 +394,7 @@ public static class FilterHelper
 
                 }
             }
-            else if (rule.Value.GetType() == typeof(JArray))
+            else if (rule.Value is JArray)
             {
                 foreach (var item in (JArray)rule.Value)
                 {
@@ -350,7 +402,13 @@ public static class FilterHelper
                     expressionList.Add(Expression.Constant(dt, conversionType));
                 }
             }
-            var init = Expression.NewArrayInit(conversionType, expressionList);
+            else if (rule.Value is Array)
+            {
+                foreach (var item in (Array)rule.Value)
+                {
+                    expressionList.Add(Expression.Constant(item, conversionType));
+                }
+            }
             return Expression.NewArrayInit(conversionType, expressionList);
         }
         else if (rule.Value is JsonElement)

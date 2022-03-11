@@ -1,4 +1,5 @@
 ﻿using Furion.Extensions;
+using Furion.FriendlyException;
 using System.ComponentModel;
 
 namespace Heavens.Core.Extension.QueayFilter;
@@ -36,7 +37,15 @@ internal class ObjectHelper
         if(conversionType == typeof(DateTimeOffset) && value.GetType() == typeof(DateTime))
             return ((DateTime)value).ConvertToDateTimeOffset();
 
-        return Convert.ChangeType(value, conversionType);
+        try
+        {
+            return Convert.ChangeType(value, conversionType);
+        }
+        catch (Exception e)
+        {
+            throw Oops.Oh(@$"类型转换失败，无法将[{value}]转换为{conversionType.Name}");
+        }
+        
     }
 
     /// <summary>

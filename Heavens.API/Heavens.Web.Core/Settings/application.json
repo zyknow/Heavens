@@ -50,6 +50,9 @@
     // 允许跨域的请求头
     "WithExposedHeaders": [ "access-token", "x-access-token" ]
   },
+  // 审计开关
+  "AuditEnable": true,
+
   // MeiliSearch 搜索引擎配置
   "SearchEngineSettings": {
     "Enabled": "true",

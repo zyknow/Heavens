@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Heavens.Web.Core.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Heavens.Application\Heavens.Application.csproj" />
     <ProjectReference Include="..\Heavens.Database.Migrations\Heavens.Database.Migrations.csproj" />
   </ItemGroup>

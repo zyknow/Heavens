@@ -22,38 +22,33 @@
       </template>
 
       <template #top>
-        <div class="w-full flex flex-row justify-between">
-          <div class="flex flex-row space-x-1">
-            <q-input
-              v-model="pageQuery.entity"
-              outlined
-              :label="`${t('用户名')}/${t('账号')}`"
-              dense
-              @keyup.enter="getUsers"
-            />
-            <q-btn icon="search" color="primary" @click="getUsers" />
+        <query-filter
+          :base-query="pageQuery"
+          :loading="state.loading"
+          easy-text-input-class="w-60"
+          @on-search="getUsers"
+        >
+          <template #btn>
             <q-btn color="primary" :label="t('添加')" @click="showDialog(t('添加'))" />
             <q-btn color="danger" :label="t('删除')" @click="deleteByIds(state.selected.map((s) => s.id))" />
-          </div>
-          <div>
-            <q-select
-              v-model="state.visibleColumns"
-              multiple
-              outlined
-              dense
-              options-dense
-              :display-value="$q.lang.table.columns"
-              emit-value
-              map-options
-              :options="columns"
-              option-value="name"
-              options-cover
-              class="float-right"
-              menu-anchor="bottom middle"
-              menu-self="bottom middle"
-            />
-          </div>
-        </div>
+          </template>
+        </query-filter>
+        <q-select
+          v-model="state.visibleColumns"
+          multiple
+          outlined
+          dense
+          options-dense
+          :display-value="`显示${$q.lang.table.columns}`"
+          emit-value
+          map-options
+          :options="columns"
+          option-value="name"
+          options-cover
+          menu-anchor="bottom middle"
+          menu-self="bottom middle"
+          class="absolute right-4 top-3"
+        />
       </template>
 
       <template #pagination>
@@ -160,14 +155,16 @@ export default {
 </script>
 <script lang="ts" setup>
 import { AddUser, DeleteUserByIds, GetUserById, GetUserPage, UpdateUser, User } from '@/api/user'
-import { reactive, computed, watch } from 'vue'
+import { reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { dateFormat } from '@/utils/date-util'
 import { useQuasar } from 'quasar'
 import { ls } from '@/utils'
-import { PageQuery, PageRequest } from '@/utils/page-request'
-import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
 import { staticRoles } from '@/router/routes'
+import { PageRequest } from '@/utils/page-request/request'
+import { FieldType, Operate, Pagination } from '@/utils/page-request/typing'
+import { PageQuery } from '@/utils/page-request/query'
+import QueryFilter from '@/components/query/query-filter.vue'
 
 const USER_VISIBLE_COLUMNS = `USER_VISIBLE_COLUMNS`
 
@@ -175,6 +172,12 @@ const USER_VISIBLE_COLUMNS = `USER_VISIBLE_COLUMNS`
 const USER_ROWS_PER_PAGE = 'USER_ROWS_PER_PAGE'
 
 const defaultVisibleColumns = ['name', 'account', 'roles', 'enabled', 'sex', 'birth', 'createdTime']
+
+onBeforeUnmount(() => {
+  ls.set(USER_VISIBLE_COLUMNS, state.visibleColumns)
+  pageQuery.saveRowsPerPage()
+})
+
 const defaultForm: User = {
   name: '',
   account: '',
@@ -290,28 +293,92 @@ const columns: any[] = [
 ]
 
 const pageQuery = reactive(
-  new PageQuery<string>(
-    '',
+  new PageQuery(
     [
       {
         field: 'name',
-        value: '',
-        operate: FilterOperate.contains
+        label: '用户名',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
       },
       {
         field: 'account',
-        value: '',
-        operate: FilterOperate.contains
+        label: '账号',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
+      },
+      {
+        field: 'enabled',
+        label: '状态',
+        type: FieldType.boolSelect,
+        operate: Operate.equal,
+        selectOptions: [
+          {
+            label: '启用',
+            value: 'true'
+          },
+          {
+            label: '禁用',
+            value: 'false'
+          }
+        ]
+      },
+      {
+        field: 'email',
+        label: '邮箱',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
+      },
+      {
+        field: 'phone',
+        label: '手机号',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
+      },
+      {
+        field: 'description',
+        label: '备注',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
+      },
+      {
+        field: 'sex',
+        label: '性别',
+        type: FieldType.boolSelect,
+        operate: Operate.equal,
+        selectOptions: [
+          {
+            label: '男性',
+            value: 'true'
+          },
+          {
+            label: '女性',
+            value: 'false'
+          }
+        ]
+      },
+      {
+        field: 'birth',
+        label: '生日',
+        type: FieldType.date
+      },
+      {
+        field: 'createdTime',
+        label: '创建时间',
+        type: FieldType.date
+      },
+      {
+        field: 'updatedTime',
+        label: '修改时间',
+        type: FieldType.date
       }
     ],
-    {
-      sortBy: 'id',
-      descending: false,
-      page: 1,
-      rowsPerPage: ls.getItem<number>(USER_ROWS_PER_PAGE) || 10,
-      rowsNumber: 1,
-      totalPages: 1
-    }
+    USER_ROWS_PER_PAGE
   )
 )
 
@@ -324,13 +391,6 @@ const state = reactive({
   dialogTitle: '添加',
   form: { ...defaultForm }
 })
-
-watch(
-  () => state.visibleColumns,
-  (v, ov) => {
-    ls.set(USER_VISIBLE_COLUMNS, v)
-  }
-)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tableHandler = async ({ pagination }: any) => {

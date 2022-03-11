@@ -23,122 +23,23 @@
       </template>
       <!-- table 顶部操作栏 -->
       <template #top>
-        <div class="w-full flex flex-row">
-          <div class="flex flex-row flex-wrap mr-20 items-center space-x-0.5 space-y-0.5">
-            <q-input
-              v-model="pageQuery.entity.createdId"
-              outlined
-              :label="t('调用者Id')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-input
-              v-model="pageQuery.entity.createdBy"
-              outlined
-              :label="t('调用者')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-input
-              v-model="pageQuery.entity.serviceName"
-              outlined
-              :label="t('服务名')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-input
-              v-model="pageQuery.entity.methodName"
-              outlined
-              :label="t('执行方法')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-input v-model="pageQuery.entity.path" outlined :label="t('请求路径')" dense @keyup.enter="getAudits" />
-            <q-select
-              v-model="pageQuery.entity.httpMethod"
-              class="w-40"
-              :options="['GET', 'POST', 'DELETE', 'PATH']"
-              :label="t('Http请求方法')"
-              outlined
-              clearable
-              dense
-            />
-            <q-input
-              v-model="pageQuery.entity.clientIpAddress"
-              outlined
-              :label="t('请求IP')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-checkbox v-model="pageQuery.entity.hasBody" toggle-indeterminate :label="t('Body')" />
-            <q-input
-              v-if="pageQuery.entity.hasBody"
-              v-model="pageQuery.entity.body"
-              outlined
-              :label="t('Body')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-checkbox v-model="pageQuery.entity.hasQuery" toggle-indeterminate :label="t('Query')" />
-            <q-input
-              v-if="pageQuery.entity.hasQuery"
-              v-model="pageQuery.entity.query"
-              outlined
-              :label="t('Query')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-checkbox v-model="pageQuery.entity.hasException" toggle-indeterminate :label="t('异常')" />
-            <q-input
-              v-if="pageQuery.entity.hasException"
-              v-model="pageQuery.entity.exception"
-              outlined
-              :label="t('异常')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-input
-              v-model="pageQuery.entity['min-executionMs']"
-              type="number"
-              outlined
-              :label="t('最小执行毫秒')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            —
-            <q-input
-              v-model="pageQuery.entity['max-executionMs']"
-              type="number"
-              outlined
-              :label="t('最大执行毫秒')"
-              dense
-              @keyup.enter="getAudits"
-            />
-            <q-date-time v-model="pageQuery.entity['min-createdTime']" outlined dense :label="t('最小创建时间')" />
-            —
-            <q-date-time v-model="pageQuery.entity['max-createdTime']" outlined dense :label="t('最大创建时间')" />
-            <div class="flex flex-row space-x-1">
-              <q-btn icon="search" color="primary" @click="getAudits" />
-              <q-btn icon="r_restart_alt" color="primary" :label="t('重置过滤')" @click="pageQuery.resetEntity()" />
-            </div>
-          </div>
-          <q-select
-            v-model="state.visibleColumns"
-            multiple
-            outlined
-            dense
-            options-dense
-            :display-value="$q.lang.table.columns"
-            emit-value
-            map-options
-            :options="state.columns"
-            option-value="name"
-            options-cover
-            class="absolute right-4 top-3"
-            menu-anchor="bottom middle"
-            menu-self="bottom middle"
-          />
-        </div>
+        <query-filter :base-query="(pageQuery as any)" :loading="state.loading" @on-search="getAudits()" />
+        <q-select
+          v-model="state.visibleColumns"
+          multiple
+          outlined
+          dense
+          options-dense
+          :display-value="`显示${$q.lang.table.columns}`"
+          emit-value
+          map-options
+          :options="state.columns"
+          option-value="name"
+          options-cover
+          class="absolute right-4 top-3"
+          menu-anchor="bottom middle"
+          menu-self="bottom middle"
+        />
       </template>
 
       <!-- 底部分页查询器 -->
@@ -352,21 +253,23 @@ export default {
 }
 </script>
 <script lang="ts" setup>
-import { AddAudit, DeleteAuditByIds, GetAuditById, GetAuditPage, UpdateAudit, Audit } from '@/api/audit'
+import { AddAudit, DeleteAuditByIds, GetAuditById, GetAuditPage, UpdateAudit, Audit, HttpMethod } from '@/api/audit'
 import { ref, defineComponent, toRefs, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { dateFormat } from '@/utils/date-util'
-import { useQuasar } from 'quasar'
-import { copyByKeys, ls } from '@/utils'
-import { PageQuery, PageRequest, Pagination } from '@/utils/page-request'
-import { FilterCondition, FilterOperate } from '@/utils/page-request/enums'
+import { copyByKeys, ls, sleepAsync } from '@/utils'
 import { AuditPage } from '../../api/audit'
 import 'vue3-json-viewer/dist/index.css'
-import { camelCase } from 'lodash-es'
-import { staticRoles } from '@/router/routes'
-import QDateTime from '@/components/framework-Components/q-date-time.vue'
-
+import { camelCase, trimEnd } from 'lodash-es'
+import QDateTime from '@/components/framework-components/q-date-time.vue'
+import QueryFilter from '@/components/query/query-filter.vue'
+import { dateFormat, dateFormatFull } from '@/utils/date-util'
+import { PageQuery } from '@/utils/page-request/query'
+import { FieldType, Operate } from '@/utils/page-request/typing'
+import { enumToOption } from '@/utils/enum'
 const t = useI18n().t
+
+const dt = enumToOption(HttpMethod)
+debugger
 
 interface AuditDetail extends Audit {
   returnValueObj?: object | string
@@ -528,167 +431,96 @@ const columns: any[] = [
 // 卸载前保存缓存
 onBeforeUnmount(() => {
   ls.set(AUDIT_VISIBLE_COLUMNS, state.visibleColumns)
-  ls.set(AUDIT_ROWS_PER_PAGE, pageQuery.pagination.rowsPerPage)
+  pageQuery.saveRowsPerPage()
 })
-
 //#region PageQuery
 const pageQuery = reactive(
-  new PageQuery<{
-    [propName: string]: any
-    hasBody?: boolean
-    hasQuery?: boolean
-    hasException?: boolean
-    hasReturnValue?: boolean
-    userRoles?: string[]
-    serviceName?: string
-    methodName?: string
-    path?: string
-    body?: string
-    query?: string
-    httpMethod?: string
-    returnValue?: string
-    clientIpAddress?: string
-    exception?: string
-    createdId?: number
-    createdBy?: string
-    'min-createdTime'?: string
-    'max-createdTime'?: string
-    'min-executionMs'?: string
-    'max-executionMs'?: string
-  }>(
-    {},
+  new PageQuery(
     [
       {
-        field: 'hasBody',
-        value: undefined,
-        operate: FilterOperate.equal,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'hasQuery',
-        value: undefined,
-        operate: FilterOperate.equal,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'hasException',
-        value: undefined,
-        operate: FilterOperate.equal,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'hasReturnValue',
-        value: undefined,
-        operate: FilterOperate.equal,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'userRoles',
-        value: undefined,
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'serviceName',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'methodName',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'path',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'body',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'query',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'httpMethod',
-        value: '',
-        operate: FilterOperate.equal,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'returnValue',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
-      },
-      {
         field: 'createdId',
-        value: '',
-        operate: FilterOperate.equal,
-        condition: FilterCondition.and
-      },
-      {
-        field: 'exception',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
+        label: '调用者Id',
+        type: FieldType.number,
+        operate: Operate.equal,
+        easy: true
       },
       {
         field: 'createdBy',
-        value: '',
-        operate: FilterOperate.contains,
-        condition: FilterCondition.and
+        label: '调用者',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
       },
       {
-        field: 'clientIpAddress',
-        value: '',
-        operate: FilterOperate.equal,
-        condition: FilterCondition.and
+        field: 'serviceName',
+        label: '服务名',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
       },
       {
-        field: 'min-createdTime',
-        value: '',
-        operate: FilterOperate.greaterOrEqual,
-        condition: FilterCondition.and
+        field: 'methodName',
+        label: '执行方法',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
       },
       {
-        field: 'max-createdTime',
-        value: '',
-        operate: FilterOperate.lessOrEqual,
-        condition: FilterCondition.and
+        field: 'path',
+        label: '请求路径',
+        type: FieldType.text,
+        operate: Operate.contains,
+        easy: true
       },
       {
-        field: 'min-executionMs',
-        value: '',
-        operate: FilterOperate.greaterOrEqual,
-        condition: FilterCondition.and
+        field: 'body',
+        label: 'Body',
+        type: FieldType.text,
+        operate: Operate.contains
       },
       {
-        field: 'max-executionMs',
-        value: '',
-        operate: FilterOperate.lessOrEqual,
-        condition: FilterCondition.and
+        field: 'query',
+        label: 'Query',
+        type: FieldType.text,
+        operate: Operate.contains
+      },
+      {
+        field: 'httpMethod',
+        label: 'Http请求方法',
+        type: FieldType.select,
+        // selectOptions: enumToOption(HttpMethod),
+        selectOptions: ['GET', 'POST', 'DELETE', 'PATH'],
+        mapOptions: true,
+        emitValue: true
+      },
+      {
+        field: 'createdTime',
+        label: '创建时间',
+        type: FieldType.date
+      },
+      {
+        field: 'hasBody',
+        label: '包含Body',
+        type: FieldType.boolSelect,
+        operate: Operate.equal
+      },
+      {
+        field: 'hasQuery',
+        label: '包含query',
+        type: FieldType.boolSelect,
+        operate: Operate.equal
+      },
+      {
+        field: 'hasQuery',
+        label: '包含query',
+        type: FieldType.boolSelect,
+        operate: Operate.equal
       }
     ],
-    {
-      sortBy: 'id',
-      descending: false,
-      page: 1,
-      rowsPerPage: ls.getItem<number>(AUDIT_ROWS_PER_PAGE) || 10,
-      rowsNumber: 1,
-      totalPages: 1
-    }
+    AUDIT_ROWS_PER_PAGE
   )
 )
+
 //#endregion
 
 const state = reactive({

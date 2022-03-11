@@ -1,5 +1,4 @@
 ﻿import { IndexSign } from '@/typing'
-import { PageRequest } from '@/utils/page-request'
 import request from 'src/utils/request'
 import { BaseEntity, PagedList, RequestResult } from './_typing'
 

@@ -1,7 +1,7 @@
 ﻿import { IndexSign } from '@/typing'
-import { PageRequest, Request } from '@/utils/page-request'
 import { BaseEntity, PagedList, RequestResult } from './_typing'
 import request from 'src/utils/request'
+import { PageRequest } from '@/utils/page-request/request'
 /**
  * Audit
  */
@@ -50,6 +50,13 @@ export interface Audit extends IndexSign, BaseEntity {
    * 方法执行期间发生异常
    */
   exception: string
+}
+
+export enum HttpMethod {
+  GET = 'GET',
+  POST = 'POST',
+  DELETE = 'DELETE',
+  PATH = 'PHAT'
 }
 
 export interface AuditPage extends Audit {

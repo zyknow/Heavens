@@ -250,7 +250,19 @@ public static class FilterHelper
         return bodies.Aggregate(Expression.AndAlso);
     }
 
-    private static bool IsValid(FilterRule rule) => !(rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()));
+    private static bool IsValid(FilterRule rule)
+    {
+        if (rule == null || string.IsNullOrWhiteSpace(rule.Field) || string.IsNullOrWhiteSpace(rule.Value?.ToString()))
+        {
+            return false;
+        }
+        else
+        {
+            if (!Enum.IsDefined(rule.Operate))
+                throw new Exception(@$"{rule.Field}下Operate不存在");
+        }
+        return true;
+    }
 
     /// <summary>
     /// 
@@ -261,6 +273,9 @@ public static class FilterHelper
     public static Expression? GetExpressionBody<T>(ParameterExpression param, FilterRule rule, List<IQueryAction<T>>? queryActions = null)
     {
         if (!IsValid(rule)) return null;
+
+
+
 
         var action = queryActions?.FirstOrDefault(q => q.FilterExp != null && rule.Field.ToUpperFirstLetter() == q.Field.ToUpperFirstLetter());
 

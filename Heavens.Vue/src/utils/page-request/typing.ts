@@ -6,11 +6,11 @@ export enum Condition {
   /**
    * 或者
    */
-  or = 1,
+  or = 'Or',
   /**
    * 并且
    */
-  and = 2
+  and = 'And'
 }
 
 /**
@@ -20,47 +20,47 @@ export enum Operate {
   /**
    * 等于
    */
-  equal = 3,
+  equal = 'Equal',
   /**
    * 不等于
    */
-  notEqual = 4,
+  notEqual = 'NotEqual',
   /**
    * 小于
    */
-  less = 5,
+  less = 'Less',
   /**
    * 小于等于
    */
-  lessOrEqual = 6,
+  lessOrEqual = 'LessOrEqual',
   /**
    * 大于
    */
-  greater = 7,
+  greater = 'Greater',
   /**
    * 大于等于
    */
-  greaterOrEqual = 8,
+  greaterOrEqual = 'GreaterOrEqual',
   /**
    * 开始于
    */
-  startsWith = 9,
+  startsWith = 'StartsWith',
   /**
    * 结束于
    */
-  endsWith = 10,
+  endsWith = 'EndsWith',
   /**
    * 包含
    */
-  contains = 11,
+  contains = 'Contains',
   /**
    * 不包含
    */
-  notContains = 12,
+  notContains = 'NotContains',
   /**
    * 包括在
    */
-  in = 13
+  in = 'In'
 }
 
 /**
@@ -71,11 +71,11 @@ export enum SortType {
   /**
    * 倒序
    */
-  desc = 0,
+  desc = 'Desc',
   /**
    * 顺序
    */
-  asc = 1
+  asc = 'Asc'
 }
 
 /**

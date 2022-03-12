@@ -106,7 +106,7 @@ public static class FilterHelper
                     {
                         if (!right.Type.IsArray)
                         {
-                            return null;
+                            return null!;
                         }
                         var exp =  Expression.Call(typeof (Enumerable), "Contains", new[] {left.Type}, right, left);
                         return exp;
@@ -126,7 +126,7 @@ public static class FilterHelper
         {typeof(decimal?),e=> e.GetDecimal()},
         {typeof(double?),e=> e.GetDouble()},
         {typeof(double),e=> e.GetDouble()},
-        {typeof(string),e=> e.GetString()},
+        {typeof(string),e=> e.GetString()!},
         {typeof(DateTime),e=> e.GetDateTime()},
         {typeof(DateTimeOffset),e=> e.GetDateTimeOffset()},
         {typeof(bool),e=> e.GetBoolean()},
@@ -174,7 +174,7 @@ public static class FilterHelper
     {
         if (rules == null || rules.Count == 0)
         {
-            return null;
+            return new List<FilterGroup>();
         }
         List<FilterGroup> groups = new List<FilterGroup>();
         for (int i = 0; i < rules.Count; i++)
@@ -273,7 +273,7 @@ public static class FilterHelper
         }
         else
         {
-            LambdaExpression expression = GetPropertyLambdaExpression(param, rule);
+            LambdaExpression expression = GetPropertyLambdaExpression(param, rule)!;
             // 如果包含Any，则表示已经完成了表达式树，直接返回 Body
             if (expression == null || expression.ToString().Contains("Any"))
                 return expression?.Body;
@@ -284,9 +284,9 @@ public static class FilterHelper
         }
     }
 
-    private static LambdaExpression GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
+    private static LambdaExpression? GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
     {
-        LambdaExpression exp = null;
+        LambdaExpression? exp = null;
         Expression propertyAccess = param;
         Type type = param.Type;
 
@@ -301,7 +301,7 @@ public static class FilterHelper
             // 获取集合类型中的类型
             type = pTypeIsCollectionType ? type.GetGenericArguments().First() : type;
 
-            PropertyInfo property = type.GetProperty(field) ?? type.GetProperty(field.ToUpperFirstLetter());
+            PropertyInfo property = type.GetProperty(field) ?? type.GetProperty(field.ToUpperFirstLetter())!;
             if (property == null)
                 throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, @$"{rule.Field}中的{field}", type.FullName);
 
@@ -424,7 +424,7 @@ public static class FilterHelper
         else if (rule.Value is JsonElement)
         {
             JsonElement json = (JsonElement)rule.Value;
-            object value = null;
+            object? value = null;
             //枚举
             if (conversionType.IsEnum)
             {
@@ -438,7 +438,7 @@ public static class FilterHelper
         }
         else
         {
-            object value = ObjectHelper.CastTo(rule.Value, conversionType);
+            object? value = ObjectHelper.CastTo(rule.Value!, conversionType);
             return Expression.Constant(value, conversionType);
         }
     }

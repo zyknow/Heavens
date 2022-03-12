@@ -23,19 +23,19 @@ public static class CsCommentsXmlCache
     /// </summary>
     /// <param name="member">成员信息</param>
     /// <returns></returns>
-    public static XmlDocument Get(MemberInfo member)
+    public static XmlDocument? Get(MemberInfo member)
     {
         string? key = member.Module.Assembly.FullName;
         XmlDocument xml;
 
-        if (_cache.TryGetValue(key, out xml))
+        if (_cache.TryGetValue(key!, out xml!))
         {
             return xml;
         }
 
         lock (_cache)
         {
-            if (_cache.TryGetValue(key, out xml))
+            if (_cache.TryGetValue(key!, out xml!))
             {
                 return xml;
             }
@@ -49,7 +49,7 @@ public static class CsCommentsXmlCache
             string? xmlText = File.ReadAllText(xmlFile);
             xml = new XmlDocument();
             xml.LoadXml(xmlText);
-            _cache.Add(key, xml);
+            _cache.Add(key!, xml);
             _cacheByPath[xmlFile] = xml;
             return xml;
         }
@@ -67,7 +67,7 @@ public static class CsCommentsXmlCache
         {
             if (xmlPath == null || File.Exists(xmlPath) == false)
             {
-                _cacheByPath[xmlPath] = _cache[key] = new XmlDocument();
+                _cacheByPath[xmlPath!] = _cache[key!] = new XmlDocument();
             }
             else
             {
@@ -75,7 +75,7 @@ public static class CsCommentsXmlCache
                 XmlDocument? xml = new XmlDocument();
 
                 xml.LoadXml(xmlText);
-                _cache[key] = xml;
+                _cache[key!] = xml;
                 _cacheByPath[xmlPath] = xml;
             }
         }
@@ -95,7 +95,7 @@ public static class CsCommentsXmlCache
         lock (_cache)
         {
             XmlDocument xml;
-            if (_cacheByPath.TryGetValue(xmlPath, out xml) == false)
+            if (_cacheByPath.TryGetValue(xmlPath, out xml!) == false)
             {
                 return;
             }
@@ -110,7 +110,7 @@ public static class CsCommentsXmlCache
     /// </summary>
     /// <param name="dllPath">dll路径</param>
     /// <returns></returns>
-    internal static string GetXmlPath(string dllPath)
+    internal static string? GetXmlPath(string dllPath)
     {
         if (string.IsNullOrEmpty(dllPath) || dllPath[0] == '<')
         {

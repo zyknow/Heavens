@@ -12,7 +12,7 @@ public static class CsCommentReader
     /// 读取任意成员的注释信息
     /// </summary>
     /// <param name="member">需要读取注释的成员</param>
-    public static CsComments Create(MemberInfo member)
+    public static CsComments? Create(MemberInfo member)
     {
         if (member == null)
         {
@@ -60,7 +60,7 @@ public static class CsCommentReader
         {
             throw new ArgumentNullException("type");
         }
-        string? xpath = string.Format("T:{0}", type.FullName.Replace("+", "."));
+        string? xpath = string.Format("T:{0}", type.FullName?.Replace("+", "."));
         return CreateComment(type, xpath);
     }
 
@@ -74,7 +74,7 @@ public static class CsCommentReader
         {
             throw new ArgumentNullException("ctor");
         }
-        string? xpath = GetXPath("M", ctor.DeclaringType, ctor.IsStatic ? "#cctor" : "#ctor");
+        string? xpath = GetXPath("M", ctor.DeclaringType!, ctor.IsStatic ? "#cctor" : "#ctor");
         xpath += GetXPathByParameters(ctor.GetParameters());
         return CreateComment(ctor, xpath);
     }
@@ -89,8 +89,8 @@ public static class CsCommentReader
         {
             throw new ArgumentNullException("field");
         }
-        string? xpath = GetXPath("E", @event.DeclaringType, @event.Name);
-        return CreateComment(@event, xpath);
+        string? xpath = GetXPath("E", @event.DeclaringType!, @event.Name);
+        return CreateComment(@event, xpath!);
     }
 
     /// <summary> 
@@ -103,7 +103,7 @@ public static class CsCommentReader
         {
             throw new ArgumentNullException("method");
         }
-        string? xpath = GetXPath("M", method.DeclaringType, method.Name);
+        string? xpath = GetXPath("M", method.DeclaringType!, method.Name);
         if (method.IsGenericMethod)
         {
             xpath += "``" + method.GetGenericArguments().Length;
@@ -126,7 +126,7 @@ public static class CsCommentReader
         {
             throw new ArgumentNullException("prop");
         }
-        string? xpath = GetXPath("P", prop.DeclaringType, prop.Name);
+        string? xpath = GetXPath("P", prop.DeclaringType!, prop.Name);
         xpath += GetXPathByParameters(prop.GetIndexParameters());
         return CreateComment(prop, xpath);
     }
@@ -141,8 +141,8 @@ public static class CsCommentReader
         {
             throw new ArgumentNullException(nameof(field));
         }
-        string? xpath = GetXPath("F", field.DeclaringType, field.Name);
-        return CreateComment(field, xpath);
+        string? xpath = GetXPath("F", field.DeclaringType!, field.Name);
+        return CreateComment(field, xpath!);
     }
 
     /// <summary> 
@@ -170,7 +170,9 @@ public static class CsCommentReader
     /// </summary>
     /// <typeparam name="T">枚举的类型</typeparam>
     /// <param name="enumType">枚举的类型</param>
+#pragma warning disable CS8714 // 类型不能用作泛型类型或方法中的类型参数。类型参数的为 Null 性与 "notnull" 约束不匹配。
     private static Dictionary<T, string> CreateEnumComment<T>(Type enumType)
+#pragma warning restore CS8714 // 类型不能用作泛型类型或方法中的类型参数。类型参数的为 Null 性与 "notnull" 约束不匹配。
     {
         if (enumType == null)
         {
@@ -180,19 +182,21 @@ public static class CsCommentReader
         {
             throw new ArgumentOutOfRangeException(nameof(enumType), "enumType 不是 System.Enum");
         }
+#pragma warning disable CS8714 // 类型不能用作泛型类型或方法中的类型参数。类型参数的为 Null 性与 "notnull" 约束不匹配。
         Dictionary<T, string>? maps = new Dictionary<T, string>();
+#pragma warning restore CS8714 // 类型不能用作泛型类型或方法中的类型参数。类型参数的为 Null 性与 "notnull" 约束不匹配。
         Array? array = Enum.GetValues(enumType);
         foreach (T item in array)
         {
-            FieldInfo? field = enumType.GetField(item.ToString());
-            CsComments? comment = Create(field);
+            FieldInfo? field = enumType.GetField(item.ToString()!);
+            CsComments? comment = Create(field!);
             if (comment != null && comment.Summary != null)
             {
                 maps.Add(item, comment.Summary);
             }
             else
             {
-                maps.Add(item, GetDescription(field));
+                maps.Add(item, GetDescription(field!));
             }
         }
         return maps;
@@ -205,7 +209,7 @@ public static class CsCommentReader
     /// <returns></returns>
     private static string GetDescription(MemberInfo member)
     {
-        DescriptionAttribute? attr = (DescriptionAttribute)Attribute.GetCustomAttribute(member, typeof(DescriptionAttribute));
+        DescriptionAttribute? attr = Attribute.GetCustomAttribute(member, typeof(DescriptionAttribute)) as DescriptionAttribute;
         if (attr == null)
         {
             return member.Name;
@@ -218,7 +222,7 @@ public static class CsCommentReader
     /// 成员信息列表
     /// </summary>
     [ThreadStatic]
-    private static List<MemberInfo> _member;
+    private static List<MemberInfo>? _member;
 
     /// <summary>
     /// 创建注释对象，读取任意成员的注释信息，如果xml不存在或者注释不存在返回null
@@ -249,13 +253,11 @@ public static class CsCommentReader
             }
 
             System.Xml.XmlNodeList? node = xml.SelectNodes("/doc/members/member[@name='" + path.Replace('+', '.') + "']");
-            if (node.Count == 0)
-            {
+            if (node?.Count == 0)
                 return null;
-            }
-
             _member.RemoveAt(_member.Count - 1);
-            return new CsComments(node[0]);
+
+            return new CsComments(node?[0]!);
 
         }
         catch (Exception)
@@ -269,12 +271,10 @@ public static class CsCommentReader
     /// </summary>
     /// <param name="args">参数数组</param>
     /// <returns></returns>
-    private static string GetXPathByParameters(ParameterInfo[] args)
+    private static string? GetXPathByParameters(ParameterInfo[] args)
     {
         if (args == null || args.Length == 0)
-        {
             return null;
-        }
         List<string>? list = new List<string>(args.Length);
         foreach (ParameterInfo? item in args)
         {
@@ -320,12 +320,12 @@ public static class CsCommentReader
             }
             else
             {
-                return type.FullName.Substring(0, type.FullName.IndexOf('`')) +
+                return type.FullName!.Substring(0, type.FullName.IndexOf('`')) +
                        GetParameterName(type.GetGenericArguments());
             }
         }
 
-        return type.FullName;
+        return type.FullName!;
     }
 
     /// <summary>
@@ -335,13 +335,13 @@ public static class CsCommentReader
     /// <param name="type">类型</param>
     /// <param name="name">名称</param>
     /// <returns></returns>
-    private static string GetXPath(string prefix, Type type, string name)
+    private static string? GetXPath(string prefix, Type type, string name)
     {
         if (type.IsGenericType && type.IsGenericTypeDefinition == false)
         {
             type = type.GetGenericTypeDefinition();
         }
 
-        return string.Format("{0}:{1}.{2}", prefix, type.FullName.Replace("+", "."), name);
+        return string.Format("{0}:{1}.{2}", prefix, type.FullName?.Replace("+", "."), name);
     }
 }

@@ -14,7 +14,7 @@ public class CacheingOptions : IConfigurableOptions
     /// <summary>
     /// redis设置(如果缓存模式选的redis，该配置必填)
     /// </summary>
-    public RedisSettings RedisSettings { get; set; }
+    public RedisSettings? RedisSettings { get; set; }
 
 }
 

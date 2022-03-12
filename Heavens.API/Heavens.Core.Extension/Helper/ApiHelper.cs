@@ -10,7 +10,7 @@ public class ApiHelper
     /// <param name="path"></param>
     /// <param name="fileName"></param>
     /// <returns></returns>
-    public static FileStreamResult GetFileResult(string path, string fileName = null)
+    public static FileStreamResult GetFileResult(string path, string? fileName = null)
     {
         return new FileStreamResult(File.OpenRead(path), "application/octet-stream") { FileDownloadName = fileName ?? Path.GetFileName(path) };
     }

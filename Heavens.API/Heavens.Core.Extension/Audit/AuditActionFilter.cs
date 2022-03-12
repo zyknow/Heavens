@@ -85,7 +85,7 @@ public class AuditActionFilter : IAsyncActionFilter
                     break;
 
                 case ContentResult contentResult:
-                        returnValue = contentResult.Content;
+                    returnValue = contentResult.Content;
                     break;
             }
         }
@@ -119,7 +119,10 @@ public class AuditActionFilter : IAsyncActionFilter
         };
         audit.SetCreateByHttpToken();
 
+
+#pragma warning disable CS4014 
         _auditRepository.InsertAsync(audit);
+#pragma warning restore CS4014 
     }
 
     #region 私有方法

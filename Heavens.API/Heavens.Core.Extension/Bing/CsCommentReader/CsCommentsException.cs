@@ -14,7 +14,7 @@ public sealed class CsCommentsException
     /// <summary>
     /// 节点中的 cref 属性的值
     /// </summary>
-    public string Cref { get; private set; }
+    public string? Cref { get; private set; }
 
     /// <summary>
     /// 节点中的内容
@@ -29,11 +29,11 @@ public sealed class CsCommentsException
     internal CsCommentsException(int index, XmlNode node)
     {
         Index = index;
-        XmlAttribute? attr = node.Attributes["cref"];
+        XmlAttribute? attr = node.Attributes!["cref"];
         if (attr != null)
         {
             Cref = attr.InnerText;
-            Cref = Cref?.Remove(0, 2);
+            Cref = Cref!.Remove(0, 2);
         }
 
         Text = node.InnerText.Trim();

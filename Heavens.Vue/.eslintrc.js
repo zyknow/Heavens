@@ -52,6 +52,9 @@ module.exports = {
     //关闭未使用的变量字段警告
     '@typescript-eslint/no-unused-vars': [0],
 
+    // 关闭eslint !强制断言警告
+    '@typescript-eslint/no-non-null-assertion': 0,
+
     // 'vue/html-self-closing':0,
     // 'vue/script-setup-uses-vars': 0,
 

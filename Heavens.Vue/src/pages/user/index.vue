@@ -159,7 +159,7 @@ import { reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { staticRoles } from '@/router/routes'
-import { FieldType, Operate } from '@/utils/page-request/typing'
+import { FieldOption, FieldType, Operate } from '@/utils/page-request/typing'
 import { PageQuery } from '@/utils/page-request/query'
 import QueryFilter from '@/components/query/query-filter.vue'
 
@@ -256,19 +256,21 @@ const pageQuery = reactive(
     {
       field: 'createdTime',
       label: '创建时间',
-      type: FieldType.date
+      type: FieldType.date,
+      operate: Operate.equal
     },
     {
       field: 'updatedTime',
       label: '修改时间',
-      type: FieldType.date
+      type: FieldType.date,
+      operate: Operate.equal
     },
     {
       label: t('操作'),
       field: 'actions',
       columns: { required: true, sortable: false },
       excludeQuery: true
-    }
+    } as FieldOption
   ])
 )
 onBeforeUnmount(() => {

@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col space-y-1 w-full">
     <div class="flex flex-row items-center justify-between">
-      <div class="flex flex-row space-x-1">
+      <div v-if="query.mode == QueryModel.easy" class="flex flex-row space-x-1">
         <q-input
-          v-if="query.mode == QueryModel.easy && easyOption.number.label"
+          v-if="easyOption.number.label"
           v-model="easyOption.number.searchKey"
           :class="easyNumberInputClass"
           :label="easyOption.number.label"
@@ -14,7 +14,7 @@
           @keydown.enter="onSearch"
         />
         <q-input
-          v-if="query.mode == QueryModel.easy && easyOption.text.label"
+          v-if="easyOption.text.label"
           v-model="easyOption.text.searchKey"
           :class="easyTextInputClass"
           :label="easyOption.text.label"
@@ -26,7 +26,12 @@
         <q-btn dense icon="search" color="primary" :loading="loading" @click="onSearch">搜索</q-btn>
         <slot name="btn"></slot>
       </div>
-      <div class="flex flex-row mr-32">
+      <div v-else></div>
+      <div class="flex flex-row mr-32 space-x-1">
+        <div v-if="query.mode != QueryModel.easy" class="flex flex-row space-x-1">
+          <q-btn dense icon="search" color="primary" :loading="loading" @click="onSearch">搜索</q-btn>
+          <slot name="btn"></slot>
+        </div>
         <q-select
           v-model="query.mode"
           outlined
@@ -38,22 +43,14 @@
           :options="enumToOption(QueryModel)"
           :option-label="(v) => t(`enum.query_mode.${v.label}`)"
         />
-        <q-btn
-          flat
-          style="margin-left: 10px"
-          color="danger"
-          @click="
-            // eslint-disable-next-line prettier/prettier
-                query.reset(); easyOption.reset();$forceUpdate()
-          "
-          >重置过滤</q-btn
-        >
+        <q-btn flat style="margin-left: 10px" color="danger" @click="onReset">重置过滤</q-btn>
       </div>
     </div>
 
-    <div v-if="query.mode == QueryModel.advanced" class="flex flex-row">
+    <div v-if="query.mode == QueryModel.advanced && !state.refreshLoading" class="flex flex-row">
       <div v-for="(item, index) in query.filters" :key="index" class="flex flex-row mr-2 mt-2">
         <query-field-item
+          ref="reference"
           :mode="query.mode"
           :fieldOption="item"
           :field-options="fieldOptions"
@@ -62,7 +59,7 @@
       </div>
     </div>
 
-    <div v-if="query.mode == QueryModel.custom" class="flex flex-col space-y-0.5">
+    <div v-if="query.mode == QueryModel.custom && !state.refreshLoading" class="flex flex-col space-y-0.5">
       <div class="flex flex-row space-x-1 items-center">
         <q-select
           v-model="state.condition"
@@ -100,14 +97,14 @@ export default {
 </script>
 <script lang="ts" setup>
 import { enumToOption, fromEnum, OptionType } from '@/utils/enum'
-import { ref, toRefs, reactive, PropType, computed, watch, onMounted } from 'vue'
+import { ref, toRefs, reactive, PropType, computed, watch, onMounted, getCurrentInstance, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import qDateTime from '../framework-components/q-date-time.vue'
 import { cloneDeep, first, join } from 'lodash-es'
 
-import { copyByKeys } from '@/utils'
+import { copyByKeys, sleepAsync } from '@/utils'
 import { BaseQuery, getOperatesByFieldType } from '@/utils/page-request/query'
-import { Condition, FieldOption, FieldType, QueryModel } from '@/utils/page-request/typing'
+import { Condition, FieldOption, FieldType, Operate, QueryModel } from '@/utils/page-request/typing'
 import QueryFieldItem from './query-field-item.vue'
 const t = useI18n().t
 
@@ -124,8 +121,8 @@ const query = props.baseQuery as BaseQuery
 
 watch(
   () => query.mode,
-  (mode) => {
-    query.reset()
+  () => {
+    onReset()
   }
 )
 
@@ -161,28 +158,37 @@ const easyOption = reactive({
 })
 
 const state = reactive({
-  condition: Condition.or
+  condition: Condition.or,
+  refreshLoading: false
 })
 
 const add = () => {
   const item: FieldOption = cloneDeep({
     ...defaultAddFieldOption,
     condition: state.condition,
-    operate: first(getOperatesByFieldType(defaultAddFieldOption?.type))?.value
+    operate: first(getOperatesByFieldType(defaultAddFieldOption?.type))!.value
   })
-
   query.filters.push(item)
 }
 
 onMounted(() => {
-  query.reset()
+  onReset()
 })
 
 const onFieldChange = (item: FieldOption, v: string) => {
   const fieldOption = query.fieldOptions?.find((p) => `${p.field}-${p.label}` == v)
   copyByKeys(item, fieldOption)
-  item.operate = first(getOperatesByFieldType(item.type))?.value
+  item.operate = first(getOperatesByFieldType(item.type))!.value
   if (fieldOption) item.value = fieldOption.value
+}
+
+const reference = ref(null)
+const onReset = async () => {
+  state.refreshLoading = true
+  query.reset()
+  easyOption.reset()
+  await nextTick()
+  state.refreshLoading = false
 }
 
 const onSearch = () => {

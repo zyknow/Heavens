@@ -409,7 +409,8 @@ const pageQuery = reactive(
       field: 'userRoles',
       label: '调用者角色',
       easy: true,
-      excludeQuery: true
+      excludeQuery: true,
+      operate: Operate.equal
     },
     {
       field: 'createdId',
@@ -465,11 +466,12 @@ const pageQuery = reactive(
       // selectOptions: enumToOption(HttpMethod),
       selectOptions: ['GET', 'POST', 'DELETE', 'PATH'],
       mapOptions: true,
-      emitValue: true
+      emitValue: true,
+      operate: Operate.equal
     },
     {
       field: 'executionMs',
-      label: '请求时间',
+      label: '请求毫秒',
       type: FieldType.numberBetween,
       columns: { format: (v: number) => `${v}ms` },
       operate: Operate.equal,
@@ -478,44 +480,52 @@ const pageQuery = reactive(
     {
       field: 'createdTime',
       label: '创建时间',
-      type: FieldType.date
+      type: FieldType.date,
+      operate: Operate.equal
     },
     {
       field: 'hasException',
       label: '异常',
-      type: FieldType.boolSelect
+      type: FieldType.boolSelect,
+      operate: Operate.equal
     },
 
     {
       field: 'hasBody',
       label: '包含Body',
-      type: FieldType.boolSelect
+      type: FieldType.boolSelect,
+      operate: Operate.equal
     },
     {
       field: 'hasQuery',
       label: '包含query',
-      type: FieldType.boolSelect
+      type: FieldType.boolSelect,
+      operate: Operate.equal
     },
     {
       field: 'hasQuery',
       label: '包含query',
-      type: FieldType.boolSelect
+      type: FieldType.boolSelect,
+      operate: Operate.equal
     },
     {
       field: 'clientIpAddress',
       label: '请求IP',
-      type: FieldType.text
+      type: FieldType.text,
+      operate: Operate.contains
     },
     {
       field: 'hasReturnValue',
       label: '返回数据',
-      type: FieldType.text
+      type: FieldType.text,
+      operate: Operate.equal
     },
     {
       field: 'actions',
       label: '操作',
       type: FieldType.text,
-      excludeQuery: true
+      excludeQuery: true,
+      operate: Operate.equal
     }
   ])
 )

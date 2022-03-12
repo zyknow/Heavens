@@ -8,6 +8,10 @@ namespace Heavens.Core.Extension.QueayFilter.common;
 /// </summary>
 public class FilterRule
 {
+    public FilterRule()
+    {
+    }
+
     /// <summary>
     /// 使用指定数据名称，数据值及操作方式初始化一个<see cref="FilterRule"/>的新实例
     /// </summary>
@@ -20,6 +24,12 @@ public class FilterRule
         Value = value;
         Operate = operate;
     }
+
+    public FilterRule(string field, object value, FilterOperate operate, FilterCondition condition) : this(field, value, operate)
+    {
+        Condition = condition;
+    }
+
     /// <summary>
     /// 获取或设置 属性名称
     /// </summary>

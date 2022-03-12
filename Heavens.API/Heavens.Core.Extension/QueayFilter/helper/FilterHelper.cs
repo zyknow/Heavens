@@ -334,7 +334,7 @@ public static class FilterHelper
                 // 拼接到Any里
                 propertyAccess = Expression.Call(typeof(Enumerable), "Any", new[] { type }, propertyAccess, lamd);
 
-             }
+            }
             else
                 propertyAccess = Expression.MakeMemberAccess(propertyAccess, property);
 
@@ -409,6 +409,16 @@ public static class FilterHelper
                     expressionList.Add(Expression.Constant(item, conversionType));
                 }
             }
+            // 字符串序列化，该方式不需要，前端传值会自动序列化
+            //else if (rule.Value is string)
+            //{
+            //    var list = JsonConvert.DeserializeObject(rule.Value.ToString());
+            //    foreach (var item in (JArray)list)
+            //    {
+            //        var dt = JsonConvert.DeserializeObject(item.ToString(), conversionType);
+            //        expressionList.Add(Expression.Constant(dt, conversionType));
+            //    }
+            //}
             return Expression.NewArrayInit(conversionType, expressionList);
         }
         else if (rule.Value is JsonElement)

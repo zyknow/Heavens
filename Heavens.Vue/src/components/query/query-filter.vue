@@ -2,7 +2,6 @@
   <div class="flex flex-col space-y-1 w-full">
     <div class="flex flex-row items-center justify-between">
       <div class="flex flex-row space-x-1">
-        <!-- TODO: 字符串类型分一组，数字类型分一组 -->
         <q-input
           v-if="query.mode == QueryModel.easy && easyOption.number.label"
           v-model="easyOption.number.searchKey"
@@ -11,6 +10,7 @@
           type="number"
           outlined
           dense
+          clearable
           @keydown.enter="onSearch"
         />
         <q-input
@@ -20,6 +20,7 @@
           :label="easyOption.text.label"
           outlined
           dense
+          clearable
           @keydown.enter="onSearch"
         />
         <q-btn dense icon="search" color="primary" :loading="loading" @click="onSearch">搜索</q-btn>
@@ -146,7 +147,9 @@ const easyOption = reactive({
   },
   number: {
     label: join(
-      query.fieldOptions.filter((f) => f.easy == true && f.type == FieldType.number).map((f) => f.label),
+      query.fieldOptions
+        .filter((f) => f.easy == true && (f.type == FieldType.number || f.type == FieldType.numberBetween))
+        .map((f) => f.label),
       '/'
     ),
     searchKey: undefined
@@ -187,7 +190,7 @@ const onSearch = () => {
     query.filters.filter((f) => {
       if (f.type == FieldType.text) {
         f.value = easyOption.text.searchKey
-      } else if (f.type == FieldType.number) {
+      } else if (f.type == FieldType.number || f.type == FieldType.numberBetween) {
         f.value = easyOption.number.searchKey
       }
     })

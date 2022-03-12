@@ -1,20 +1,20 @@
 <template>
   <div class="h-full">
     <q-table
-      v-model:selected.sync="state.selected"
+      v-model:selected.sync="pageQuery.selected"
       v-model:pagination="pageQuery.pagination"
-      :rows="state.users"
-      :columns="columns"
+      :rows="pageQuery.data"
+      :columns="pageQuery.columns"
       selection="multiple"
-      :loading="state.loading"
+      :loading="pageQuery.loading"
       :row-key="(v) => v.id"
-      :visible-columns="state.visibleColumns"
+      :visible-columns="pageQuery.visibleColumns"
       flat
       square
       :rows-per-page-options="[10, 15, 50, 500, 1000, 10000]"
       table-header-class="bg-gray-100"
       class="h-full relative sticky-header-column-table sticky-right-column-table"
-      :virtual-scroll="state.users.length >= 100"
+      :virtual-scroll="pageQuery.data.length >= 100"
       @request="tableHandler"
     >
       <template #loading>
@@ -24,17 +24,17 @@
       <template #top>
         <query-filter
           :base-query="pageQuery"
-          :loading="state.loading"
+          :loading="pageQuery.loading"
           easy-text-input-class="w-60"
           @on-search="getUsers"
         >
           <template #btn>
             <q-btn color="primary" :label="t('添加')" @click="showDialog(t('添加'))" />
-            <q-btn color="danger" :label="t('删除')" @click="deleteByIds(state.selected.map((s) => s.id))" />
+            <q-btn color="danger" :label="t('删除')" @click="deleteByIds(pageQuery.selected.map((s) => s.id))" />
           </template>
         </query-filter>
         <q-select
-          v-model="state.visibleColumns"
+          v-model="pageQuery.visibleColumns"
           multiple
           outlined
           dense
@@ -42,7 +42,7 @@
           :display-value="`显示${$q.lang.table.columns}`"
           emit-value
           map-options
-          :options="columns"
+          :options="pageQuery.columns"
           option-value="name"
           options-cover
           menu-anchor="bottom middle"
@@ -157,26 +157,14 @@ export default {
 import { AddUser, DeleteUserByIds, GetUserById, GetUserPage, UpdateUser, User } from '@/api/user'
 import { reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { dateFormat } from '@/utils/date-util'
 import { useQuasar } from 'quasar'
-import { ls } from '@/utils'
 import { staticRoles } from '@/router/routes'
-import { PageRequest } from '@/utils/page-request/request'
-import { FieldType, Operate, Pagination } from '@/utils/page-request/typing'
+import { FieldType, Operate } from '@/utils/page-request/typing'
 import { PageQuery } from '@/utils/page-request/query'
 import QueryFilter from '@/components/query/query-filter.vue'
 
-const USER_VISIBLE_COLUMNS = `USER_VISIBLE_COLUMNS`
-
-// 分页大小
-const USER_ROWS_PER_PAGE = 'USER_ROWS_PER_PAGE'
-
-const defaultVisibleColumns = ['name', 'account', 'roles', 'enabled', 'sex', 'birth', 'createdTime']
-
-onBeforeUnmount(() => {
-  ls.set(USER_VISIBLE_COLUMNS, state.visibleColumns)
-  pageQuery.saveRowsPerPage()
-})
+const $q = useQuasar()
+const t = useI18n().t
 
 const defaultForm: User = {
   name: '',
@@ -194,217 +182,117 @@ const defaultForm: User = {
   updatedBy: ''
 }
 
-const $q = useQuasar()
-const t = useI18n().t
-const columns: any[] = [
-  {
-    label: t('用户名'),
-    name: 'name',
-    field: 'name',
-    sortable: true,
-    align: 'center',
-    textClasses: ''
-  },
-  {
-    label: t('账号'),
-    name: 'account',
-    field: 'account',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('持有角色'),
-    name: 'roles',
-    field: 'roles',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('状态'),
-    name: 'enabled',
-    field: 'enabled',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('邮箱'),
-    name: 'email',
-    field: 'email',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('手机号'),
-    name: 'phone',
-    field: 'phone',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('备注'),
-    name: 'description',
-    field: 'description',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('性别'),
-    name: 'sex',
-    field: 'sex',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('年龄'),
-    name: 'age',
-    field: 'age',
-    sortable: true,
-    format: (v: number) => `${v > 0 ? v : ''}`,
-    align: 'center'
-  },
-  {
-    label: t('生日'),
-    name: 'birth',
-    field: 'birth',
-    format: (v: string) => `${v ? dateFormat(v) : ''}`,
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('创建时间'),
-    name: 'createdTime',
-    field: 'createdTime',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('修改时间'),
-    name: 'updatedTime',
-    field: 'updatedTime',
-    sortable: true,
-    align: 'center'
-  },
-  {
-    label: t('操作'),
-    name: 'actions',
-    align: 'center',
-    required: true
-  }
-]
-
 const pageQuery = reactive(
-  new PageQuery(
-    [
-      {
-        field: 'name',
-        label: '用户名',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'account',
-        label: '账号',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'enabled',
-        label: '状态',
-        type: FieldType.boolSelect,
-        operate: Operate.equal,
-        selectOptions: [
-          {
-            label: '启用',
-            value: 'true'
-          },
-          {
-            label: '禁用',
-            value: 'false'
-          }
-        ]
-      },
-      {
-        field: 'email',
-        label: '邮箱',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'phone',
-        label: '手机号',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'description',
-        label: '备注',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'sex',
-        label: '性别',
-        type: FieldType.boolSelect,
-        operate: Operate.equal,
-        selectOptions: [
-          {
-            label: '男性',
-            value: 'true'
-          },
-          {
-            label: '女性',
-            value: 'false'
-          }
-        ]
-      },
-      {
-        field: 'birth',
-        label: '生日',
-        type: FieldType.date
-      },
-      {
-        field: 'createdTime',
-        label: '创建时间',
-        type: FieldType.date
-      },
-      {
-        field: 'updatedTime',
-        label: '修改时间',
-        type: FieldType.date
-      }
-    ],
-    USER_ROWS_PER_PAGE
-  )
+  new PageQuery<User>([
+    {
+      field: 'name',
+      label: '用户名',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'account',
+      label: '账号',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'enabled',
+      label: '状态',
+      type: FieldType.boolSelect,
+      operate: Operate.equal,
+
+      selectOptions: [
+        {
+          label: '启用',
+          value: 'true'
+        },
+        {
+          label: '禁用',
+          value: 'false'
+        }
+      ]
+    },
+    {
+      field: 'email',
+      label: '邮箱',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'phone',
+      label: '手机号',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'description',
+      label: '备注',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'sex',
+      label: '性别',
+      type: FieldType.boolSelect,
+      operate: Operate.equal,
+
+      selectOptions: [
+        {
+          label: '男性',
+          value: 'true'
+        },
+        {
+          label: '女性',
+          value: 'false'
+        }
+      ]
+    },
+    {
+      field: 'createdTime',
+      label: '创建时间',
+      type: FieldType.date
+    },
+    {
+      field: 'updatedTime',
+      label: '修改时间',
+      type: FieldType.date
+    },
+    {
+      label: t('操作'),
+      field: 'actions',
+      columns: { required: true, sortable: false },
+      excludeQuery: true
+    }
+  ])
 )
+onBeforeUnmount(() => {
+  pageQuery.saveOption()
+})
 
 const state = reactive({
-  visibleColumns: (ls.getItem(USER_VISIBLE_COLUMNS) || defaultVisibleColumns) as string[],
-  selected: [] as User[],
-  users: [] as User[],
-  loading: false,
   dialogVisible: false,
   dialogTitle: '添加',
   form: { ...defaultForm }
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tableHandler = async ({ pagination }: any) => {
   pageQuery.pagination = pagination
   await getUsers()
 }
 
 const getUsers = async () => {
-  state.loading = true
+  pageQuery.loading = true
   const res = await GetUserPage(pageQuery.toPageRequest())
-  state.loading = false
+  pageQuery.loading = false
   res.notifyOnErr()
   if (res.succeeded) {
-    state.users = res.data?.items as User[]
+    pageQuery.data = res.data?.items as User[]
     pageQuery.pagination.rowsNumber = res.data?.totalCount as number
     pageQuery.pagination.totalPages = res.data?.totalPages as number
   }
@@ -440,9 +328,9 @@ const deleteByIds = (ids: number[]) => {
   $q.dialog({
     message: ids.length > 1 ? `${t('已选中')}${ids.length}，${t('确定要删除这些数据吗')}` : t('确定要删除这个数据吗')
   }).onOk(async () => {
-    state.loading = true
+    pageQuery.loading = true
     const res = await DeleteUserByIds(ids)
-    state.loading = false
+    pageQuery.loading = false
     res.notify()
     if (res.succeeded) getUsers()
   })

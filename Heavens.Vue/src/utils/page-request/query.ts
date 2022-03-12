@@ -7,6 +7,7 @@ import { enumToOption } from '../enum'
 import { PageRequest, DataRequest } from './request'
 import { FieldOption, QueryModel, Condition, FieldType, Pagination, Operate } from './typing'
 import { ls } from '..'
+import router from '@/router'
 
 export class BaseQuery {
   constructor(fieldOptions: FieldOption[]) {
@@ -68,7 +69,7 @@ export class BaseQuery {
       const { fieldOptions } = this
       const filters: FieldOption[] = []
       for (const item of fieldOptions) {
-        if (item.type == FieldType.date) {
+        if (item.type == FieldType.date || item.type == FieldType.numberBetween) {
           filters.push({
             ...item,
             field: `start-${item.field}`,
@@ -81,7 +82,7 @@ export class BaseQuery {
             field: `end-${item.field}`,
             label: `结束${item.label}`,
             operate: Operate.lessOrEqual,
-            value: dateFormatFull(Date.now())
+            value: item.type == FieldType.date ? dateFormatFull(Date.now()) : undefined
           })
         } else {
           filters.push({ ...item })
@@ -99,57 +100,140 @@ export class BaseQuery {
   }
 }
 
-export class PageQuery extends BaseQuery {
+const PAGE_QUERY_TABLE_OPTIONS = 'PAGE_QUERY_TABLE_OPTIONS'
+const defaultPerPage = 10
+const tableOptions: { routerName: string; rowsPerPage: number; defaultVisibleColumns: any[] }[] =
+  ls.getItem(PAGE_QUERY_TABLE_OPTIONS) || []
+const saveTableOption = () => {
+  ls.set(PAGE_QUERY_TABLE_OPTIONS, tableOptions)
+}
+export class PageQuery<T> extends BaseQuery {
+  //#region 构造函数
   /**
    *
    * @param fieldOptions
    * @param pagination
    */
-  constructor(fieldOptions: FieldOption[], pagination: Pagination | string = '') {
+  constructor(fieldOptions: FieldOption[], pagination?: Pagination) {
     super(fieldOptions)
 
-    if (typeof pagination == 'string') {
-      this.rowsPerPageStr = pagination
-      this.pagination = {
-        sortBy: 'id',
-        descending: false,
-        page: 1,
-        rowsPerPage: ls.getItem<number>(pagination) || 10,
-        rowsNumber: 1,
-        totalPages: 1
-      }
-    } else {
-      this.pagination = pagination
+    this.routerName = router.currentRoute.value.name as string
+    let tableOption = tableOptions.find((p) => p.routerName == this.routerName)
+    this.pagination = pagination || {
+      sortBy: '',
+      descending: false,
+      page: 1,
+      rowsPerPage: tableOption?.rowsPerPage || defaultPerPage,
+      rowsNumber: 1,
+      totalPages: 1
     }
+
+    if (!tableOption) {
+      tableOption = {
+        routerName: this.routerName,
+        rowsPerPage: this.pagination.rowsPerPage,
+        defaultVisibleColumns: fieldOptions.filter((p) => p.defaultVisibleColumn != false).map((p) => p.field)
+      }
+      tableOptions.push(tableOption)
+    }
+
+    this.visibleColumns = tableOption.defaultVisibleColumns
+
+    // 设置 table 中的 columns 参数
+    this.columns = fieldOptions.map((p) => {
+      return {
+        ...p,
+        ...{ sortable: true, align: 'center' },
+        ...p.columns,
+        name: p.field
+      }
+    })
+
+    this.fieldOptions = this.fieldOptions.filter((p) => !p.excludeQuery)
   }
+  //#endregion
 
   /**
    * 分页参数
    */
   pagination: Pagination
 
-  private rowsPerPageStr?: string
+  /**
+   * 显示的列
+   */
+  visibleColumns: string[]
+
+  /**
+   * loading
+   */
+  loading: boolean = false
+
+  /**
+   * 数据源
+   */
+  data: T[] = []
+
+  /**
+   * 选中的数据
+   */
+  selected: T[] = []
+
+  /**
+   * ? 仅用于table中的columns参数
+   */
+  columns: any[]
+
+  /**
+   * 当前路由名
+   */
+  private routerName: string
+
+  /**
+   * 上一次请求的字符串，用于对比不同时设置成第一页
+   */
+  private beforeRequestFilterStr?: string
 
   /**
    * 获取 PageRequest
+   * @param inputFilters
    * @returns
    */
-  toPageRequest() {
+  toPageRequest(inputFilters?: Filter[]) {
     const req = new PageRequest()
-    const filters = this.filters.filter((f) => {
-      if (f.value?.toString()?.length) {
-        if (f.field?.includes('-')) f.field = last(f.field.split('-'))
-        return true
-      }
-      return false
-    })
-    req.filters = filters as any
+
+    const filters =
+      inputFilters ||
+      this.filters.filter((f) => {
+        if (f.value?.toString()?.length) {
+          if (f.field?.includes('-')) f.field = last(f.field.split('-'))
+          return true
+        }
+        return false
+      })
+
+    const filterStr = filters.toString()
+    // 请求字符串发现变动，直接返回到第一页
+    if (this.beforeRequestFilterStr != filterStr) this.pagination.page = 1
+    this.beforeRequestFilterStr = filterStr
+
+    req.filters = filters as Filter[]
     req.setPagination(this.pagination)
     return req
   }
 
-  saveRowsPerPage() {
-    if (this.rowsPerPageStr) ls.set(this.rowsPerPageStr, this.pagination.rowsPerPage)
+  toDataQuery(limit = 0) {
+    return new DataQuery(this.fieldOptions, limit)
+  }
+  /**
+   * 保存每页行数
+   */
+  saveOption() {
+    const tableOption = tableOptions.find((p) => p.routerName == this.routerName)
+    if (tableOption) {
+      tableOption.rowsPerPage = this.pagination.rowsPerPage
+      tableOption.defaultVisibleColumns = this.visibleColumns
+    }
+    saveTableOption()
   }
 }
 
@@ -190,6 +274,7 @@ export const getOperatesByFieldType = (type?: FieldType): { label: string; value
   switch (type) {
     case FieldType.date:
     case FieldType.number:
+    case FieldType.numberBetween:
       operates = [
         Operate.equal,
         Operate.notEqual,

@@ -64,20 +64,22 @@ export class BaseQuery {
 
   reset = (): void => {
     if (this.mode == QueryModel.custom) {
-      this.filters = [this.fieldOptions[0]]
+      this.filters = [{ ...this.fieldOptions[0] }]
+      this.filters.splice(0, this.filters.length)
+      // this.filters = [this.fieldOptions[0]]
     } else if (this.mode == QueryModel.advanced) {
       const { fieldOptions } = this
-      const filters: FieldOption[] = []
+      this.filters = []
       for (const item of fieldOptions) {
         if (item.type == FieldType.date || item.type == FieldType.numberBetween) {
-          filters.push({
+          this.filters.push({
             ...item,
             field: `start-${item.field}`,
             label: `起始${item.label}`,
             value: undefined,
             operate: Operate.greaterOrEqual
           })
-          filters.push({
+          this.filters.push({
             ...item,
             field: `end-${item.field}`,
             label: `结束${item.label}`,
@@ -85,13 +87,9 @@ export class BaseQuery {
             value: item.type == FieldType.date ? dateFormatFull(Date.now()) : undefined
           })
         } else {
-          filters.push({ ...item })
+          this.filters.push({ ...item })
         }
       }
-      this.filters = [
-        ...filters
-        // ...filters.filter((f) => this.filters.findIndex((qf) => qf.field == f.field && qf.label == f.label) == -1)
-      ]
       this.setAllCondition(Condition.and)
     } else if (this.mode == QueryModel.easy) {
       this.filters = cloneDeep(this.fieldOptions.filter((f) => f.easy))

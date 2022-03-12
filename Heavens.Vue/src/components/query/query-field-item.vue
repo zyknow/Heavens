@@ -68,7 +68,7 @@ export default {
 import { OptionType } from '@/utils/enum'
 import { getOperatesByFieldType } from '@/utils/page-request/query'
 import { FieldOption, FieldType, QueryModel } from '@/utils/page-request/typing'
-import { ref, toRefs, reactive, PropType } from 'vue'
+import { ref, toRefs, reactive, PropType, getCurrentInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
 import qDateTime from '../framework-components/q-date-time.vue'
 defineEmits(['onFieldChange'])

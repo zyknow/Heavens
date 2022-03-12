@@ -133,7 +133,7 @@ export interface Filter {
   /**
    * 筛选操作方式
    */
-  operate?: Operate
+  operate: Operate
   /**
    * 筛选条件
    */

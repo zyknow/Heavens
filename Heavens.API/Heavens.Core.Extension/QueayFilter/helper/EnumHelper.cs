@@ -12,12 +12,12 @@ public static class EnumHelper
     /// </summary>
     /// <param name="item"></param>
     /// <returns></returns>
-    public static string GetEnumCode(Enum item)
+    public static string? GetEnumCode(Enum item)
     {
-        object[] attrs = item.GetType().GetField(item.ToString()).GetCustomAttributes(typeof(CodeAttribute), true);
+        object[] attrs = item.GetType().GetField(item.ToString())!.GetCustomAttributes(typeof(CodeAttribute), true);
         if (attrs != null && attrs.Length > 0)
         {
-            CodeAttribute descAttr = attrs[0] as CodeAttribute;
+            CodeAttribute descAttr = (attrs[0] as CodeAttribute)!;
             return descAttr.Code;
         }
         return null;

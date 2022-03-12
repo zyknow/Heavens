@@ -6,20 +6,23 @@ namespace Heavens.Core.Extension.SearchEngine;
 
 public class SearchEngine : ISearchEngine
 {
-    MeilisearchClient client;
+    MeilisearchClient? client;
+
+    public SearchEngineOptions option { get; set; }
 
     public SearchEngine(ILogger<SearchEngine> logger)
     {
         _logger = logger;
-        Connect();
+        InitAsync();
+        option = App.GetConfig<SearchEngineOptions>("SearchEngineSettings");
     }
 
     public ILogger<SearchEngine> _logger { get; }
 
-    /// <summary>
-    /// 配置文件是否开启搜索引擎
-    /// </summary>
-    private bool _enabled => App.Configuration["SearchEngineSettings:Enabled"].ToBool();
+    private async void InitAsync()
+    {
+        await Connect();
+    }
 
     /// <summary>
     /// 连接搜索引擎
@@ -27,17 +30,12 @@ public class SearchEngine : ISearchEngine
     /// <param name="connectStr"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    public async Task<bool> Connect(string connectStr = null, string key = null)
+    public async Task<bool> Connect()
     {
-        if (!_enabled)
-        {
+        if (option?.Enabled != true)
             return false;
-        }
 
-        connectStr = connectStr ?? App.Configuration["SearchEngineSettings:ConnectStr"];
-        key = key ?? App.Configuration["SearchEngineSettings:MasterKey"];
-
-        client = new MeilisearchClient(connectStr, key);
+        client = new MeilisearchClient(option.ConnectStr, option.MasterKey);
         bool healthy = await IsHealthy();
         _logger.LogInformation(@$"搜索引擎连接：{(healthy ? "成功" : "失败")}");
         return healthy;
@@ -60,12 +58,12 @@ public class SearchEngine : ISearchEngine
     /// <returns></returns>
     public Task<bool> IsHealthy()
     {
-        if (client.IsNull())
+        if (client == null)
         {
             return Task.FromResult(false);
         }
 
-        return client?.IsHealthyAsync();
+        return client.IsHealthyAsync();
     }
 
     /// <summary>
@@ -77,12 +75,10 @@ public class SearchEngine : ISearchEngine
     /// <returns></returns>
     public async Task<SearchResult<T>> Search<T>(string indexStr, string search)
     {
-        if (!_enabled)
-        {
-            return default;
-        }
+        //if (option?.Enabled != true)
+        //    return false;
 
-        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        Meilisearch.Index? index = await client?.GetIndexAsync(indexStr)!;
         if (index == null)
             await client.CreateIndexAsync(indexStr);
         index = await client.GetIndexAsync(indexStr);
@@ -97,14 +93,12 @@ public class SearchEngine : ISearchEngine
     /// <param name="indexStr"></param>
     /// <param name="list"></param>
     /// <returns></returns>
-    public async Task AddOrUpdates<T>(string indexStr, List<T> list = null) where T : class, new()
+    public async Task AddOrUpdates<T>(string indexStr, List<T>? list = null) where T : class, new()
     {
-        if (!_enabled)
-        {
-            return;
-        }
+        //if (option?.Enabled != true)
+        //    return false;
         //BeforeCheck();
-        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        Meilisearch.Index index = await client?.GetIndexAsync(indexStr)!;
         if (index == null)
             await client.CreateIndexAsync(indexStr);
         index = await client.GetIndexAsync(indexStr);
@@ -122,19 +116,17 @@ public class SearchEngine : ISearchEngine
     /// <param name="indexStr"></param>
     /// <param name="entity"></param>
     /// <returns></returns>
-    public async Task AddOrUpdate<T>(string indexStr, T entity = null) where T : class, new()
+    public async Task AddOrUpdate<T>(string indexStr, T? entity = null) where T : class, new()
     {
-        if (!_enabled)
-        {
-            return;
-        }
+        //if (option?.Enabled != true)
+        //    return false;
         //BeforeCheck();
-        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        Meilisearch.Index index = await client?.GetIndexAsync(indexStr)!;
         if (index == null)
             await client.CreateIndexAsync(indexStr);
         index = await client.GetIndexAsync(indexStr);
 
-        if (!entity.IsNull())
+        if (entity != null)
         {
             await index.AddDocumentsAsync(new List<T>() { entity });
         }
@@ -148,12 +140,10 @@ public class SearchEngine : ISearchEngine
     /// <returns></returns>
     public async Task DeleteDocuments(string indexStr, string[] ids)
     {
-        if (!_enabled)
-        {
-            return;
-        }
+        //if (option?.Enabled != true)
+        //    return false;
         //BeforeCheck();
-        Meilisearch.Index index = await client.GetIndexAsync(indexStr);
+        Meilisearch.Index index = await client?.GetIndexAsync(indexStr)!;
         if (index == null)
             await client.CreateIndexAsync(indexStr);
         index = await client.GetIndexAsync(indexStr);
@@ -168,12 +158,10 @@ public class SearchEngine : ISearchEngine
     /// <returns></returns>
     public async Task DeleteIndex(string indexStr)
     {
-        if (!_enabled)
-        {
-            return;
-        }
+        //if (option?.Enabled != true)
+        //    return false;
         //BeforeCheck();
-        await client.DeleteIndexAsync(indexStr);
+        await client!.DeleteIndexAsync(indexStr);
     }
 
     /// <summary>
@@ -183,23 +171,13 @@ public class SearchEngine : ISearchEngine
     public async Task DeleteAllIndex()
     {
 
-        if (!_enabled)
-        {
-            return;
-        }
+        //if (option?.Enabled != true)
+        //    return false;
         //BeforeCheck();
-        IEnumerable<Meilisearch.Index> indexs = await client.GetAllIndexesAsync();
+        IEnumerable<Meilisearch.Index> indexs = await client?.GetAllIndexesAsync()!;
         foreach (Meilisearch.Index index in indexs)
         {
             await index.DeleteAsync();
-        }
-    }
-
-    private void BeforeCheck()
-    {
-        if (client == null)
-        {
-            Connect();
         }
     }
 }

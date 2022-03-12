@@ -33,12 +33,12 @@ public class FilterRule
     /// <summary>
     /// 获取或设置 属性名称
     /// </summary>
-    public string Field { get; set; }
+    public string Field { get; set; } = string.Empty;
 
     /// <summary>
     /// 获取或设置 属性值
     /// </summary>
-    public object Value { get; set; }
+    public object? Value { get; set; }
 
     /// <summary>
     /// 获取或设置 操作类型

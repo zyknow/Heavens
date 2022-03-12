@@ -15,7 +15,7 @@ internal class ObjectHelper
     /// <param name="value"></param>
     /// <param name="conversionType"></param>
     /// <returns></returns>
-    public static object CastTo(object value, Type conversionType)
+    public static object? CastTo(object value, Type conversionType)
     {
         if (value == null)
         {
@@ -27,11 +27,11 @@ internal class ObjectHelper
         }
         if (conversionType.IsEnum)
         {
-            return Enum.Parse(conversionType, value.ToString());
+            return Enum.Parse(conversionType, value.ToString()!);
         }
         if (conversionType == typeof(Guid))
         {
-            return Guid.Parse(value.ToString());
+            return Guid.Parse(value.ToString()!);
         }
 
         if(conversionType == typeof(DateTimeOffset) && value.GetType() == typeof(DateTime))
@@ -41,7 +41,7 @@ internal class ObjectHelper
         {
             return Convert.ChangeType(value, conversionType);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             throw Oops.Oh(@$"类型转换失败，无法将[{value}]转换为{conversionType.Name}");
         }
@@ -79,18 +79,20 @@ internal class ObjectHelper
     /// <typeparam name="T"> 动态类型 </typeparam>
     /// <param name="value"> 要转化的源对象 </param>
     /// <returns> 转化后的指定类型的对象，转化失败引发异常。 </returns>
-    public static T CastTo<T>(object value)
+    public static T? CastTo<T>(object value)
     {
         if (value == null && default(T) == null)
         {
             return default;
         }
-        if (value.GetType() == typeof(T))
+        if (value!.GetType() == typeof(T))
         {
             return (T)value;
         }
-        object result = CastTo(value, typeof(T));
-        return (T)result;
+        object? result = CastTo(value, typeof(T));
+
+
+        return (T)result!;
     }
 
 }

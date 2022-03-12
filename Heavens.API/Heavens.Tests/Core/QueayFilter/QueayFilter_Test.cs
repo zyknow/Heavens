@@ -23,7 +23,9 @@ public class QueayFilter_Test
         var list = new[] { 1, 2, 3 };
 
         // 目标表达式
-        Expression<Func<Student, bool>> exp = e => e.Grades.Any(p => list.Contains(p.Id));
+        Expression<Func<Student, bool>> exp = e => e.Grades!.Any(p => list.Contains(p.Id));
+
+        var student = new Student();
 
 
         var data = new List<Student>()

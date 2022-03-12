@@ -18,7 +18,7 @@ public class UserJob : ISpareTimeWorker
     /// <param name="timer"></param>
     /// <param name="count"></param>
     [SpareTime("Update User Age", DoOnce = false, StartNow = false, CronFormat = "* * 4 * * ? *")]
-    public async Task DoSomethingAsync(SpareTimer timer, long count)
+    public void DoSomething(SpareTimer timer, long count)
     {
         //// 更新年龄
         //List<User> users = await _userRepository.Where(u => u.Birth != null && (int)((DateTime.Now - (DateTime)u.Birth).TotalDays / 365) != u.Age).AsTracking().ToListAsync();

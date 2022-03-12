@@ -10,17 +10,17 @@ public sealed class CsComments
     /// <summary>
     /// 文档注释中的 summary 或 value 节点，用于表示注释的主体说明
     /// </summary>
-    public string Summary { get; private set; }
+    public string? Summary { get; private set; }
 
     /// <summary>
     /// 文档注释中的 remarks 节点，用于表示备注信息
     /// </summary>
-    public string Remarks { get; private set; }
+    public string? Remarks { get; private set; }
 
     /// <summary>
     /// 文档注释中的 returns 节点，用于表示返回值信息
     /// </summary>
-    public string Returns { get; private set; }
+    public string? Returns { get; private set; }
 
     /// <summary>
     /// 文档注释中的 param 节点，用于表示参数信息
@@ -74,23 +74,23 @@ public sealed class CsComments
 
         XmlNodeList? param = node.SelectNodes("param");
         Param = new CsCommentsParamCollection();
-        foreach (XmlNode item in param)
+        foreach (XmlNode item in param!)
         {
             CsCommentsParam? p = new CsCommentsParam(item);
-            Param[p.Name] = p;
+            Param[p.Name!] = p;
         }
 
         XmlNodeList? typeparam = node.SelectNodes("typeparam");
         TypeParam = new CsCommentsParamCollection();
-        foreach (XmlNode item in typeparam)
+        foreach (XmlNode item in typeparam!)
         {
             CsCommentsParam? p = new CsCommentsParam(item);
-            TypeParam[p.Name] = p;
+            TypeParam[p.Name!] = p;
         }
 
         XmlNodeList? exception = node.SelectNodes("exception");
         int index = 0;
-        Exception = new CsCommentsException[exception.Count];
+        Exception = new CsCommentsException[exception!.Count];
         foreach (XmlNode item in exception)
         {
             Exception[index] = new CsCommentsException(index, item);

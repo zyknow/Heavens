@@ -10,12 +10,12 @@ public sealed class CsCommentsParam
     /// <summary>
     /// 节点中的 name 属性的值
     /// </summary>
-    public string Name { get; private set; }
+    public string? Name { get; private set; }
 
     /// <summary>
     /// 节点中的内容
     /// </summary>
-    public string Text { get; private set; }
+    public string? Text { get; private set; }
 
     /// <summary>
     /// 空对象
@@ -33,7 +33,7 @@ public sealed class CsCommentsParam
     /// <param name="node">Xml节点</param>
     internal CsCommentsParam(XmlNode node)
     {
-        XmlAttribute? attr = node.Attributes["name"];
+        XmlAttribute? attr = node.Attributes!["name"];
         if (attr != null)
         {
             Name = attr.InnerText.Trim();

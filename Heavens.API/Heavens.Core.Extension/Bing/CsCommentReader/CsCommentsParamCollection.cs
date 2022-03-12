@@ -10,7 +10,7 @@ public sealed class CsCommentsParamCollection : Dictionary<string, CsCommentsPar
     /// </summary>
     /// <param name="name">name 属性</param>
     /// <returns></returns>
-    public new CsCommentsParam this[string name]
+    public new CsCommentsParam? this[string name]
     {
         get
         {
@@ -25,7 +25,7 @@ public sealed class CsCommentsParamCollection : Dictionary<string, CsCommentsPar
             }
 
             CsCommentsParam value;
-            if (TryGetValue(name, out value))
+            if (TryGetValue(name, out value!))
             {
                 return value;
             }
@@ -39,7 +39,7 @@ public sealed class CsCommentsParamCollection : Dictionary<string, CsCommentsPar
                 name = name.Remove(0, 1);
             }
 
-            base[name] = value;
+            base[name] = value!;
         }
     }
 }

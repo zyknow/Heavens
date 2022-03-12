@@ -8,7 +8,7 @@ public class SortBy
     /// <summary>
     /// 字段名
     /// </summary>
-    public string Field { get; set; }
+    public string Field { get; set; } = string.Empty;
     /// <summary>
     /// 0 asc 
     /// 1 desc

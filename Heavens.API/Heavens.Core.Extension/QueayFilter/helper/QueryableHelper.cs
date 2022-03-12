@@ -19,9 +19,9 @@ internal class QueryableHelper
     /// <param name="query"></param>
     /// <param name="sort"></param>
     /// <returns></returns>
-    internal static IQueryable<T> OrderCondition<T>(IQueryable<T> query, SortBy sort, LambdaExpression exp = null)
+    internal static IQueryable<T> OrderCondition<T>(IQueryable<T> query, SortBy sort, LambdaExpression? exp = null)
     {
-        if (sort == null)
+        if (sort == null || sort.Field.IsEmpty())
         {
             return query;
         }
@@ -33,23 +33,22 @@ internal class QueryableHelper
 
         Type t = typeof(T);
 
-        Type propertyType = exp?.Body.Type;
+        Type? propertyType = exp?.Body.Type;
         if (exp == null)
         {
             var property = t.GetProperty(fieldName) ?? t.GetProperty(fieldName.ToUpperFirstLetter());
             propertyType = property?.PropertyType;
             if (propertyType == null)
-            {
                 throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, fieldName, t.Name);
-            }
+
             //创建一个访问属性的表达式
-            MemberExpression propertyAccess = Expression.MakeMemberAccess(parameter, property);
+            MemberExpression propertyAccess = Expression.MakeMemberAccess(parameter, property!);
             exp = Expression.Lambda(propertyAccess, parameter);
         }
 
         string OrderName = "OrderBy";
-        OrderName = OrderName + (orderinfo.SortType.Equals(SortType.Desc) ? "Descending" : "");
-        MethodCallExpression resultExp = Expression.Call(typeof(Queryable), OrderName, new Type[] { typeof(T), propertyType }, query.Expression, Expression.Quote(exp));
+        OrderName += (orderinfo.SortType.Equals(SortType.Desc) ? "Descending" : "");
+        MethodCallExpression resultExp = Expression.Call(typeof(Queryable), OrderName, new Type[] { typeof(T), propertyType! }, query.Expression, Expression.Quote(exp));
         query = query.Provider.CreateQuery<T>(resultExp);
         return query;
     }

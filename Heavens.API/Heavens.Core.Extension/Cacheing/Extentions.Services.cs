@@ -27,9 +27,9 @@ public static class OptionsServicesExtentions
                     options.UseCSRedis(conf =>
                         conf.DBConfig = new CSRedisDBOptions
                         {
-                            ConnectionStrings = cacheOpt.RedisSettings.ConnectionStrings,
-                            Sentinels = cacheOpt.RedisSettings.Sentinels,
-                            ReadOnly = cacheOpt.RedisSettings.SentinelReadOnly
+                            ConnectionStrings = cacheOpt?.RedisSettings?.ConnectionStrings,
+                            Sentinels = cacheOpt?.RedisSettings?.Sentinels,
+                            ReadOnly = cacheOpt?.RedisSettings?.SentinelReadOnly ?? false,
                         }
                     )
                 );

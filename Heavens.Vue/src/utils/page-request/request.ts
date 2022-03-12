@@ -12,11 +12,10 @@ export abstract class BaseRequest {
 }
 
 export class DataRequest extends BaseRequest {
-  constructor(filters: Filter[] = [], sortBy: SortBy = {}, limit?: number) {
+  constructor(filters: Filter[] = [], sortBy?: SortBy, limit?: number) {
     super()
     this.filters = filters
     if (sortBy?.field) this.sort = sortBy
-    else this.sort = { field: 'id', sortType: SortType.desc }
   }
 
   /**
@@ -45,7 +44,7 @@ export class PageRequest extends BaseRequest {
   setPagination = (pagination: Pagination): void => {
     this.page = pagination.page
     this.pageSize = pagination.rowsPerPage
-    this.sort.field = pagination.sortBy || 'id'
+    this.sort.field = pagination.sortBy
     this.sort.sortType = pagination.descending ? SortType.desc : SortType.asc
   }
 }

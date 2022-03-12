@@ -30,11 +30,11 @@
     <!-- advanced 模式下 Label 显示-->
     <span v-if="mode == QueryModel.advanced">{{ option.label }}：</span>
 
-    <!-- 字段 -->
+    <!-- #region 字段 -->
     <q-input
-      v-if="option.type == FieldType.text || option.type == FieldType.number"
+      v-if="option.type == FieldType.text || option.type == FieldType.number || option.type == FieldType.numberBetween"
       v-model="option.value"
-      :type="(option.type as any)"
+      :type="(option.type.replace('Between','') as any)"
       outlined
       dense
     />
@@ -56,6 +56,7 @@
       :use-chips="option.useChips"
       clearable
     />
+    <!-- #endregion -->
   </div>
 </template>
 <script lang="ts">

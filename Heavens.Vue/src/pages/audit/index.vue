@@ -2,19 +2,19 @@
   <div class="h-full">
     <!-- Table -->
     <q-table
-      v-model:selected.sync="state.selected"
+      v-model:selected.sync="pageQuery.selected"
       v-model:pagination="pageQuery.pagination"
-      :rows="state.audits"
-      :columns="state.columns"
+      :rows="pageQuery.data"
+      :columns="pageQuery.columns"
       selection="multiple"
-      :loading="state.loading"
+      :loading="pageQuery.loading"
       :row-key="(v) => v.id"
-      :visible-columns="state.visibleColumns"
+      :visible-columns="pageQuery.visibleColumns"
       flat
       :rows-per-page-options="[10, 15, 50, 500, 1000, 10000]"
       table-header-class="bg-gray-100"
       class="h-full relative sticky-header-column-table sticky-right-column-table"
-      :virtual-scroll="state.audits.length >= 200"
+      :virtual-scroll="pageQuery.data.length >= 200"
       @request="tableHandler"
     >
       <!-- 加载动画 -->
@@ -23,9 +23,14 @@
       </template>
       <!-- table 顶部操作栏 -->
       <template #top>
-        <query-filter :base-query="(pageQuery as any)" :loading="state.loading" @on-search="getAudits()" />
+        <query-filter
+          easy-text-input-class="w-60"
+          :base-query="(pageQuery as any)"
+          :loading="pageQuery.loading"
+          @on-search="getAudits()"
+        />
         <q-select
-          v-model="state.visibleColumns"
+          v-model="pageQuery.visibleColumns"
           multiple
           outlined
           dense
@@ -33,7 +38,7 @@
           :display-value="`显示${$q.lang.table.columns}`"
           emit-value
           map-options
-          :options="state.columns"
+          :options="pageQuery.columns"
           option-value="name"
           options-cover
           class="absolute right-4 top-3"
@@ -256,16 +261,13 @@ export default {
 import { AddAudit, DeleteAuditByIds, GetAuditById, GetAuditPage, UpdateAudit, Audit, HttpMethod } from '@/api/audit'
 import { ref, defineComponent, toRefs, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { copyByKeys, ls, sleepAsync } from '@/utils'
+import { copyByKeys } from '@/utils'
 import { AuditPage } from '../../api/audit'
 import 'vue3-json-viewer/dist/index.css'
-import { camelCase, trimEnd } from 'lodash-es'
-import QDateTime from '@/components/framework-components/q-date-time.vue'
+import { camelCase } from 'lodash-es'
 import QueryFilter from '@/components/query/query-filter.vue'
-import { dateFormat, dateFormatFull } from '@/utils/date-util'
 import { PageQuery } from '@/utils/page-request/query'
 import { FieldType, Operate } from '@/utils/page-request/typing'
-import { enumToOption } from '@/utils/enum'
 const t = useI18n().t
 
 interface AuditDetail extends Audit {
@@ -274,35 +276,6 @@ interface AuditDetail extends Audit {
   queryObj: object | string
   exceptionObj: object | string
 }
-
-// 显示列
-const AUDIT_VISIBLE_COLUMNS = `AUDIT_VISIBLE_COLUMNS`
-
-// 分页大小
-const AUDIT_ROWS_PER_PAGE = 'AUDIT_ROWS_PER_PAGE'
-
-// 默认显示的Table列
-const defaultVisibleColumns = [
-  'userRoles',
-  'serviceName',
-  'methodName',
-  'path',
-  'hasBody',
-  'hasQuery',
-  'httpMethod',
-  'hasReturnValue',
-  'executionMs',
-  'clientIpAddress',
-  'hasException',
-  'id',
-  'createdId',
-  'createdBy',
-  'createdTime',
-  'updatedId',
-  'updatedBy',
-  'updatedTime',
-  'actions'
-]
 
 const columns: any[] = [
   {
@@ -427,108 +400,129 @@ const columns: any[] = [
 ]
 // 卸载前保存缓存
 onBeforeUnmount(() => {
-  ls.set(AUDIT_VISIBLE_COLUMNS, state.visibleColumns)
-  pageQuery.saveRowsPerPage()
+  pageQuery.saveOption()
 })
 //#region PageQuery
 const pageQuery = reactive(
-  new PageQuery(
-    [
-      {
-        field: 'createdId',
-        label: '调用者Id',
-        type: FieldType.number,
-        operate: Operate.equal,
-        easy: true
-      },
-      {
-        field: 'createdBy',
-        label: '调用者',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'serviceName',
-        label: '服务名',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'methodName',
-        label: '执行方法',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'path',
-        label: '请求路径',
-        type: FieldType.text,
-        operate: Operate.contains,
-        easy: true
-      },
-      {
-        field: 'body',
-        label: 'Body',
-        type: FieldType.text,
-        operate: Operate.contains
-      },
-      {
-        field: 'query',
-        label: 'Query',
-        type: FieldType.text,
-        operate: Operate.contains
-      },
-      {
-        field: 'httpMethod',
-        label: 'Http请求方法',
-        type: FieldType.select,
-        // selectOptions: enumToOption(HttpMethod),
-        selectOptions: ['GET', 'POST', 'DELETE', 'PATH'],
-        mapOptions: true,
-        emitValue: true
-      },
-      {
-        field: 'createdTime',
-        label: '创建时间',
-        type: FieldType.date
-      },
-      {
-        field: 'hasBody',
-        label: '包含Body',
-        type: FieldType.boolSelect,
-        operate: Operate.equal
-      },
-      {
-        field: 'hasQuery',
-        label: '包含query',
-        type: FieldType.boolSelect,
-        operate: Operate.equal
-      },
-      {
-        field: 'hasQuery',
-        label: '包含query',
-        type: FieldType.boolSelect,
-        operate: Operate.equal
-      }
-    ],
-    AUDIT_ROWS_PER_PAGE
-  )
+  new PageQuery<AuditPage>([
+    {
+      field: 'userRoles',
+      label: '调用者角色',
+      easy: true,
+      excludeQuery: true
+    },
+    {
+      field: 'createdId',
+      label: '调用者Id',
+      type: FieldType.number,
+      operate: Operate.equal,
+      easy: true
+    },
+    {
+      field: 'createdBy',
+      label: '调用者',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'serviceName',
+      label: '服务名',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'methodName',
+      label: '执行方法',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'path',
+      label: '请求路径',
+      type: FieldType.text,
+      operate: Operate.contains,
+      easy: true
+    },
+    {
+      field: 'body',
+      label: 'Body',
+      type: FieldType.text,
+      operate: Operate.contains
+    },
+    {
+      field: 'query',
+      label: 'Query',
+      type: FieldType.text,
+      operate: Operate.contains
+    },
+    {
+      field: 'httpMethod',
+      label: 'Http请求方法',
+      type: FieldType.select,
+      // selectOptions: enumToOption(HttpMethod),
+      selectOptions: ['GET', 'POST', 'DELETE', 'PATH'],
+      mapOptions: true,
+      emitValue: true
+    },
+    {
+      field: 'executionMs',
+      label: '请求时间',
+      type: FieldType.numberBetween,
+      columns: { format: (v: number) => `${v}ms` },
+      operate: Operate.equal,
+      easy: true
+    },
+    {
+      field: 'createdTime',
+      label: '创建时间',
+      type: FieldType.date
+    },
+    {
+      field: 'hasException',
+      label: '异常',
+      type: FieldType.boolSelect
+    },
+
+    {
+      field: 'hasBody',
+      label: '包含Body',
+      type: FieldType.boolSelect
+    },
+    {
+      field: 'hasQuery',
+      label: '包含query',
+      type: FieldType.boolSelect
+    },
+    {
+      field: 'hasQuery',
+      label: '包含query',
+      type: FieldType.boolSelect
+    },
+    {
+      field: 'clientIpAddress',
+      label: '请求IP',
+      type: FieldType.text
+    },
+    {
+      field: 'hasReturnValue',
+      label: '返回数据',
+      type: FieldType.text
+    },
+    {
+      field: 'actions',
+      label: '操作',
+      type: FieldType.text,
+      excludeQuery: true
+    }
+  ])
 )
 
 //#endregion
 
 const state = reactive({
-  columns,
-  visibleColumns: (ls.getItem(AUDIT_VISIBLE_COLUMNS) || defaultVisibleColumns) as string[],
-  // table选中项
-  selected: [] as AuditPage[],
-  // table 数据
-  audits: [] as AuditPage[],
-  loading: false,
-  // 搜索过滤
   // para
   paraDialogVisible: false,
   paraDialogTitle: 'Body',
@@ -547,12 +541,12 @@ const tableHandler = async ({ pagination }: any) => {
 
 // 获取Audit Page
 const getAudits = async () => {
-  state.loading = true
+  pageQuery.loading = true
   const res = await GetAuditPage(pageQuery.toPageRequest())
-  state.loading = false
+  pageQuery.loading = false
   res.notifyOnErr()
   if (res.succeeded) {
-    state.audits = res.data?.items as AuditPage[]
+    pageQuery.data = res.data?.items as AuditPage[]
     pageQuery.pagination.rowsNumber = res.data?.totalCount as number
     pageQuery.pagination.totalPages = res.data?.totalPages as number
   }
@@ -560,9 +554,9 @@ const getAudits = async () => {
 
 // 显示 详细 Dialog
 const showParaDialog = async (type: string, id: number) => {
-  state.loading = true
+  pageQuery.loading = true
   const auditRes = await GetAuditById(id)
-  state.loading = false
+  pageQuery.loading = false
 
   auditRes.notifyOnErr()
   if (!auditRes.succeeded) return
@@ -579,9 +573,9 @@ const showParaDialog = async (type: string, id: number) => {
 
 // 显示 详情 Dialog
 const showDetailDialog = async (id: number) => {
-  state.loading = true
+  pageQuery.loading = true
   var auditRes = await GetAuditById(id)
-  state.loading = false
+  pageQuery.loading = false
 
   auditRes.notifyOnErr()
   if (!auditRes.succeeded) return

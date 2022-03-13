@@ -37,6 +37,7 @@
       :type="(option.type.replace('Between','') as any)"
       outlined
       dense
+      @keydown.enter="$emit('onSearch')"
     />
 
     <q-checkbox v-if="option.type == FieldType.boolCheckBox" v-model="option.value" toggle-indeterminate />
@@ -71,7 +72,7 @@ import { FieldOption, FieldType, QueryModel } from '@/utils/page-request/typing'
 import { ref, toRefs, reactive, PropType, getCurrentInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
 import qDateTime from '../framework-components/q-date-time.vue'
-defineEmits(['onFieldChange'])
+defineEmits(['onFieldChange', 'onSearch'])
 
 const props = defineProps({
   fieldOption: Object as PropType<FieldOption>,

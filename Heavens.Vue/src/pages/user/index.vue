@@ -159,7 +159,7 @@ import { reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { staticRoles } from '@/router/routes'
-import { FieldOption, FieldType, Operate } from '@/utils/page-request/typing'
+import { ExcludeType, FieldOption, FieldType, Operate } from '@/utils/page-request/typing'
 import { PageQuery } from '@/utils/page-request/query'
 import QueryFilter from '@/components/query/query-filter.vue'
 
@@ -269,7 +269,7 @@ const pageQuery = reactive(
       label: t('操作'),
       field: 'actions',
       columns: { required: true, sortable: false },
-      excludeQuery: true
+      exclude: ExcludeType.Query
     } as FieldOption
   ])
 )

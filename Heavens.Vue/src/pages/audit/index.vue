@@ -267,7 +267,7 @@ import 'vue3-json-viewer/dist/index.css'
 import { camelCase } from 'lodash-es'
 import QueryFilter from '@/components/query/query-filter.vue'
 import { PageQuery } from '@/utils/page-request/query'
-import { FieldType, Operate } from '@/utils/page-request/typing'
+import { ExcludeType, FieldType, Operate } from '@/utils/page-request/typing'
 const t = useI18n().t
 
 interface AuditDetail extends Audit {
@@ -409,7 +409,7 @@ const pageQuery = reactive(
       field: 'userRoles',
       label: '调用者角色',
       easy: true,
-      excludeQuery: true,
+      exclude: ExcludeType.Query,
       operate: Operate.equal
     },
     {
@@ -451,13 +451,15 @@ const pageQuery = reactive(
       field: 'body',
       label: 'Body',
       type: FieldType.text,
-      operate: Operate.contains
+      operate: Operate.contains,
+      exclude: ExcludeType.Columns
     },
     {
       field: 'query',
       label: 'Query',
       type: FieldType.text,
-      operate: Operate.contains
+      operate: Operate.contains,
+      exclude: ExcludeType.Columns
     },
     {
       field: 'httpMethod',
@@ -484,10 +486,11 @@ const pageQuery = reactive(
       operate: Operate.equal
     },
     {
-      field: 'hasException',
+      field: 'Exception',
       label: '异常',
-      type: FieldType.boolSelect,
-      operate: Operate.equal
+      type: FieldType.text,
+      operate: Operate.contains,
+      exclude: ExcludeType.Columns
     },
 
     {
@@ -503,8 +506,8 @@ const pageQuery = reactive(
       operate: Operate.equal
     },
     {
-      field: 'hasQuery',
-      label: '包含query',
+      field: 'hasException',
+      label: '包含异常',
       type: FieldType.boolSelect,
       operate: Operate.equal
     },
@@ -516,15 +519,22 @@ const pageQuery = reactive(
     },
     {
       field: 'hasReturnValue',
-      label: '返回数据',
+      label: '包含返回数据',
       type: FieldType.text,
       operate: Operate.equal
+    },
+    {
+      field: 'returnValue',
+      label: '返回数据',
+      type: FieldType.text,
+      operate: Operate.contains,
+      exclude: ExcludeType.Columns
     },
     {
       field: 'actions',
       label: '操作',
       type: FieldType.text,
-      excludeQuery: true,
+      exclude: ExcludeType.Query,
       operate: Operate.equal
     }
   ])

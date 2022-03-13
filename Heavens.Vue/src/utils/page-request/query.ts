@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import { Filter } from './typing'
+import { ExcludeType, Filter } from './typing'
 import { IndexSign } from '@/typing'
 import { cloneDeep, last } from 'lodash-es'
 import { dateFormatFull } from '../date-util'
@@ -138,16 +138,18 @@ export class PageQuery<T> extends BaseQuery {
     this.visibleColumns = tableOption.defaultVisibleColumns
 
     // 设置 table 中的 columns 参数
-    this.columns = fieldOptions.map((p) => {
-      return {
-        ...p,
-        ...{ sortable: true, align: 'center' },
-        ...p.columns,
-        name: p.field
-      }
-    })
+    this.columns = fieldOptions
+      .filter((p) => p.exclude != ExcludeType.both && p.exclude != ExcludeType.Columns)
+      .map((p) => {
+        return {
+          ...p,
+          ...{ sortable: true, align: 'center' },
+          ...p.columns,
+          name: p.field
+        }
+      })
 
-    this.fieldOptions = this.fieldOptions.filter((p) => !p.excludeQuery)
+    this.fieldOptions = this.fieldOptions.filter((p) => p.exclude != ExcludeType.both && p.exclude != ExcludeType.Query)
   }
   //#endregion
 

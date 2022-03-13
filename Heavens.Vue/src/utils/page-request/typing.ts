@@ -167,22 +167,23 @@ export type FieldOption = Filter & {
   easy?: boolean
   /**
    * 当type为select时，需要传入该options
+   * boolSelect有默认值，可不传
    */
-  selectOptions?: OptionType<any>[] | any[]
+  selectOptions?: OptionType<{ label: string; value: any }>[] | any[]
   /**
-   * 对应 QSelect 中的参数，仅当字段类型为select或bool时有效
+   * 对应 QSelect 中的参数，仅当字段类型为select或boolSelect时有效
    */
   emitValue?: boolean
   /**
-   * 对应 QSelect 中的参数，仅当字段类型为select或bool时有效
+   * 对应 QSelect 中的参数，仅当字段类型为select或boolSelect时有效
    */
   mapOptions?: boolean
   /**
-   * 对应 QSelect 中的参数，仅当字段类型为select或bool时有效
+   * 对应 QSelect 中的参数，仅当字段类型为select或boolSelect时有效
    */
   multiple?: boolean
   /**
-   * 对应 QSelect 中的参数，仅当字段类型为select或bool时有效
+   * 对应 QSelect 中的参数，仅当字段类型为select或boolSelect时有效
    */
   useChips?: boolean
 
@@ -250,13 +251,19 @@ export type FieldOption = Filter & {
   defaultVisibleColumn?: boolean
 
   /**
-   * 在查询中排除，仅用于配置table Column
+   * 配置排除类型
    */
-  excludeQuery?: boolean
+  exclude?: ExcludeType
 
   /**
    * ? 仅在开发人员需要自定义多个参数and 或 or 中间的隔层，一般不要使用
    * ? 具体使用方式请参考文档
    */
   notRemoveItemByQuery?: boolean
+}
+
+export enum ExcludeType {
+  Columns,
+  Query,
+  both
 }

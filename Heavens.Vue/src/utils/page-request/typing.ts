@@ -169,7 +169,7 @@ export type FieldOption = Filter & {
    * 当type为select时，需要传入该options
    * boolSelect有默认值，可不传
    */
-  selectOptions?: OptionType<{ label: string; value: any }>[] | any[]
+  selectOptions?: OptionType<any>[] | any[]
   /**
    * 对应 QSelect 中的参数，仅当字段类型为select或boolSelect时有效
    */

@@ -19,7 +19,7 @@ public interface IBaseEntity<TKey> : IPrivateEntity
     /// <summary>
     /// 创建时间
     /// </summary>
-    public DateTimeOffset? CreatedTime { get; set; }
+    public DateTime? CreatedTime { get; set; }
     /// <summary>
     /// 更新者id
     /// </summary>
@@ -31,7 +31,7 @@ public interface IBaseEntity<TKey> : IPrivateEntity
     /// <summary>
     /// 更新时间
     /// </summary>
-    public DateTimeOffset? UpdatedTime { get; set; }
+    public DateTime? UpdatedTime { get; set; }
     /// <summary>
     /// 根据httpToken设置创建字段,如果没有token信息则只设置CreatedTime
     /// </summary>

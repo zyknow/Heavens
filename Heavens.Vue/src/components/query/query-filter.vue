@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col space-y-1 w-full">
     <div class="flex flex-row items-center justify-between">
-      <div v-if="query.mode == QueryModel.easy" class="flex flex-row space-x-1">
+      <div class="flex flex-row space-x-1">
         <q-input
-          v-if="easyOption.number.label"
+          v-if="easyOption.number.label && query.mode == QueryModel.easy"
           v-model="easyOption.number.searchKey"
           :class="easyNumberInputClass"
           :label="easyOption.number.label"
@@ -14,7 +14,7 @@
           @keydown.enter="onSearch"
         />
         <q-input
-          v-if="easyOption.text.label"
+          v-if="easyOption.text.label && query.mode == QueryModel.easy"
           v-model="easyOption.text.searchKey"
           :class="easyTextInputClass"
           :label="easyOption.text.label"
@@ -23,15 +23,16 @@
           clearable
           @keydown.enter="onSearch"
         />
-        <q-btn dense icon="search" color="primary" :loading="loading" @click="onSearch">搜索</q-btn>
+        <q-btn dense icon="search" class="w-20" color="primary" :loading="loading" @click="onSearch">搜索</q-btn>
         <slot name="btn"></slot>
       </div>
-      <div v-else></div>
-      <div class="flex flex-row mr-32 space-x-1">
-        <div v-if="query.mode != QueryModel.easy" class="flex flex-row space-x-1">
-          <q-btn dense icon="search" color="primary" :loading="loading" @click="onSearch">搜索</q-btn>
+      <!-- <div v-else></div> -->
+      <!-- 按钮组 -->
+      <div class="flex flex-row mr-32 space-x-1 items-center">
+        <!-- <div v-if="query.mode != QueryModel.easy" class="flex flex-row space-x-1">
+          <q-btn dense icon="search" class="w-20 h-10" color="primary" :loading="loading" @click="onSearch">搜索</q-btn>
           <slot name="btn"></slot>
-        </div>
+        </div> -->
         <q-select
           v-model="query.mode"
           outlined
@@ -43,10 +44,11 @@
           :options="enumToOption(QueryModel)"
           :option-label="(v) => t(`enum.query_mode.${v.label}`)"
         />
+        <q-icon class="text-yellow-500 cursor-pointer" size="1.5rem" name="contact_support" />
         <q-btn flat style="margin-left: 10px" color="danger" @click="onReset">重置过滤</q-btn>
       </div>
     </div>
-
+    <!-- 高级过滤 -->
     <div v-if="query.mode == QueryModel.advanced && !state.refreshLoading" class="flex flex-row">
       <div v-for="(item, index) in query.filters" :key="index" class="flex flex-row mr-2 mt-2">
         <query-field-item
@@ -55,10 +57,11 @@
           :fieldOption="item"
           :field-options="fieldOptions"
           @on-field-change="onFieldChange"
+          @on-search="$emit('onSearch')"
         />
       </div>
     </div>
-
+    <!-- 自定义过滤 -->
     <div v-if="query.mode == QueryModel.custom && !state.refreshLoading" class="flex flex-col space-y-0.5">
       <div class="flex flex-row space-x-1 items-center">
         <q-select
@@ -81,6 +84,7 @@
             :fieldOption="item"
             :field-options="fieldOptions"
             @on-field-change="onFieldChange"
+            @on-search="$emit('onSearch')"
           />
           <q-btn icon="remove" dense color="danger" @click="query.filters.splice(index, 1)" />
 

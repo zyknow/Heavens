@@ -23,9 +23,9 @@ public static class CsCommentsXmlCache
     /// </summary>
     /// <param name="member">成员信息</param>
     /// <returns></returns>
-    public static XmlDocument? Get(MemberInfo member)
+    public static XmlDocument Get(MemberInfo member)
     {
-        string? key = member.Module.Assembly.FullName;
+        string key = member.Module.Assembly.FullName;
         XmlDocument xml;
 
         if (_cache.TryGetValue(key!, out xml!))
@@ -40,13 +40,13 @@ public static class CsCommentsXmlCache
                 return xml;
             }
 
-            string? xmlFile = GetXmlPath(member.Module.FullyQualifiedName);
+            string xmlFile = GetXmlPath(member.Module.FullyQualifiedName);
             if (xmlFile == null)
             {
                 return null;
             }
 
-            string? xmlText = File.ReadAllText(xmlFile);
+            string xmlText = File.ReadAllText(xmlFile);
             xml = new XmlDocument();
             xml.LoadXml(xmlText);
             _cache.Add(key!, xml);
@@ -62,7 +62,7 @@ public static class CsCommentsXmlCache
     /// <param name="xmlPath">Xml路径</param>
     internal static void Set(Assembly assembly, string xmlPath)
     {
-        string? key = assembly.FullName;
+        string key = assembly.FullName;
         lock (_cache)
         {
             if (xmlPath == null || File.Exists(xmlPath) == false)
@@ -71,11 +71,11 @@ public static class CsCommentsXmlCache
             }
             else
             {
-                string? xmlText = File.ReadAllText(xmlPath);
-                XmlDocument? xml = new XmlDocument();
+                string xmlText = File.ReadAllText(xmlPath);
+                XmlDocument xml = new XmlDocument();
 
                 xml.LoadXml(xmlText);
-                _cache[key!] = xml;
+                _cache[key] = xml;
                 _cacheByPath[xmlPath] = xml;
             }
         }
@@ -100,7 +100,7 @@ public static class CsCommentsXmlCache
                 return;
             }
 
-            string? xmlText = File.ReadAllText(xmlPath);
+            string xmlText = File.ReadAllText(xmlPath);
             xml.LoadXml(xmlText);
         }
     }
@@ -110,14 +110,14 @@ public static class CsCommentsXmlCache
     /// </summary>
     /// <param name="dllPath">dll路径</param>
     /// <returns></returns>
-    internal static string? GetXmlPath(string dllPath)
+    internal static string GetXmlPath(string dllPath)
     {
         if (string.IsNullOrEmpty(dllPath) || dllPath[0] == '<')
         {
             return null;
         }
 
-        string? xmlFile = dllPath.Remove(dllPath.Length - Path.GetExtension(dllPath).Length) + ".xml";
+        string xmlFile = dllPath.Remove(dllPath.Length - Path.GetExtension(dllPath).Length) + ".xml";
         if (File.Exists(xmlFile) == false)
         {
             xmlFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin",

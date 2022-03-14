@@ -10,7 +10,7 @@ public sealed class CsCommentsParamCollection : Dictionary<string, CsCommentsPar
     /// </summary>
     /// <param name="name">name 属性</param>
     /// <returns></returns>
-    public new CsCommentsParam? this[string name]
+    public new CsCommentsParam this[string name]
     {
         get
         {

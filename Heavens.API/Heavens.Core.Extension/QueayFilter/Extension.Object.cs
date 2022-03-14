@@ -15,7 +15,7 @@ internal class ObjectHelper
     /// <param name="value"></param>
     /// <param name="conversionType"></param>
     /// <returns></returns>
-    public static object? CastTo(object value, Type conversionType)
+    public static object CastTo(object value, Type conversionType)
     {
         if (value == null)
         {
@@ -79,7 +79,7 @@ internal class ObjectHelper
     /// <typeparam name="T"> 动态类型 </typeparam>
     /// <param name="value"> 要转化的源对象 </param>
     /// <returns> 转化后的指定类型的对象，转化失败引发异常。 </returns>
-    public static T? CastTo<T>(object value)
+    public static T CastTo<T>(object value)
     {
         if (value == null && default(T) == null)
         {
@@ -89,10 +89,10 @@ internal class ObjectHelper
         {
             return (T)value;
         }
-        object? result = CastTo(value, typeof(T));
+        object result = CastTo(value, typeof(T));
 
 
-        return (T)result!;
+        return (T)result;
     }
 
 }

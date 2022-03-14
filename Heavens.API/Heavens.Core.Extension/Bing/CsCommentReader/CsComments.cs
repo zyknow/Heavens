@@ -10,17 +10,17 @@ public sealed class CsComments
     /// <summary>
     /// 文档注释中的 summary 或 value 节点，用于表示注释的主体说明
     /// </summary>
-    public string? Summary { get; private set; }
+    public string Summary { get; private set; }
 
     /// <summary>
     /// 文档注释中的 remarks 节点，用于表示备注信息
     /// </summary>
-    public string? Remarks { get; private set; }
+    public string Remarks { get; private set; }
 
     /// <summary>
     /// 文档注释中的 returns 节点，用于表示返回值信息
     /// </summary>
-    public string? Returns { get; private set; }
+    public string Returns { get; private set; }
 
     /// <summary>
     /// 文档注释中的 param 节点，用于表示参数信息
@@ -54,41 +54,41 @@ public sealed class CsComments
 
     internal CsComments(XmlNode node)
     {
-        XmlElement? summary = node["summary"] ?? node["value"];
+        XmlElement summary = node["summary"] ?? node["value"];
         if (summary != null)
         {
             Summary = summary.InnerText.Trim();
         }
 
-        XmlElement? remarks = node["remarks"];
+        XmlElement remarks = node["remarks"];
         if (remarks != null)
         {
             Remarks = remarks.InnerText.Trim();
         }
 
-        XmlElement? returns = node["returns"];
+        XmlElement returns = node["returns"];
         if (returns != null)
         {
             Returns = returns.InnerText.Trim();
         }
 
-        XmlNodeList? param = node.SelectNodes("param");
+        XmlNodeList param = node.SelectNodes("param");
         Param = new CsCommentsParamCollection();
         foreach (XmlNode item in param!)
         {
-            CsCommentsParam? p = new CsCommentsParam(item);
+            CsCommentsParam p = new CsCommentsParam(item);
             Param[p.Name!] = p;
         }
 
-        XmlNodeList? typeparam = node.SelectNodes("typeparam");
+        XmlNodeList typeparam = node.SelectNodes("typeparam");
         TypeParam = new CsCommentsParamCollection();
         foreach (XmlNode item in typeparam!)
         {
-            CsCommentsParam? p = new CsCommentsParam(item);
+            CsCommentsParam p = new CsCommentsParam(item);
             TypeParam[p.Name!] = p;
         }
 
-        XmlNodeList? exception = node.SelectNodes("exception");
+        XmlNodeList exception = node.SelectNodes("exception");
         int index = 0;
         Exception = new CsCommentsException[exception!.Count];
         foreach (XmlNode item in exception)

@@ -19,7 +19,7 @@ internal class QueryableHelper
     /// <param name="query"></param>
     /// <param name="sort"></param>
     /// <returns></returns>
-    internal static IQueryable<T> OrderCondition<T>(IQueryable<T> query, SortBy sort, LambdaExpression? exp = null)
+    internal static IQueryable<T> OrderCondition<T>(IQueryable<T> query, SortBy sort, LambdaExpression exp = null)
     {
         if (sort == null || sort.Field.IsEmpty())
         {
@@ -33,7 +33,7 @@ internal class QueryableHelper
 
         Type t = typeof(T);
 
-        Type? propertyType = exp?.Body.Type;
+        Type propertyType = exp?.Body.Type;
         if (exp == null)
         {
             var property = t.GetProperty(fieldName) ?? t.GetProperty(fieldName.ToUpperFirstLetter());

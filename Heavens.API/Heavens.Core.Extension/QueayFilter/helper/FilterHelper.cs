@@ -141,7 +141,7 @@ public static class FilterHelper
     /// <typeparam name="T">表达式实体类型</typeparam>
     /// <param name="rules">查询条件组，如果为null，则直接返回 true 表达式</param>
     /// <returns>查询表达式</returns>
-    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules, List<IQueryAction<T>>? queryActions)
+    public static Expression<Func<T, bool>> GetExpression<T>(ICollection<FilterRule> rules, List<IQueryAction<T>> queryActions)
     {
 
         // 检查参数名
@@ -204,7 +204,7 @@ public static class FilterHelper
     /// <param name="param"></param>
     /// <param name="rules"></param>
     /// <returns></returns>
-    private static Expression GetExpressionBody<T>(ParameterExpression param, ICollection<FilterRule> rules, List<IQueryAction<T>>? queryActions = null)
+    private static Expression GetExpressionBody<T>(ParameterExpression param, ICollection<FilterRule> rules, List<IQueryAction<T>> queryActions = null)
     {
 
         //如果无条件或条件为空，直接返回 true表达式
@@ -270,7 +270,7 @@ public static class FilterHelper
     /// <param name="param"></param>
     /// <param name="rule"></param>
     /// <returns></returns>
-    public static Expression? GetExpressionBody<T>(ParameterExpression param, FilterRule rule, List<IQueryAction<T>>? queryActions = null)
+    public static Expression GetExpressionBody<T>(ParameterExpression param, FilterRule rule, List<IQueryAction<T>> queryActions = null)
     {
         if (!IsValid(rule)) return null;
 
@@ -299,9 +299,9 @@ public static class FilterHelper
         }
     }
 
-    private static LambdaExpression? GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
+    private static LambdaExpression GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
     {
-        LambdaExpression? exp = null;
+        LambdaExpression exp = null;
         Expression propertyAccess = param;
         Type type = param.Type;
 
@@ -439,7 +439,7 @@ public static class FilterHelper
         else if (rule.Value is JsonElement)
         {
             JsonElement json = (JsonElement)rule.Value;
-            object? value = null;
+            object value = null;
             //枚举
             if (conversionType.IsEnum)
             {
@@ -453,7 +453,7 @@ public static class FilterHelper
         }
         else
         {
-            object? value = ObjectHelper.CastTo(rule.Value!, conversionType);
+            object value = ObjectHelper.CastTo(rule.Value!, conversionType);
             return Expression.Constant(value, conversionType);
         }
     }

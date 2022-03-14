@@ -28,7 +28,7 @@ public abstract class BaseRequest
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public virtual Expression<Func<T, bool>> GetRulesExpression<T>(List<IQueryAction<T>>? queryActions = null)
+    public virtual Expression<Func<T, bool>> GetRulesExpression<T>(List<IQueryAction<T>> queryActions = null)
     {
         var exp = FilterHelper.GetExpression(Filters, queryActions);
 

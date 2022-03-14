@@ -20,5 +20,8 @@ public class Mapper : IRegister
         config.ForType<Audit, AuditDto>()
             .Map(dest => dest.UserRoles, src => src.UserRoles.Split("|", StringSplitOptions.None).ToList(), src => !src.UserRoles.IsEmpty())
             .Map(dest => dest.ServiceName, src => src.ServiceName.Split(".", StringSplitOptions.None).Last(), src => !src.ServiceName.IsEmpty());
+
+        config.ForType<AuditDto, Audit>()
+            .Map(dest => dest.UserRoles, src => string.Join("|", src.UserRoles), src => !src.UserRoles.IsEmpty());
     }
 }

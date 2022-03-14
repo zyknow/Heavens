@@ -20,7 +20,7 @@ public abstract class BaseEntity<TKey> : CommonEntity<TKey>, IBaseEntity<TKey>
             UpdatedId = TokenInfo.Id;
         }
 
-        UpdatedTime = DateTime.Now;
+        UpdatedTime = DateTimeOffset.Now;
     }
     
     public void SetCreateByHttpToken()
@@ -35,7 +35,7 @@ public abstract class BaseEntity<TKey> : CommonEntity<TKey>, IBaseEntity<TKey>
             CreatedId = TokenInfo.Id;
         }
 
-        CreatedTime = DateTime.Now;
+        CreatedTime = DateTimeOffset.Now;
     }
 }
 

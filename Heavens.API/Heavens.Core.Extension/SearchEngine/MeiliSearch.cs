@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Heavens.Core.Extension.SearchEngine;
 
-public class MeiliSearch : ISearchEngine,ISingleton
+public class MeiliSearch : ISearchEngine, ISingleton
 {
     public MeilisearchClient Client { get; set; }
 
@@ -15,16 +15,11 @@ public class MeiliSearch : ISearchEngine,ISingleton
     {
         _logger = logger;
         option = App.GetConfig<SearchEngineOptions>("SearchEngineSettings");
-        Init();
-
     }
 
     public ILogger<MeiliSearch> _logger { get; }
 
-    private async void Init()
-    {
-        await Connect();
-    }
+
 
     /// <summary>
     /// 连接搜索引擎
@@ -32,7 +27,7 @@ public class MeiliSearch : ISearchEngine,ISingleton
     /// <param name="connectStr"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    public async Task<bool> Connect()
+    public bool Connect()
     {
         if (option?.Enabled != true)
         {
@@ -40,20 +35,60 @@ public class MeiliSearch : ISearchEngine,ISingleton
             return false;
         }
 
+        if (IsHealthy())
+        {
+            return false;
+        }
+
         Client = new MeilisearchClient(option.ConnectStr, option.MasterKey);
-        bool healthy = await IsHealthy();
-        _logger.LogInformation(@$"搜索引擎连接：{(healthy ? "成功" : "失败")}");
-        return healthy;
+        CreateDefaultSearchKey().GetAwaiter().GetResult();
+        _logger.LogInformation(@$"搜索引擎连接成功");
+        return true;
     }
+
+    private async Task CreateDefaultSearchKey()
+    {
+        var uid = "default_heavens_search_key";
+        var keys = (await Client?.GetKeysAsync())?.Results;
+
+        if (!keys.Any(p => p.Description == uid))
+        {
+            await Client?.CreateKeyAsync(new Key()
+            {
+                KeyUid = uid,
+                Description = uid,
+                Actions = new[] { "search" },
+                Indexes = new[] { "*" },
+            });
+        }
+
+
+    }
+
+    public async Task<Key> GetSearchKey()
+    {
+        Connect();
+        var keys = (await Client?.GetKeysAsync())?.Results;
+
+        ArgumentNullException.ThrowIfNull(keys);
+
+        var key = keys.FirstOrDefault(p => p.Description == "default_heavens_search_key");
+
+        return key;
+
+    }
+
 
     /// <summary>
     /// 搜索引擎状态
     /// </summary>
     /// <returns></returns>
-    public async Task<bool> IsHealthy()
+    public bool IsHealthy()
     {
-        ArgumentNullException.ThrowIfNull(Client);
-        return await Client.IsHealthyAsync()!;
+        if (Client == null)
+        { return false; }
+
+        return true;
 
 
     }
@@ -67,6 +102,7 @@ public class MeiliSearch : ISearchEngine,ISingleton
     /// <returns></returns>
     public async Task<SearchResult<T>> Search<T>(string indexStr, string search, SearchQuery searchQuery = null)
     {
+        Connect();
         Meilisearch.Index index = await Client?.GetIndexAsync(indexStr)!;
         ArgumentNullException.ThrowIfNull(index);
 
@@ -82,6 +118,7 @@ public class MeiliSearch : ISearchEngine,ISingleton
     /// <returns></returns>
     public async Task AddOrUpdates<T>(string indexStr, List<T> list = null) where T : class, new()
     {
+        Connect();
 
         Meilisearch.Index index = Client?.Index(indexStr);
         ArgumentNullException.ThrowIfNull(index);
@@ -99,7 +136,7 @@ public class MeiliSearch : ISearchEngine,ISingleton
     /// <returns></returns>
     public async Task AddOrUpdate<T>(string indexStr, T entity = null) where T : class, new()
     {
-
+        Connect();
         Meilisearch.Index index = Client?.Index(indexStr)!;
         ArgumentNullException.ThrowIfNull(index);
 
@@ -117,6 +154,7 @@ public class MeiliSearch : ISearchEngine,ISingleton
     /// <returns></returns>
     public async Task DeleteDocuments(string indexStr, string[] ids)
     {
+        Connect();
         Meilisearch.Index index = await Client?.GetIndexAsync(indexStr)!;
         ArgumentNullException.ThrowIfNull(index);
 
@@ -130,6 +168,7 @@ public class MeiliSearch : ISearchEngine,ISingleton
     /// <returns></returns>
     public async Task DeleteIndex(string indexStr)
     {
+        Connect();
         ArgumentNullException.ThrowIfNull(Client);
         await Client.DeleteIndexAsync(indexStr);
     }
@@ -140,6 +179,7 @@ public class MeiliSearch : ISearchEngine,ISingleton
     /// <returns></returns>
     public async Task DeleteAllIndex()
     {
+        Connect();
         IEnumerable<Meilisearch.Index> indexs = await Client?.GetAllIndexesAsync();
         ArgumentNullException.ThrowIfNull(indexs);
 

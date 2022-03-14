@@ -22,15 +22,14 @@ public class SearchEngine_Test
     [Fact]
     public async Task Connect_Test()
     {
-        var res = await _searchEngine.Connect();
+        var res = _searchEngine.Connect();
         Assert.True(res);
     }
 
     [Fact]
     public async Task AddOrUpdate_Test()
     {
-        await _searchEngine.Connect();
-        var res = await _searchEngine.Client.CreateIndexAsync(indexName,"heavens");
+        _searchEngine.Connect();
         await _searchEngine.AddOrUpdate(indexName, new SE_Student()
         {
             Name = "1"

@@ -10,8 +10,8 @@ public class ImgHelper
 
     private static ImageFormat GetImageFormat(string extension)
     {
-        ImageFormat? format = null;
-        string? ex = extension.ToLower();
+        ImageFormat format = null;
+        string ex = extension.ToLower();
         switch (ex)
         {
             case ".jpg":
@@ -65,7 +65,7 @@ public class ImgHelper
     /// <param name="resolution"></param>
     public static void SaveThumbnail(byte[] bytes, string savePath, int resolution = 320, string extension = ".jpg")
     {
-        using Image? img = ResizeToImage(bytes.ToMemoryStream(), resolution);
+        using Image img = ResizeToImage(bytes.ToMemoryStream(), resolution);
         img.Save(savePath, GetImageFormat(extension));
     }
 
@@ -76,7 +76,7 @@ public class ImgHelper
     /// <param name="resolution">分辨率 1440/1080/720 等，填数字</param>
     public static byte[] ResizeToBytes(byte[] bytes, int resolution, string extension = ".png")
     {
-        using Image? img = ResizeToImage(bytes.ToMemoryStream(), resolution);
+        using Image img = ResizeToImage(bytes.ToMemoryStream(), resolution);
         return img.ToBytes(GetImageFormat(extension));
     }
 
@@ -89,7 +89,7 @@ public class ImgHelper
     /// <returns></returns>
     public static Stream ResizeToStream(byte[] bytes, int resolution, string extension = ".png")
     {
-        using Image? img = ResizeToImage(bytes.ToMemoryStream(), resolution);
+        using Image img = ResizeToImage(bytes.ToMemoryStream(), resolution);
         return img.ToBytes(GetImageFormat(extension)).ToMemoryStream();
     }
 

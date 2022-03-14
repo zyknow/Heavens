@@ -14,7 +14,7 @@ public static partial class ExpressionExtension
     /// </summary>
     /// <param name="exp"></param>
     /// <returns></returns>
-    public static string? ToLambdaString(this Expression exp)
+    public static string ToLambdaString(this Expression exp)
     {
         return exp?.ToString()?.Replace("OrElse", "||").Replace("AndAlso", "&&").Replace("Not","!");
     }

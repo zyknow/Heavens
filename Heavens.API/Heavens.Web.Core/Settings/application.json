@@ -55,9 +55,9 @@
 
   // MeiliSearch 搜索引擎配置
   "SearchEngineSettings": {
-    "Enabled": "true",
+    "Enabled": true,
     "ConnectStr": "http://mjrfid.cn:7700",
-    "MasterKey": "masterKey"
+    "MasterKey": "heavens"
   },
   "LocalizationSettings": {
     "SupportedCultures": [ "en-US", "zh-CN" ], // 配置支持的语言列表

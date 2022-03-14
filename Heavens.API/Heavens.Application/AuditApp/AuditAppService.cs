@@ -9,6 +9,7 @@ using Heavens.Core.Extension.Extensions;
 using Heavens.Core.Extension.QueayFilter.common;
 using Heavens.Core.Extension.QueayFilter;
 using Bing.Expressions;
+using Heavens.Core.Extension.SearchEngine;
 
 namespace Heavens.Application.AuditApp;
 
@@ -16,10 +17,10 @@ namespace Heavens.Application.AuditApp;
 /// 审计接口
 /// </summary>
 [Authorize, IgnoreAudit]
-public class AuditAppService : BaseAppService<int, Audit, AuditDto, AuditPage>
+public class AuditAppService : BaseSEAppService<int, Audit, AuditDto, AuditPage>, IScoped
 {
     public IAuditService _auditService { get; set; }
-    public AuditAppService(IRepository<Audit> auditRepository, IAuditService auditService) : base(auditRepository)
+    public AuditAppService(IRepository<Audit> auditRepository, IAuditService auditService, ISearchEngine searchEngine) : base(auditRepository, searchEngine)
     {
         _auditService = auditService;
 

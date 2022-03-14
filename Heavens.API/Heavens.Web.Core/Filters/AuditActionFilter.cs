@@ -3,8 +3,11 @@ using Furion;
 using Furion.ClayObject.Extensions;
 using Furion.DatabaseAccessor;
 using Furion.JsonSerialization;
+using Heavens.Application.AuditApp;
+using Heavens.Application.AuditApp.Dtos;
 using Heavens.Core.Authorizations;
 using Heavens.Core.Entities;
+using Heavens.Core.Extension.Audit;
 using Meilisearch;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,25 +19,28 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Heavens.Core.Extension.Audit;
+namespace Heavens.Web.Core.Filters;
 
 /// <summary>
 /// 审计 Filter
 /// </summary>
 public class AuditActionFilter : IAsyncActionFilter
 {
-    public AuditActionFilter(IRepository<Entities.Audit> auditRepository)
+    public AuditActionFilter(IRepository<Heavens.Core.Entities.Audit> auditRepository,AuditAppService auditAppService)
     {
         _auditRepository = auditRepository;
+        _auditAppService = auditAppService;
     }
 
-    public IRepository<Entities.Audit> _auditRepository { get; }
+    public IRepository<Heavens.Core.Entities.Audit> _auditRepository { get; }
+    public AuditAppService _auditAppService { get; }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -51,7 +57,7 @@ public class AuditActionFilter : IAsyncActionFilter
 
         // 请求用户所持有的角色
         var roles = TokenInfo.Roles;
-        var rolesStr = !roles.IsEmpty() ? string.Join("|", roles) : "";
+        //var rolesStr = !roles.IsEmpty() ? string.Join("|", roles) : "";
 
         // 请求的控制器
         var type = (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerTypeInfo.AsType();
@@ -103,9 +109,9 @@ public class AuditActionFilter : IAsyncActionFilter
         // path参数
         var path = context.HttpContext.Request.Path;
 
-        var audit = new Entities.Audit()
+        var audit = new AuditDto()
         {
-            UserRoles = rolesStr,
+            UserRoles = roles.ToArray(),
             ServiceName = serverName,
             ExecutionMs = (int)watch.ElapsedMilliseconds,
             MethodName = method?.Name,
@@ -117,12 +123,9 @@ public class AuditActionFilter : IAsyncActionFilter
             Query = query,
             Path = path,
         };
-        audit.SetCreateByHttpToken();
 
+        await _auditAppService.Add(audit);
 
-#pragma warning disable CS4014 
-        _auditRepository.InsertAsync(audit);
-#pragma warning restore CS4014 
     }
 
     #region 私有方法

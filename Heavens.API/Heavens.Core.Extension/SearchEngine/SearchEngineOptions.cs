@@ -13,8 +13,8 @@ public class SearchEngineOptions : IConfigurableOptions
 {
     public bool Enabled { get; set; }
 
-    public string? ConnectStr { get; set; }
+    public string ConnectStr { get; set; }
 
-    public string? MasterKey { get; set; }
+    public string MasterKey { get; set; }
 
 }

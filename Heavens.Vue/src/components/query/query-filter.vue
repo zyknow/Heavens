@@ -75,7 +75,7 @@
           :option-label="(v) => (v.value == Condition.or ? '符合以下任何条件' : '符合以下所有条件')"
           @update:model-value="(v) => query.setAllCondition(v)"
         />
-        <q-btn color="primary" icon="add" dense flat @click="add" />
+        <q-btn color="primary" icon="add" dense flat @click="addCustomItem" />
       </div>
       <div class="flex flex-row space-y-0.5 space-x-5">
         <div v-for="(item, index) in query.filters" :key="index" class="flex flex-row space-x-1 ml-5">
@@ -166,7 +166,7 @@ const state = reactive({
   refreshLoading: false
 })
 
-const add = () => {
+const addCustomItem = () => {
   const item: FieldOption = cloneDeep({
     ...defaultAddFieldOption,
     condition: state.condition,

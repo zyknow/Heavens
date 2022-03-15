@@ -65,8 +65,6 @@ export class BaseQuery {
   reset = (): void => {
     if (this.mode == QueryModel.custom) {
       this.filters = [{ ...this.fieldOptions[0] }]
-      this.filters.splice(0, this.filters.length)
-      // this.filters = [this.fieldOptions[0]]
     } else if (this.mode == QueryModel.advanced) {
       const { fieldOptions } = this
       this.filters = []
@@ -225,7 +223,7 @@ export class PageQuery<T> extends BaseQuery {
     return new DataQuery(this.fieldOptions, limit)
   }
   /**
-   * 保存每页行数
+   * 保存当前页配置
    */
   saveOption() {
     const tableOption = tableOptions.find((p) => p.routerName == this.routerName)

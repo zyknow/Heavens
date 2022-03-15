@@ -20,7 +20,7 @@ public class SearchEngine_Test
     }
 
     [Fact]
-    public async Task Connect_Test()
+    public void Connect_Test()
     {
         var res = _searchEngine.Connect();
         Assert.True(res);
@@ -34,5 +34,13 @@ public class SearchEngine_Test
         {
             Name = "1"
         });
+    }
+
+    [Fact]
+    public async Task Search_Test()
+    {
+        _searchEngine.Connect();
+        var data = await _searchEngine.Search<SE_Student>(indexName, "1");
+        Assert.NotNull(data);
     }
 }

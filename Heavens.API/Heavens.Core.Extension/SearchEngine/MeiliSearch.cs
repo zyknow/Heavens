@@ -41,26 +41,28 @@ public class MeiliSearch : ISearchEngine, ISingleton
         }
 
         Client = new MeilisearchClient(option.ConnectStr, option.MasterKey);
-        CreateDefaultSearchKey().GetAwaiter().GetResult();
+        //CreateDefaultSearchKey().GetAwaiter().GetResult();
         _logger.LogInformation(@$"搜索引擎连接成功");
         return true;
     }
 
     private async Task CreateDefaultSearchKey()
     {
-        var uid = "default_heavens_search_key";
-        var keys = (await Client?.GetKeysAsync())?.Results;
+        //var uid = "default_heavens_search_key";
+        var keyUid = (await Client?.GetKeysAsync())?.Results?.FirstOrDefault(p => p.Actions.Contains("search"))?.KeyUid;
 
-        if (!keys.Any(p => p.Description == uid))
-        {
-            await Client?.CreateKeyAsync(new Key()
-            {
-                KeyUid = uid,
-                Description = uid,
-                Actions = new[] { "search" },
-                Indexes = new[] { "*" },
-            });
-        }
+        var key = await Client?.GetKeyAsync(keyUid);
+
+        //if (!keys.Any(p => p.Description == uid))
+        //{
+        //    await Client?.CreateKeyAsync(new Key()
+        //    {
+        //        KeyUid = uid,
+        //        Description = uid,
+        //        Actions = new[] { "search" },
+        //        Indexes = new[] { "*" },
+        //    });
+        //}
 
 
     }

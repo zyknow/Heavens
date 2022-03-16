@@ -355,3 +355,4 @@ MigrationBackup/
 Heavens.API/Heavens.Application/Heavens.Application.xml
 Heavens.API/Heavens.Core/Heavens.Core.xml
 /Heavens.API/Heavens.Web.Core/Heavens.Web.Core.xml
+/Template/nuget.exe

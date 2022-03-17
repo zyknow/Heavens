@@ -16,7 +16,7 @@ public sealed class Startup : XunitTestFramework
     public Startup(IMessageSink messageSink) : base(messageSink)
     {
         // 初始化 IServiceCollection 对象
-        IServiceCollection? services = Inject.Create();
+        IServiceCollection services = Inject.Create();
 
         // 在这里可以和 .NET Core 一样注册服务了！！！！！！！！！！！！！！
 

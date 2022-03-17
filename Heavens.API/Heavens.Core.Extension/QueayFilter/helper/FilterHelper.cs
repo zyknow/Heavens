@@ -3,6 +3,7 @@ using Bing.Expressions;
 using Bing.Extensions;
 using EasyCaching.Core.Internal;
 using Furion.FriendlyException;
+using Heavens.Core.Extension.Extensions;
 using Heavens.Core.Extension.QueayFilter;
 using Heavens.Core.Extension.QueayFilter.common;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
@@ -198,6 +199,7 @@ public static class FilterHelper
         }
         return groups;
     }
+
     /// <summary>
     /// 
     /// </summary>
@@ -288,77 +290,107 @@ public static class FilterHelper
         }
         else
         {
-            LambdaExpression expression = GetPropertyLambdaExpression(param, rule)!;
-            // 如果包含Any，则表示已经完成了表达式树，直接返回 Body
-            if (expression == null || expression.ToString().Contains("Any"))
-                return expression?.Body;
-
-            Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
-            var exp = ExpressionDict[rule.Operate](expression.Body, constant);
-            return exp;
+            return GetLambdaExpression(param, rule);
         }
     }
 
-    private static LambdaExpression GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
+
+    class TempExpression
     {
-        LambdaExpression exp = null;
-        Expression propertyAccess = param;
-        Type type = param.Type;
-
-        var fields = rule.Field.Split(".");
-
-        for (int i = 0; i < fields.Length; i++)
+        public TempExpression(Expression exp, ParameterExpression paramExp, Type linqType)
         {
+            Exp = exp;
+            ParamExp = paramExp;
+            LinqType = linqType;
+        }
+
+        /// <summary>
+        /// 表达式
+        /// </summary>
+        public Expression Exp { get; set; }
+        /// <summary>
+        /// 表达式参数
+        /// </summary>
+        public ParameterExpression ParamExp { get; set; }
+        /// <summary>
+        /// 表达式内参数类型
+        /// </summary>
+        public Type LinqType { get; set; }
+    }
+
+    private static Expression GetLambdaExpression(ParameterExpression param, FilterRule rule)
+    {
+        Expression exp = null;
+        var fields = rule.Field.Split(".").ToList();
+
+        var exps = new List<TempExpression>();
+
+        var type = param.Type;
+
+        Expression access = param;
+
+        // 表达式树访问参数
+        ParameterExpression collectionParamExp = null;
+        for (int i = 0; i < fields.Count; i++)
+        {
+
             var field = fields[i];
+            PropertyInfo property = null;
 
-
-            var pTypeIsCollectionType = type.IsCollectionType();
-            // 获取集合类型中的类型
-            type = pTypeIsCollectionType ? type.GetGenericArguments().First() : type;
-
-            PropertyInfo property = type.GetProperty(field) ?? type.GetProperty(field.ToUpperFirstLetter())!;
-            if (property == null)
-                throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, @$"{rule.Field}中的{field}", type.FullName);
-
-            // 最后一个属性验证属性与属性值是否匹配
-            if (i == fields.Length - 1)
+            if (type.IsCollectionType())
             {
-                bool flag = CheckFilterRule(property.PropertyType, rule);
-                if (!flag)
-                    return null;
-            }
+                // 存储上一个表达式
+                exps.Add(new TempExpression(access, collectionParamExp, type.GetGenericFirstType()));
 
-            // 父类型为集合类型
-            if (pTypeIsCollectionType)
-            {
-                // 生成参数
-                ParameterExpression parameterExpression = Expression.Parameter(type, "v");
+                // 集合内部的泛型类型
+                var collectionGenType = type.GetGenericFirstType();
 
-                // 生成访问参数
-                var access = Expression.MakeMemberAccess(parameterExpression, property);
+                // 当前字段PropertyInfo
+                property = collectionGenType.GetProperty(field, true);
 
-                // 获取操作数据
-                var value = ChangeTypeToExpression(rule, property.PropertyType);
+                // 生成参数名，示例：A
+                string paramStr = Encoding.ASCII.GetString(new byte[] { (byte)(64 + i) });
+                collectionParamExp = Expression.Parameter(collectionGenType, paramStr);
 
-                // 
-                var expr = ExpressionDict[rule.Operate](access, value);
-
-                // 生成lamda
-                var lamd = Expression.Lambda(expr, parameterExpression);
-
-                // 拼接到Any里
-                propertyAccess = Expression.Call(typeof(Enumerable), "Any", new[] { type }, propertyAccess, lamd);
-
+                // 访问参数 示例：A.Id
+                access = Expression.MakeMemberAccess(i == 0 ? param : collectionParamExp, property);
             }
             else
-                propertyAccess = Expression.MakeMemberAccess(propertyAccess, property);
+            {
+                property = type.GetProperty(field, true);
+                if (property == null)
+                    throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, @$"{rule.Field}中的{field}", type.FullName);
 
+                access = Expression.MakeMemberAccess(access, property);
+            }
             type = property.PropertyType;
+
         }
 
-        exp = Expression.Lambda(propertyAccess, param);
+
+        // 遍历完后，access值一定是最后的表达式
+        var lambdaExp = Expression.Lambda(access, collectionParamExp ?? param);
+
+        Expression constant = ChangeTypeToExpression(rule, lambdaExp.Body.Type);
+        exp = ExpressionDict[rule.Operate](lambdaExp.Body, constant);
+
+        if (!exps.IsEmpty())
+        {
+            for (int i = exps.Count - 1; i >= 0; i--)
+            {
+                var tExp = exps[i].Exp;
+
+                // 生成lamda
+                var lamd = Expression.Lambda(exp, i == exps.Count - 1 ? collectionParamExp : exps[i + 1].ParamExp ?? param);
+
+                exp = Expression.Call(typeof(Enumerable), "Any", new[] { exps[i].LinqType }, tExp, lamd);
+            }
+        }
+
         return exp;
+
     }
+
 
     /// <summary>
     /// 验证属性与属性值是否匹配 
@@ -366,24 +398,24 @@ public static class FilterHelper
     /// <param name="type">最后一个属性</param>
     /// <param name="rule">条件信息</param>
     /// <returns></returns>
-    private static bool CheckFilterRule(Type type, FilterRule rule)
-    {
-        if (rule.Value == null || rule.Value.ToString() == string.Empty)
-        {
-            rule.Value = null;
-        }
+    //private static bool CheckFilterRule(Type type, FilterRule rule)
+    //{
+    //    if (rule.Value == null || rule.Value.ToString() == string.Empty)
+    //    {
+    //        rule.Value = null;
+    //    }
 
-        if (rule.Value == null && (type == typeof(string) || ObjectHelper.IsNullableType(type)))
-        {
-            return rule.Operate == FilterOperate.Equal || rule.Operate == FilterOperate.NotEqual;
-        }
+    //    if (rule.Value == null && (type == typeof(string) || ObjectHelper.IsNullableType(type)))
+    //    {
+    //        return rule.Operate == FilterOperate.Equal || rule.Operate == FilterOperate.NotEqual;
+    //    }
 
-        if (rule.Value == null)
-        {
-            return !type.IsValueType;
-        }
-        return true;
-    }
+    //    if (rule.Value == null)
+    //    {
+    //        return !type.IsValueType;
+    //    }
+    //    return true;
+    //}
 
     private static Expression ChangeTypeToExpression(FilterRule rule, Type conversionType)
     {

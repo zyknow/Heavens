@@ -294,11 +294,28 @@ public static class FilterHelper
         }
     }
 
-    class ExpEtn
+
+    class TempExpression
     {
+        public TempExpression(Expression exp, ParameterExpression paramExp, Type linqType)
+        {
+            Exp = exp;
+            ParamExp = paramExp;
+            LinqType = linqType;
+        }
+
+        /// <summary>
+        /// 表达式
+        /// </summary>
         public Expression Exp { get; set; }
-        public ParameterExpression P { get; set; }
-        public Type Type { get; set; }
+        /// <summary>
+        /// 表达式参数
+        /// </summary>
+        public ParameterExpression ParamExp { get; set; }
+        /// <summary>
+        /// 表达式内参数类型
+        /// </summary>
+        public Type LinqType { get; set; }
     }
 
     private static Expression GetLambdaExpression(ParameterExpression param, FilterRule rule)
@@ -306,60 +323,54 @@ public static class FilterHelper
         Expression exp = null;
         var fields = rule.Field.Split(".").ToList();
 
-        var exps = new List<ExpEtn>();
+        var exps = new List<TempExpression>();
 
         var type = param.Type;
 
-        Expression lastAccess = param;
-        ParameterExpression lastParamExp = null;
+        Expression access = param;
+
+        // 表达式树访问参数
+        ParameterExpression collectionParamExp = null;
         for (int i = 0; i < fields.Count; i++)
         {
 
             var field = fields[i];
+            PropertyInfo property = null;
 
             if (type.IsCollectionType())
             {
                 // 存储上一个表达式
-                exps.Add(new ExpEtn()
-                {
-                    Exp = lastAccess,
-                    P = lastParamExp,
-                    Type = type.GetGenericFirstType()
-                });
+                exps.Add(new TempExpression(access, collectionParamExp, type.GetGenericFirstType()));
 
-                var genType = type.GetGenericFirstType();
+                // 集合内部的泛型类型
+                var collectionGenType = type.GetGenericFirstType();
 
                 // 当前字段PropertyInfo
-                PropertyInfo property = genType.GetProperty(field, true);
+                property = collectionGenType.GetProperty(field, true);
 
                 // 生成参数名，示例：A
                 string paramStr = Encoding.ASCII.GetString(new byte[] { (byte)(64 + i) });
-                var paramExp = Expression.Parameter(genType, paramStr);
+                collectionParamExp = Expression.Parameter(collectionGenType, paramStr);
 
                 // 访问参数 示例：A.Id
-                var access = Expression.MakeMemberAccess(i == 0 ? param : paramExp, property);
-
-                type = property.PropertyType;
-                lastAccess = access;
-                lastParamExp = paramExp;
-
+                access = Expression.MakeMemberAccess(i == 0 ? param : collectionParamExp, property);
             }
             else
             {
-                var property = type.GetProperty(field, true);
+                property = type.GetProperty(field, true);
                 if (property == null)
                     throw Oops.Oh(Excode.FIELD_IN_TYPE_NOT_FOUND, @$"{rule.Field}中的{field}", type.FullName);
 
-                var access = Expression.MakeMemberAccess(lastAccess, property);
-                lastAccess = access;
-
-                type = property.PropertyType;
-
+                access = Expression.MakeMemberAccess(access, property);
             }
+            type = property.PropertyType;
+
         }
 
-        // 遍历完后，pAccess一定是最后的表达式
-        var lambdaExp = Expression.Lambda(lastAccess, lastParamExp);
+
+        // 遍历完后，access值一定是最后的表达式
+        var lambdaExp = Expression.Lambda(access, collectionParamExp ?? param);
+
         Expression constant = ChangeTypeToExpression(rule, lambdaExp.Body.Type);
         exp = ExpressionDict[rule.Operate](lambdaExp.Body, constant);
 
@@ -370,11 +381,12 @@ public static class FilterHelper
                 var tExp = exps[i].Exp;
 
                 // 生成lamda
-                var lamd = Expression.Lambda(exp, i == exps.Count - 1 ? lastParamExp : exps[i + 1].P ?? param);
+                var lamd = Expression.Lambda(exp, i == exps.Count - 1 ? collectionParamExp : exps[i + 1].ParamExp ?? param);
 
-                exp = Expression.Call(typeof(Enumerable), "Any", new[] { exps[i].Type }, tExp, lamd);
+                exp = Expression.Call(typeof(Enumerable), "Any", new[] { exps[i].LinqType }, tExp, lamd);
             }
         }
+
         return exp;
 
     }

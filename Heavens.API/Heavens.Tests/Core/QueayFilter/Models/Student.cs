@@ -21,8 +21,8 @@ public class Student
 
     public int GradeId { get; set; }
 
-    public virtual Grade? Grade { get; set; }
+    public virtual Grade Grade { get; set; }
 
-    public virtual ICollection<Grade>? Grades { get; set; }
+    public virtual ICollection<Grade> Grades { get; set; }
 
 }

@@ -3,6 +3,7 @@ using Bing.Expressions;
 using Bing.Extensions;
 using EasyCaching.Core.Internal;
 using Furion.FriendlyException;
+using Heavens.Core.Extension.Extensions;
 using Heavens.Core.Extension.QueayFilter;
 using Heavens.Core.Extension.QueayFilter.common;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
@@ -288,16 +289,168 @@ public static class FilterHelper
         }
         else
         {
-            LambdaExpression expression = GetPropertyLambdaExpression(param, rule)!;
-            // 如果包含Any，则表示已经完成了表达式树，直接返回 Body
-            if (expression == null || expression.ToString().Contains("Any"))
-                return expression?.Body;
+            var fields = rule.Field.Split(".");
+            LambdaExpression expression;
+            if (fields.Length == 1)
+            {
+                expression = GetPropertyLambdaExpression(param, rule);
 
-            Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
-            var exp = ExpressionDict[rule.Operate](expression.Body, constant);
-            return exp;
+                Expression constant = ChangeTypeToExpression(rule, expression.Body.Type);
+                var exp = ExpressionDict[rule.Operate](expression.Body, constant);
+                return exp;
+            }
+            else
+                return GetMultiPropertyLambdaExpression(param, rule, fields.ToList())?.Body;
         }
     }
+
+    private static LambdaExpression GetMultiPropertyLambdaExpression(ParameterExpression param, FilterRule rule, List<string> fields)
+    {
+        Expression exp = null;
+
+        List<Type> accessTypes = new List<Type>();
+
+        List<Type> originTyps = new List<Type>();
+
+        Expression lastFieldExp = null;
+
+        #region 获取所有字段类型Type
+
+
+        // 上一个访问字段类型
+        var prevAccessType = param.Type;
+        foreach (var field in fields)
+        {
+            var type = prevAccessType.GetProperty(field, true).PropertyType;
+
+            prevAccessType = type.GetGenericFirstType();
+
+            accessTypes.Add(prevAccessType);
+            originTyps.Add(type);
+        }
+        #endregion
+
+        // 生成最后面的表达式
+        if(originTyps[^2].IsCollectionType())
+        {
+            int i = fields.Count - 1;
+            // 字段名
+            var field = fields[i];
+
+            // 字段类型
+            var type = accessTypes[i];
+
+            // 检测第一个字段类型
+            bool flag = CheckFilterRule(type, rule);
+            if (!flag)
+                return null;
+
+            // 获取上级类型
+            var parentType = i == 0 ? param.Type : accessTypes[i - 1];
+            var parentOriginType = i == 0 ? param.Type : originTyps[i - 1];
+
+
+
+            // 当前字段PropertyInfo
+            PropertyInfo property = parentType.GetProperty(field, true);
+
+            // 生成参数名，示例：A
+            string paramStr = Encoding.ASCII.GetString(new byte[] { (byte)(64 + i) });
+            ParameterExpression parameterExpression = Expression.Parameter(parentType, paramStr);
+
+            // 访问参数 示例：A.Id
+            var access = Expression.MakeMemberAccess( parameterExpression, property);
+
+            Expression expression = null;
+    
+                // 获取操作数据
+                var value = ChangeTypeToExpression(rule, property.PropertyType);
+                expression = ExpressionDict[rule.Operate](access, value);
+                // 生成expBody lamda 示例：A=> A.Id == 1
+                //exp = Expression.Lambda(expression, parameterExpression);
+ 
+            if (parentOriginType.IsCollectionType())
+            {
+                lastFieldExp = Expression.Lambda(expression, parameterExpression);
+            }
+            else
+            {
+                lastFieldExp = Expression.MakeMemberAccess(expression, property);
+            }
+        }
+
+        // 倒叙遍历
+        for (int i = 0; i < fields.Count; i++)
+        {
+            // 字段名
+            var field = fields[i];
+
+            // 字段类型
+            var type = accessTypes[i];
+
+            // 检测第一个字段类型
+            if (i == fields.Count - 1)
+            {
+                bool flag = CheckFilterRule(type, rule);
+                if (!flag)
+                    return null;
+            }
+
+            // 获取上级类型
+            var parentType = i == 0 ? param.Type : accessTypes[i - 1];
+            var parentOriginType = i == 0 ? param.Type : originTyps[i - 1];
+
+
+
+            // 当前字段PropertyInfo
+            PropertyInfo property = parentType.GetProperty(field, true);
+
+            // 生成参数名，示例：A
+            string paramStr = Encoding.ASCII.GetString(new byte[] { (byte)(64 + i) });
+            ParameterExpression parameterExpression = Expression.Parameter(parentType, paramStr);
+
+            // 访问参数 示例：A.Id
+            var access = Expression.MakeMemberAccess(i == 0 ? param : parameterExpression, property);
+
+            Expression expression = null;
+            if (i == fields.Count - 1)
+            {
+                // 获取操作数据
+                var value = ChangeTypeToExpression(rule, property.PropertyType);
+                expression = ExpressionDict[rule.Operate](access, value);
+                // 生成expBody lamda 示例：A=> A.Id == 1
+                //exp = Expression.Lambda(expression, parameterExpression);
+            }
+            else
+            {
+                if (property.PropertyType.IsCollectionType())
+                {
+                    expression = Expression.Call(typeof(Enumerable), "Any", new[] { type }, access, exp);
+                    exp = Expression.Lambda(expression, i == 0 ? param : parameterExpression);
+                }
+                //else
+                //{
+                //    if (i == 0)
+                //        exp = Expression.Lambda(exp, param);
+                //    else
+                //    {
+                //        exp = Expression.Lambda(exp, parameterExpression);
+                //    }
+                //}
+            }
+            if (parentOriginType.IsCollectionType())
+            {
+                exp = Expression.Lambda(expression, parameterExpression);
+            }
+            else
+            {
+                exp = Expression.MakeMemberAccess(exp?? expression, property);
+            }
+
+        }
+        return (LambdaExpression)exp;
+    }
+
 
     private static LambdaExpression GetPropertyLambdaExpression(ParameterExpression param, FilterRule rule)
     {

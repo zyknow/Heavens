@@ -17,10 +17,10 @@ namespace Heavens.Application.AuditApp;
 /// 审计接口
 /// </summary>
 [Authorize, IgnoreAudit]
-public class AuditAppService : BaseSEAppService<int, Audit, AuditDto, AuditPage>, IScoped
+public class AuditAppService : BaseAppService<int, Audit, AuditDto, AuditPage>, IScoped
 {
     public IAuditService _auditService { get; set; }
-    public AuditAppService(IRepository<Audit> auditRepository, IAuditService auditService, ISearchEngine searchEngine) : base(auditRepository, searchEngine)
+    public AuditAppService(IRepository<Audit> auditRepository, IAuditService auditService, ISearchEngine searchEngine) : base(auditRepository)
     {
         _auditService = auditService;
 

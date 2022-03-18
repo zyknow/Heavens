@@ -18,7 +18,7 @@ public class CodeGenService : ICodeGenService, IScoped
     {
         if (!_env.IsNull() && !_env.IsDevelopment())
         {
-            throw Oops.Bah("非开发环境无法使用");
+            throw Oops.Oh(Excode.NON_DEVELOPER_MODE);
         }
 
         if (!ProjectPath.IsEmpty())
@@ -114,7 +114,7 @@ namespace Heavens.Application.{apidirName};
 /// {CsCommentReader.Create(item)?.Summary ?? item.Name}接口
 /// </summary>
 [Authorize]
-public class {apidirName}Service : {(item.BaseType.Name.Contains("BaseEntity") ? @$"BaseAppService<{item.Name}, {item.Name}Dto>" : "IDynamicApiController")}, IScoped
+public class {apidirName}Service : {(item.BaseType.Name.Contains("BaseEntity") ? @$"BaseAppService<int,{item.Name}, {item.Name}Dto, {item.Name}Dto>" : "IDynamicApiController")}, IScoped
 {{
     {(item.BaseType.Name.Contains("BaseEntity") ?
     @$"public I{item.Name}Service _{item.Name.ToCamelCase()}Service {{ get; set; }}
@@ -176,7 +176,7 @@ public class {item.Name}Dto {(item.BaseType.Name.Contains("BaseEntity") ? ": Bas
             string serviceCsCode =
 $@"namespace Heavens.Application.{apidirName}.Services;
 
-public class {item.Name}Service : I{item.Name}Service
+public class {item.Name}Service : I{item.Name}Service,IScoped
 {{
 }}
 ";
@@ -241,8 +241,11 @@ public interface I{item.Name}Service
 
     public void GenVueApi(string path)
     {
-        Assembly assembly = Assembly.Load("Heavens.Application");
-        IEnumerable<Type> types = assembly.GetTypes().Where(a => a.Namespace.Contains("Dtos") && a.Name != "Mapper" && !a.Name.Contains("<>"));
+        Assembly applicationAssembly = Assembly.Load("Heavens.Application");
+
+        var types = applicationAssembly.GetTypes().Where(a => a.Namespace.Contains("Dtos") && a.Name != "Mapper" && !a.Name.Contains("<>")).ToList();
+
+        types.AddRange(Assembly.Load("Heavens.Enums").GetTypes().Where(p => p.IsEnum && p.Name != "Excode"));
 
 
         string apiPath = path.IsEmpty() ? Path.Combine(GetProjectPath(), "Heavens.Vue", "src", "api") : Path.Combine(path, "api");
@@ -255,13 +258,10 @@ public interface I{item.Name}Service
         List<Type> allDtos = types.Where(d => d.IsClass).ToList();
         List<Type> allEnums = types.Where(d => d.IsEnum).ToList();
 
-        IEnumerable<Type> appServices = assembly.GetTypes().Where(a => !a.IsAbstract && a.Name.Contains("AppService") && !a.Name.Contains("<>") && a.Name != "CodeGenAppService");
+        IEnumerable<Type> appServices = applicationAssembly.GetTypes().Where(a => !a.IsAbstract && a.Name.Contains("AppService") && !a.Name.Contains("<>") && a.Name != "CodeGenAppService");
 
         foreach (Type appService in appServices)
         {
-            //var appRoute = @$"api/{appService.Name.Replace("AppService", "").ToSnakeCase().Replace("_", "-")}";
-
-
             List<Type> dtos = allDtos.Where(d => d.Namespace == @$"{appService.Namespace}.Dtos").ToList();
             List<Type> enums = allEnums.Where(d => d.Namespace == @$"{appService.Namespace}.Dtos").ToList();
 
@@ -269,9 +269,9 @@ public interface I{item.Name}Service
 
             string imports =
 @$"import {{ IndexSign }} from '@/typing'
-import {{ PageRequest, Request }} from '@/utils/page-request'
+import {{ BaseEntity,PagedList, RequestResult }} from './_typing'
 import request from 'src/utils/request'
-import {{ BaseEntity, PagedList, RequestResult }} from './_typing'
+import {{ PageRequest }} from '@/utils/page-request/request'
 {string.Join("", importotherInterfaces.Select(p =>
 @$"import {{ {p} }} from './{p.ToCamelCase()}'"
 ))}
@@ -306,104 +306,120 @@ import {{ BaseEntity, PagedList, RequestResult }} from './_typing'
             string str = @$"
 <template>
   <div class=""h-full"">
-    <!-- Table -->
     <q-table
-      :rows=""state.[name]s""
-      :columns=""state.columns""
+      v-model:selected.sync=""pageQuery.selected""
+      v-model:pagination=""pageQuery.pagination""
+      :rows=""pageQuery.data""
+      :columns=""pageQuery.columns""
       selection=""multiple""
-      :loading=""state.loading""
-      :row-key=""v => v.id""
-      :visible-columns=""state.visibleColumns""
-      v-model:selected.sync=""state.selected""
+      :loading=""pageQuery.loading""
+      :row-key=""(v) => v.id""
+      :visible-columns=""pageQuery.visibleColumns""
       flat
-      @request=""tableHandler""
-      v-model:pagination=""state.pagination""
+      square
       :rows-per-page-options=""[10, 15, 50, 500, 1000, 10000]""
       table-header-class=""bg-gray-100""
       class=""h-full relative sticky-header-column-table sticky-right-column-table""
-      :virtual-scroll=""state.[name]s.length >= 200""
+      :virtual-scroll=""pageQuery.data.length >= 100""
+      @request=""tableHandler""
     >
-    <!-- 加载动画 -->
       <template #loading>
         <q-inner-loading showing color=""primary"" />
       </template>
-    <!-- table 顶部操作栏 -->
+
       <template #top>
-        <div class=""w-full flex flex-row justify-between"">
-          <div class=""flex flex-row space-x-1"">
-            <q-input
-              outlined
-              :label=""``""
-              dense
-              v-model=""state.searchKey""
-              @keyup.enter=""get[Name]s""
-            ></q-input>
-            <q-btn icon=""search"" color=""primary"" @click=""get[Name]s"" />
+        <query-filter
+          :base-query=""pageQuery""
+          :loading=""pageQuery.loading""
+          easy-text-input-class=""w-60""
+          @on-search=""get[Name]s""
+        >
+          <template #btn>
             <q-btn color=""primary"" :label=""t('添加')"" @click=""showDialog(t('添加'))"" />
-            <q-btn
-              color=""danger""
-              :label=""t('删除')""
-              @click=""deleteByIds(state.selected.map(s => s.id))""
-            />
-          </div>
-          <div>
-            <q-select
-              v-model=""state.visibleColumns""
-              multiple
-              outlined
-              dense
-              options-dense
-              :display-value=""$q.lang.table.columns""
-              emit-value
-              map-options
-              :options=""state.columns""
-              option-value=""name""
-              options-cover
-              class=""float-right""
-              menu-anchor=""bottom middle""
-              menu-self=""bottom middle""
-            />
-          </div>
-        </div>
+            <q-btn color=""danger"" :label=""t('删除')"" @click=""deleteByIds(pageQuery.selected.map((s) => s.id))"" />
+          </template>
+        </query-filter>
+        <q-select
+          v-model=""pageQuery.visibleColumns""
+          multiple
+          outlined
+          dense
+          options-dense
+          :display-value=""`显示${{$q.lang.table.columns}}`""
+          emit-value
+          map-options
+          :options=""pageQuery.columns""
+          option-value=""name""
+          options-cover
+          menu-anchor=""bottom middle""
+          menu-self=""bottom middle""
+          class=""absolute right-4 top-3""
+        />
       </template>
-    <!-- 底部分页查询器 -->
+
       <template #pagination>
         <q-pagination
-          v-model=""state.pagination.page""
+          v-model=""pageQuery.pagination.page""
           color=""primary""
           :max-pages=""9""
-          :max=""state.pagination.totalPages""
+          :max=""pageQuery.pagination.totalPages""
           boundary-numbers
           @click=""get[Name]s""
         />
       </template>
-    <!-- #region Table 自定义显示 -->
+
+      <template #body-cell-enabled=""props"">
+        <!-- 状态显示为Icon -->
+        <q-td :props=""props"" class=""w-1"">
+          <q-icon
+            size=""2rem""
+            :color=""props.row.enabled ? 'success' : 'danger'""
+            :name=""props.row.enabled ? 'r_face_retouching_natural' : 'r_face_retouching_off'""
+          />
+        </q-td>
+        <!-- 状态显示为文字 -->
+        <!-- <q-td :props=""props"" class=""w-1"">
+          <q-chip dense outline square :color=""props.row.enabled ? 'success' : 'danger'"">
+            {{{{ props.row.enabled ? '启用' : '禁用' }}}}
+          </q-chip>
+        </q-td>-->
+      </template>
+
+      <template #body-cell-sex=""props"">
+        <!-- 状态显示为Icon -->
+        <q-td :props=""props"" class=""w-1"">
+          <q-icon size=""2rem"" :color=""props.row.sex ? 'primary' : 'pink-3'"" :name=""props.row.sex ? 'male' : 'female'"" />
+        </q-td>
+      </template>
+
+      <template #body-cell-roles=""props"">
+        <q-td :props=""props"">
+          <q-chip v-for=""role in props.row.roles"" :key=""role"" dense outline square color=""primary"">{{{{ role }}}}</q-chip>
+        </q-td>
+      </template>
+
       <template #body-cell-actions=""props"">
         <q-td :props=""props"" class=""space-x-1 w-1"">
           <q-btn dense color=""primary"" icon=""edit"" @click=""showDialog(t('编辑'), props.row.id)"" />
           <q-btn dense color=""danger"" icon=""remove"" @click=""deleteByIds([props.row.id])"" />
         </q-td>
       </template>
-    <!-- #endregion -->
     </q-table>
 
-    <!-- Dialog -->
     <q-dialog v-model=""state.dialogVisible"">
       <q-card class=""w-2/4"">
         <q-card-section>
           <div class=""text-h6"">{{{{ t(state.dialogTitle) }}}}</div>
         </q-card-section>
-        <q-separator></q-separator>
+        <q-separator />
 
         <q-card-section class=""q-pt-none mt-8"">
           <q-form class=""space-y-2"" @submit=""dialogFormSubmit"">
             {string.Join("", props.Select(p =>
-                            @$"<q-input dense outlined v-model=""state.form.{p.Name.ToCamelCase()}"" :label=""t('{CsCommentReader.Create(p).Summary ?? p.Name.ToCamelCase() }')""></q-input>"
+                            @$"<q-input dense outlined v-model=""state.form.{p.Name.ToCamelCase()}"" :label=""t('{CsCommentReader.Create(p)?.Summary ?? p.Name.ToCamelCase() }')""></q-input>"
                             + "\r\n"))}
-            
-
             <q-btn class=""float-right"" :label=""t(state.dialogTitle)"" color=""primary"" type=""submit"" />
-            <q-card-actions class=""w-full""></q-card-actions>
+            <q-card-actions class=""w-full"" />
           </q-form>
         </q-card-section>
       </q-card>
@@ -411,114 +427,67 @@ import {{ BaseEntity, PagedList, RequestResult }} from './_typing'
   </div>
 </template>
 <script lang=""ts"">
-// 声明额外的选项
 export default {{
-  name:'[Name]'
+  name: '[Name]'
 }}
 </script>
 <script lang=""ts"" setup>
 import {{ Add[Name], Delete[Name]ByIds, Get[Name]ById, Get[Name]Page, Update[Name], [Name] }} from '@/api/[name]'
-import {{ ref, defineComponent, toRefs, reactive, computed, watch, onBeforeUnmount }} from 'vue'
+import {{ reactive, computed, watch, onBeforeUnmount }} from 'vue'
 import {{ useI18n }} from 'vue-i18n'
-import {{ dateFormat }} from '@/utils/date-util'
 import {{ useQuasar }} from 'quasar'
-import {{ ls }} from '@/utils'
-import {{ PageRequest }} from '@/utils/page-request'
-import {{ FilterCondition, FilterOperate }} from '@/utils/page-request/enums'
-
-// 显示列
-const [NAME]_VISIBLE_COLUMNS = `[NAME]_VISIBLE_COLUMNS`
-
-// 分页大小
-const [NAME]_ROWS_PER_PAGE = '[NAME]_ROWS_PER_PAGE'
-// 默认显示的Table列
-const defaultVisibleColumns = [{string.Join(",", props.Select(p => @$"'{p.Name.ToCamelCase()}'"))}]
-
-// Form表单默认内容
-const defaultForm: [Name] = {{
-}}
-
-// 卸载前保存缓存
-onBeforeUnmount(() => {{
-  ls.set([NAME]_VISIBLE_COLUMNS, state.visibleColumns)
-  ls.set([NAME]_ROWS_PER_PAGE, state.pagination.rowsPerPage)
-}})
+import {{ staticRoles }} from '@/router/routes'
+import {{ ExcludeType, FieldOption, FieldType, Operate }} from '@/utils/page-request/typing'
+import {{ PageQuery }} from '@/utils/page-request/query'
+import QueryFilter from '@/components/query/query-filter.vue'
 
 const $q = useQuasar()
 const t = useI18n().t
-const columns = [
+
+const defaultForm: [Name] = {{
+
+}}
+
+const pageQuery = reactive(
+  new PageQuery<[Name]>([
     {string.Join("", props.Select(p => @$"{{
-    label: t('{CsCommentReader.Create(p).Summary ?? p.Name.ToCamelCase() }'),
-    name: '{p.Name.ToCamelCase()}',
-    field: '{p.Name.ToCamelCase()}',
-    sortable: true,
-    align: 'center',
-    textClasses: '',
-  }},"))}
-  {{
-    label: t('操作'),
-    name: 'actions',
-    align: 'center',
-    required: true,
-  }},
-] as any[]
-const state = reactive({{
-  columns,
-  visibleColumns: (ls.getItem([NAME]_VISIBLE_COLUMNS) || defaultVisibleColumns) as string[],
-  // table选中项
-  selected: [] as [Name][],
-  // table 数据
-  [name]s: [] as [Name][],
-  loading: false,
-  // 搜索框值
-  searchKey: '',
-  // 搜索过滤
-  pageRequest: new PageRequest(1, 10, [
+    {GetPageQueryOption(p)}
+    }},"))}
     {{
-      field: 'name',
-      value: '',
-      operate: FilterOperate.contains,
-      condition: FilterCondition.or,
-    }},
-  ]),
-  pagination: {{
-    sortBy: 'id',
-    descending: false,
-    page: 1,
-    rowsPerPage: ls.getItem<number>([NAME]_ROWS_PER_PAGE) || 10,
-    rowsNumber: 1,
-    totalPages: 1,
-  }},
-  dialogVisible: false,
-  dialogTitle: '添加',
-  form: {{ ...defaultForm }},
+      label: t('操作'),
+      field: 'actions',
+      columns: {{ required: true, sortable: false }},
+      exclude: ExcludeType.Query
+    }} as FieldOption
+  ])
+)
+onBeforeUnmount(() => {{
+  pageQuery.saveOption()
 }})
 
-// 排序触发事件
-const tableHandler = async ({{ pagination, filter }}:any) => {{
-  state.pagination = pagination
+const state = reactive({{
+  dialogVisible: false,
+  dialogTitle: '添加',
+  form: {{ ...defaultForm }}
+}})
+
+const tableHandler = async ({{ pagination }}: any) => {{
+  pageQuery.pagination = pagination
   await get[Name]s()
 }}
 
-// 获取[Name]数据
 const get[Name]s = async () => {{
-  const {{ pageRequest }} = state
-
-  pageRequest.setAllRulesValue(state.searchKey)
-  pageRequest.setOrder(state.pagination)
-
-  state.loading = true
-  const res = await Get[Name]Page(pageRequest)
-  state.loading = false
+  pageQuery.loading = true
+  const res = await Get[Name]Page(pageQuery.toPageRequest())
+  pageQuery.loading = false
   res.notifyOnErr()
   if (res.succeeded) {{
-    state.[name]s = res.data?.items as [Name][]
-    state.pagination.rowsNumber = res.data?.totalCount as number
-    state.pagination.totalPages = res.data?.totalPages as number
+    pageQuery.data = res.data?.items as [Name][]
+    pageQuery.pagination.rowsNumber = res.data?.totalCount as number
+    pageQuery.pagination.totalPages = res.data?.totalPages as number
   }}
 }}
 
-// 显示 dialog
 const showDialog = async (type: string, id?: number) => {{
   if (type == t('添加')) {{
     state.form = {{ ...defaultForm }}
@@ -532,7 +501,6 @@ const showDialog = async (type: string, id?: number) => {{
   state.dialogVisible = true
 }}
 
-// dialog form 表单提交
 const dialogFormSubmit = async () => {{
   const type = state.dialogTitle
   let res
@@ -546,27 +514,24 @@ const dialogFormSubmit = async () => {{
   if (res?.succeeded) get[Name]s()
 }}
 
-// 根据Id 数组删除 [Name]
 const deleteByIds = (ids: number[]) => {{
   $q.dialog({{
-    message:
-      ids.length > 1
-        ? `${{t('已选中')}}${{ids.length}}，${{t('确定要删除这些数据吗')}}`
-        : t('确定要删除这个数据吗'),
+    message: ids.length > 1 ? `${{t('已选中')}}${{ids.length}}，${{t('确定要删除这些数据吗')}}` : t('确定要删除这个数据吗')
   }}).onOk(async () => {{
-    state.loading = true
+    pageQuery.loading = true
     const res = await Delete[Name]ByIds(ids)
-    state.loading = false
+    pageQuery.loading = false
     res.notify()
     if (res.succeeded) get[Name]s()
   }})
 }}
 
-// 获取数据
 get[Name]s()
 
+const roles = computed(() => Object.values<string>(staticRoles))
 </script>
-<style lang=""sass""></style>
+<style lang=""sass"" scoped></style>
+
 ";
             str = str
                 .Replace("[NAME]", type.Name.Replace("Dto", "").ToUpper())
@@ -652,6 +617,53 @@ export async function Delete{appName.ToUpperFirstLetter()}ByIds(ids: number[]): 
     data: ids,
   }})
 }}";
+    }
+
+    private string GetPageQueryOption(PropertyInfo type)
+    {
+        var str = @$"
+field: '{type.Name.ToCamelCase()}',
+label: t('{CsCommentReader.Create(type)?.Summary ?? type.Name.ToCamelCase()}'),";
+
+        if (type == typeof(bool))
+        {
+            str += @$"
+type: FieldType.boolSelect,
+operate: Operate.equal,";
+        }
+        else if (type.PropertyType.IsEnum)
+        {
+            str += @$"
+type: FieldType.select,
+operate: Operate.equal,
+selectOptions: enumToOption({type.Name})
+";
+        }
+        else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+        {
+            str += @$"
+type: FieldType.Date,
+operate: Operate.equal,
+";
+        }
+        else if (type == typeof(int) || type == typeof(decimal) || type == typeof(long))
+        {
+            str += @$"
+type: FieldType.numberBetween,
+operate: Operate.equal,
+easy: true
+";
+        }
+        else
+        {
+            str += @$"
+type: FieldType.text,
+operate: Operate.contains,
+easy: true
+";
+        }
+        return str;
+
     }
 
     private string GetDtoStr(List<Type> types)

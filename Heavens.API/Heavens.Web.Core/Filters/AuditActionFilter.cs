@@ -33,7 +33,7 @@ namespace Heavens.Web.Core.Filters;
 /// </summary>
 public class AuditActionFilter : IAsyncActionFilter
 {
-    public AuditActionFilter(IRepository<Heavens.Core.Entities.Audit> auditRepository,AuditAppService auditAppService)
+    public AuditActionFilter(IRepository<Heavens.Core.Entities.Audit> auditRepository, AuditAppService auditAppService)
     {
         _auditRepository = auditRepository;
         _auditAppService = auditAppService;
@@ -109,9 +109,9 @@ public class AuditActionFilter : IAsyncActionFilter
         // path参数
         var path = context.HttpContext.Request.Path;
 
-        var audit = new AuditDto()
+        var audit = new Audit()
         {
-            UserRoles = roles.ToArray(),
+            UserRoles = string.Join("|", roles),
             ServiceName = serverName,
             ExecutionMs = (int)watch.ElapsedMilliseconds,
             MethodName = method?.Name,
@@ -124,7 +124,26 @@ public class AuditActionFilter : IAsyncActionFilter
             Path = path,
         };
 
-        await _auditAppService.Add(audit);
+#pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+        _auditRepository.InsertAsync(audit);
+#pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+
+        //var audit = new AuditDto()
+        //{
+        //    UserRoles = roles.ToArray(),
+        //    ServiceName = serverName,
+        //    ExecutionMs = (int)watch.ElapsedMilliseconds,
+        //    MethodName = method?.Name,
+        //    ReturnValue = returnValue,
+        //    ClientIpAddress = context.HttpContext.GetRemoteIpAddressToIPv4(),
+        //    HttpMethod = context.HttpContext.Request.Method,
+        //    Exception = exception,
+        //    Body = body,
+        //    Query = query,
+        //    Path = path,
+        //};
+
+        //await _auditAppService.Add(audit);
 
     }
 

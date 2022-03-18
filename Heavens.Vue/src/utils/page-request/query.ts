@@ -18,6 +18,9 @@ export class BaseQuery {
    */
   filters: FieldOption[] = []
 
+  /**
+   * 字段配置
+   */
   fieldOptions: FieldOption[] = []
 
   mode: QueryModel = QueryModel.easy

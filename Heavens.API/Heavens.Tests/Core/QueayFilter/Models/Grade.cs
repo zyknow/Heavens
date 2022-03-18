@@ -17,4 +17,9 @@ public class Grade
     public DateTimeOffset OffsetTime { get; set; }
 
     public DateTime Time { get; set; }
+
+    public virtual ICollection<Student> Students { get; set; }
+
+    public virtual Student Student { get; set; }
+
 }

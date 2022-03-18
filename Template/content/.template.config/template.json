@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "zhu yi",
+    "classifications": [ "Web/WebAPI" ],
+    "name": "Heavens Fast Dev Template", 
+    "identity": "heavensfeel.Fast.Dev.Template",
+    "shortName": "heavens",
+    "tags": {
+      "language": "C#" ,
+      "type":"project"
+    },
+    "sourceName": "Heavens", 
+    "preferNameDirectory": true  
+}

@@ -15,25 +15,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Database.Migrations
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Web.Entry", "Heavens.Web.Entry\Heavens.Web.Entry.csproj", "{C8D99F52-EDC7-411F-8300-6DB14BF59E8C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EADB5895-82F0-4CFD-915C-3E02053D13A7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00_Solution Items", "00_Solution Items", "{EADB5895-82F0-4CFD-915C-3E02053D13A7}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.filenesting.json = .filenesting.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D500F424-9D30-454F-A103-86D7547EB231}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01_src", "01_src", "{D500F424-9D30-454F-A103-86D7547EB231}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Core.Extension", "Heavens.Core.Extension\Heavens.Core.Extension.csproj", "{F5D80671-A353-4135-89AB-2FE313B59419}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EE1DA06E-DF33-45E8-B6E3-C240E9191A85}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02_tests", "02_tests", "{EE1DA06E-DF33-45E8-B6E3-C240E9191A85}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Tests", "Heavens.Tests\Heavens.Tests.csproj", "{0FBA8FB8-EA64-4996-AA34-B3C07F0D708C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01_Db_Migrations", "01_Db_Migrations", "{82760E87-D8EC-4221-A52B-EC95AB77CF8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heavens.Enums", "Heavens.Enums\Heavens.Enums.csproj", "{5672AAFA-6A99-4C19-9131-5AD1B72436FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Enums", "Heavens.Enums\Heavens.Enums.csproj", "{5672AAFA-6A99-4C19-9131-5AD1B72436FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heavens.Tasks", "Heavens.Tasks\Heavens.Tasks.csproj", "{6DC9CF89-B679-4E30-89EC-E538978EF0BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heavens.Tasks", "Heavens.Tasks\Heavens.Tasks.csproj", "{6DC9CF89-B679-4E30-89EC-E538978EF0BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

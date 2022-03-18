@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Heavens.Application._Framework.CodeGenApp;
 
+#if DEBUG
 /// <summary>
 /// 根据后端实体生成代码
 /// </summary>
@@ -24,9 +25,6 @@ public class CodeGenAppService : IDynamicApiController
     [HttpGet]
     public void GenApplications(string path = null)
     {
-        if (!App.WebHostEnvironment.IsDevelopment())
-            throw Oops.Oh(Excode.NON_DEVELOPER_MODE);
-
         _codeGenService.GenApplication(path);
     }
 
@@ -37,9 +35,6 @@ public class CodeGenAppService : IDynamicApiController
     [HttpGet]
     public void GenVueApi(string path = null)
     {
-        if (!App.WebHostEnvironment.IsDevelopment())
-            throw Oops.Oh(Excode.NON_DEVELOPER_MODE);
-
         _codeGenService.GenVueApi(path);
 
     }
@@ -51,11 +46,9 @@ public class CodeGenAppService : IDynamicApiController
     [HttpGet]
     public void GenVuePages(string path = null)
     {
-        if (!App.WebHostEnvironment.IsDevelopment())
-            throw Oops.Oh(Excode.NON_DEVELOPER_MODE);
-
         _codeGenService.GenVuePage(path);
 
     }
 
 }
+#endif

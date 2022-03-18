@@ -16,18 +16,31 @@ public class CodeGenService_Test
     [Fact]
     public void GenVueApi_Test()
     {
-        _codeGenService.GenVueApi(Path.Combine(Environment.CurrentDirectory, "GenVueApi"));
+        var path = Path.Combine(Environment.CurrentDirectory, "GenVueApi");
+
+        if(Directory.Exists(path))
+            Directory.Delete(path, true);
+
+        _codeGenService.GenVueApi(path);
     }
 
     [Fact]
     public void GenApplication_Test()
     {
-        _codeGenService.GenApplication(Path.Combine(Environment.CurrentDirectory, "GenApplication"));
+        var path = Path.Combine(Environment.CurrentDirectory, "GenApplication");
+        if (Directory.Exists(path))
+            Directory.Delete(path, true);
+
+        _codeGenService.GenApplication(path);
     }
 
     [Fact]
     public void GenVuePage_Test()
     {
-        _codeGenService.GenVuePage(Path.Combine(Environment.CurrentDirectory, "GenVuePage"));
+        var path = Path.Combine(Environment.CurrentDirectory, "GenVuePage");
+        if (Directory.Exists(path))
+            Directory.Delete(path, true);
+
+        _codeGenService.GenVuePage(path);
     }
 }

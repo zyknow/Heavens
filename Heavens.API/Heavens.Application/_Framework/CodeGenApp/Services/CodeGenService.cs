@@ -515,6 +515,10 @@ const dialogFormSubmit = async () => {{
 }}
 
 const deleteByIds = (ids: number[]) => {{
+  if (!ids.length) {{
+    notify.warn('未选中任何数据')
+    return
+  }}
   $q.dialog({{
     message: ids.length > 1 ? `${{t('已选中')}}${{ids.length}}，${{t('确定要删除这些数据吗')}}` : t('确定要删除这个数据吗')
   }}).onOk(async () => {{

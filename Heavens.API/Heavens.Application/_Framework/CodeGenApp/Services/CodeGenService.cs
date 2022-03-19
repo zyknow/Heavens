@@ -440,7 +440,7 @@ import {{ staticRoles }} from '@/router/routes'
 import {{ ExcludeType, FieldOption, FieldType, Operate }} from '@/utils/page-request/typing'
 import {{ PageQuery }} from '@/utils/page-request/query'
 import QueryFilter from '@/components/query/query-filter.vue'
-import { notify } from '@/utils/notify'
+import {{ notify }} from '@/utils/notify'
 const $q = useQuasar()
 const t = useI18n().t
 
